@@ -1,10 +1,16 @@
 import { api, fmt } from '../data.js';
-import { el, card, chip, table, switchRow, toast, empty } from '../ui.js';
+import { el, card, chip, table, switchRow, toast, empty, notConnected } from '../ui.js';
 import { market, px } from '../market.js';
 
 /** Manage Bots — production /manage-bots. */
 export async function bots(ctx) {
-  const [bots, trades] = await Promise.all([api.bots.list(), api.bots.trades()]);
+  let bots = []; let trades = [];
+  try {
+    [bots, trades] = await Promise.all([api.bots.list(), api.bots.trades()]);
+  } catch {
+    return el('div', { class: 'page' },
+      card('Manage Bots', { note: 'nothing to read' }, notConnected('Your cloud bots and their trades')));
+  }
   const net = trades.reduce((s, t) => s + (t.pnl || 0), 0);
 
   const tabs = el('div', { class: 'tabs' },

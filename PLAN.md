@@ -105,8 +105,8 @@ app/
     dashboard.css                         # aurora design system for the app surface
     js/
       router.js                           # hash router, route table, guards
-      data.js                             # data layer: Supabase-shaped API + mock adapter
-      ui.js                               # DOM helpers: el(), card(), table(), spark(), candles()
+      data.js                             # data layer: live Supabase reads only, no fixtures
+      ui.js                               # DOM helpers: el(), card(), table(), sparkline()
       pages/
         overview.js  chart.js  bots.js  signals.js  subscription.js
         wallet.js    settings.js  lens.js  referral.js  tutorials.js
@@ -116,17 +116,16 @@ app/
 
 1. **Same information architecture as the real app** — same sidebar items, same route names, same
    card/table compositions — so behaviour learned from production carries over.
-2. **Same schema vocabulary** — the mock data uses the real column names (`daily_upload_limit`,
-   `available_cents`, `mt5_limit`, `priority_score`, `analysis_history`, `cloud_bots`, …). When the
-   rebuild goes live, swapping `data.js` from the mock adapter to `supabase-js` is a one-file
-   change; every page already speaks the production shape.
+2. **Same schema vocabulary** — pages read the real column names (`daily_upload_limit`,
+   `available_cents`, `mt5_limit`, `priority_score`, `analysis_history`, `cloud_bots`, …) straight
+   from PostgREST; there is no fixture layer to drift out of sync.
 3. **Hash routing** (`#/overview`) so the static app needs no server rewrite rules, while the URL
    names match the production routes.
 4. **Theme**: black `#05070A`, ice `#E9F2F1`, aurora `#35F0A8` — the same token set as the
    marketing site, with the operator surfaces (terminal, tables, charts) tuned for long sessions:
    dimmed chrome, aurora only for live data and primary actions.
-5. **Charts are hand-drawn SVG** (candles, sparklines, heat cells) — no charting dependency, same
-   visual language as the marketing hero mock.
+5. **Charts draw only real series** — candlesticks come from `market.candles()` (yfinance through
+   the local service); the generated candle/heat helpers were deleted with the fixture layer.
 
 ### Data layer contract (`data.js`)
 
@@ -143,7 +142,7 @@ api.usage.today()          → { analyses, signals, charts }
 api.tutorials.list()       → [{ title, youtube_id, category, duration_label, … }]
 ```
 
-Each returns a promise and reads from `mock` in this build; the Supabase adapter implements the
+Each returns a promise and reads from the signed-in account via PostgREST; the adapter implements the
 same signatures against PostgREST + RPCs.
 
 ---
@@ -159,21 +158,21 @@ same signatures against PostgREST + RPCs.
 | 4 | Trade Lens, Referral, Tutorials, Contact Support | **done** |
 | 5 | Live Supabase adapter (read-only), verified against production | **done** |
 | 6 | EA Marketplace (`#/ea-marketplace`) — catalogue, plan-gated install, `ea_downloads` record, publish form | **done** |
-| 7 | Synthetic Indices (`#/synthetic-chart`) — 7 simulated series, index/timeframe switch, instrument spec, position-size maths | **done** |
+| 7 | ~~Synthetic Indices (`#/synthetic-chart`)~~ | **removed** — simulated series deleted in the no-fake purge |
+| 8 | No-fake purge: fixture layer, EA catalogue, synthetic page, hero mockup all removed | **done** |
 
 ### Live data mode (shipped)
 
-`app/dashboard/js/supabase.js` implements the **same API surface** as the mock against the production
-PostgREST project — reads only, every call a GET, RLS still enforced by Postgres.
+`app/dashboard/js/supabase.js` implements the account API against the production PostgREST project —
+reads only, every call a GET, RLS still enforced by Postgres.
 
 - `js/config.js` — project URL, project ref and the anon key (a public client key: it ships in the
   pipnex-ai.com bundle).
-- `js/data.js` — `api` is a proxy over both adapters. In demo mode it serves the mock; in live mode
-  it calls Supabase and **falls back to mock per call** if a table errors, so one failing table never
-  blanks a page. `setMode()`, `getMode()`, `setSession()` and friends are exported.
-- Settings → **Data source** panel: paste an access token (or the whole `sb-…-auth-token` JSON) and
-  the app switches to live mode; the top bar then shows a `LIVE` badge. “Sign out” clears the session
-  and returns to demo data.
+- `js/data.js` — `api` proxies the single live adapter. With no session every method rejects with
+  `code: 'NO_ACCOUNT'` and the page renders `notConnected()`; a failing table states its own error.
+- Settings → **Account connection** panel: paste an access token (or the whole `sb-…-auth-token`
+  JSON); the top bar then shows a `LIVE` badge. “Disconnect” clears the session and the pages say
+  what they can no longer read.
 
 **Verified against production** (read-only, using the signed-in session): the plan catalogue comes
 back as basic 9.99 / pro 49.99 / ultimate 99.99 / platinum 299.99 with the production `mt5_limit`,
@@ -192,30 +191,21 @@ platinum-locked for this user.
   catalogue (basic/pro/ultimate/platinum with `price_cents`, `mt5_limit`, `daily_upload_limit`,
   `voice_limit`, `priority_score`), `permissionsFor()` mirroring the `get_user_permissions` RPC.
 - `app/dashboard/js/router.js` — hash router, route table, nav highlighting, permission context.
-- `app/dashboard/js/ui.js` — `el()`, `card()`, `table()`, `switchRow()`, plus hand-drawn SVG
-  candlesticks and sparklines (no charting dependency).
+- `app/dashboard/js/ui.js` — `el()`, `card()`, `table()`, `switchRow()`, `sparkline()`, and
+  `notConnected()` for the honest empty state; no generated chart helpers remain.
 - `app/dashboard/js/pages/` — overview, terminal (+upload), trading (bots/auto-trading/signals),
   account (subscription/wallet/settings), content (lens/referral/tutorials/support),
-  research, tools (prop-firm/edge-stats), marketplace, synthetic.
+  research, tools (prop-firm/edge-stats), marketplace.
 
-**Synthetic Indices** (`#/synthetic-chart`, phase 7): seven Deriv-style series drawn from a seeded
-walk per (instrument, timeframe) — no broker feed exists, so the page states "Simulated series",
-keeps the tradeability row at `No — simulation only`, and labels the spec table illustrative. The
-position-size panel is real arithmetic over the spec (`risk$ / (stop pts × tick)`, with a min-lot
-warning). Chart is a pixel-measured SVG with a price scale, time axis and last-price tag; labels
-scale up and time ticks thin out below 560 px. Functional check: `app/dashboard/_check-synthetic.html`
-(10 assertions), page-overflow probe: `app/dashboard/_check-overflow.html`. Screenshots in
-`checks/synthetic-chart/`.
-
-Layout fix carried by phase 7: `.page` now declares `grid-template-columns: minmax(0, 1fr)`, so a
+Layout fix carried by phase 7 (still in place): `.page` now declares `grid-template-columns: minmax(0, 1fr)`, so a
 page can no longer push the document wider than the viewport (the implicit `auto` column sized to
 max-content). Verified at 390 px: `scrollWidth == clientWidth == 375`.
 
-**EA Marketplace** (`#/ea-marketplace`, added in phase 6): six EAs in `ea_marketplace`, filtered by
-category tabs and a live search box; installing is gated on plan rank (`basic < pro < ultimate <
-platinum`) and appends a row to `ea_downloads`. The live adapter reads `eas` + `ea_downloads` and
-falls back to the mock rows through `data.js`'s per-call fallback. Functional check:
-`app/dashboard/_check-marketplace.html` (9 assertions, run headless — see `checks/ea-marketplace/`).
+**EA Marketplace** (`#/ea-marketplace`, phase 6): reads `eas` + `ea_downloads` only. The seeded
+catalogue, the plan-gated “install” write and the publish form were removed in the no-fake purge —
+this client is read-only, so the page lists what the account can read and says so when the table is
+empty. Checks: `app/dashboard/_check-no-fake.html` (25 assertions, 0 failures; screenshots in
+`checks/no-fake/`).
 
 **Live in the browser**: `http://127.0.0.1:36249/dashboard/` (craft-anything's preview server) and
 `http://192.168.1.108:8766/dashboard/` (LAN copy for a phone).

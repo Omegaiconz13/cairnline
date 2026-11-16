@@ -1,5 +1,5 @@
 import { el, card, chip, toast } from './ui.js';
-import { api, fmt, permissionsFor, getMode, setMode, loadStoredSession, hasSession } from './data.js';
+import { api, fmt, permissionsFor, loadStoredSession, hasSession, sessionInfo } from './data.js';
 
 import { overview } from './pages/overview.js';
 import { terminal, upload } from './pages/terminal.js';
@@ -9,7 +9,6 @@ import { lens, referral, tutorials, support } from './pages/content.js';
 import { research } from './pages/research.js';
 import { propFirm, edgeStats } from './pages/tools.js';
 import { eaMarketplace } from './pages/marketplace.js';
-import { syntheticChart } from './pages/synthetic.js';
 
 const ROUTES = {
   overview: { title: 'PipNex Dashboard', render: overview },
@@ -19,7 +18,6 @@ const ROUTES = {
   'auto-trading': { title: 'Auto Trading', render: autoTrading },
   signals: { title: 'Pulse Signals', render: signals },
   'ea-marketplace': { title: 'EA Marketplace', render: eaMarketplace },
-  'synthetic-chart': { title: 'Synthetic Indices', render: syntheticChart },
   subscription: { title: 'Subscription', render: subscription },
   wallet: { title: 'Wallet', render: wallet },
   settings: { title: 'Settings', render: settings },
@@ -69,20 +67,29 @@ export async function renderRoute() {
 
 export async function boot() {
   const stored = loadStoredSession();
-  if (stored && hasSession()) setMode('live');
+  if (stored) sessionInfo();
 
-  ctx.profile = await api.profile.get();
-  const plans = await api.plans.list();
-  const sub = await api.subscription.get();
-  ctx.permissions = permissionsFor(sub && sub.plan_key, plans);
-  ctx.mode = getMode();
+  // Everything below reads the signed-in account only. With no session the boot
+  // keeps the shell running and every page renders its own "not connected" state.
+  try {
+    ctx.profile = await api.profile.get();
+    const plans = await api.plans.list();
+    const sub = await api.subscription.get();
+    ctx.permissions = permissionsFor(sub && sub.plan_key, plans);
+  } catch {
+    ctx.profile = null;
+    ctx.permissions = permissionsFor(null, []);
+  }
 
-  const initials = (ctx.profile.display_name || 'PP').split(/\s+/).map((s) => s[0]).join('').slice(0, 2).toUpperCase();
+  const initials = (ctx.profile && ctx.profile.display_name ? ctx.profile.display_name : 'PP')
+    .split(/\s+/).map((s) => s[0]).join('').slice(0, 2).toUpperCase();
   document.getElementById('sideAvatar').textContent = initials;
   document.getElementById('topAvatar').textContent = initials;
-  document.getElementById('sideName').textContent = ctx.profile.display_name;
-  document.getElementById('sideAccount').textContent = `${ctx.profile.account_id} · ${ctx.permissions.planName}`;
-  document.getElementById('liveBadge').hidden = ctx.mode !== 'live';
+  document.getElementById('sideName').textContent = ctx.profile && ctx.profile.display_name ? ctx.profile.display_name : 'Not connected';
+  document.getElementById('sideAccount').textContent = ctx.profile && ctx.profile.account_id
+    ? `${ctx.profile.account_id} · ${ctx.permissions.planName}`
+    : 'Sign in to read your account';
+  document.getElementById('liveBadge').hidden = !ctx.profile;
 
   document.getElementById('bellDot').hidden = false;
   document.getElementById('bellBtn').addEventListener('click', () => {

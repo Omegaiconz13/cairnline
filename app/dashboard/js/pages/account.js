@@ -1,10 +1,16 @@
-import { api, fmt, getMode, setMode, setSession, clearSession, hasSession, sessionInfo } from '../data.js';
-import { el, card, chip, table, switchRow, toast, field } from '../ui.js';
+import { api, fmt, setSession, clearSession, hasSession, sessionInfo } from '../data.js';
+import { el, card, chip, table, switchRow, toast, field, notConnected } from '../ui.js';
 import { market } from '../market.js';
 
 /** Subscription — production /subscription. */
 export async function subscription(ctx) {
-  const [plans, sub, history] = await Promise.all([api.plans.list(), api.subscription.get(), api.subscription.history()]);
+  let plans = []; let sub = null; let history = [];
+  try {
+    [plans, sub, history] = await Promise.all([api.plans.list(), api.subscription.get(), api.subscription.history()]);
+  } catch {
+    return el('div', { class: 'page' },
+      card('Subscription', { note: 'nothing to read' }, notConnected('Your plan, limits and billing history')));
+  }
   const active = sub || { plan_key: null, status: 'none', current_period_start: null, current_period_end: null, cancel_at_period_end: false };
   const current = plans.find((p) => p.key === active.plan_key);
 
@@ -27,6 +33,120 @@ export async function subscription(ctx) {
         isCurrent ? 'Manage plan' : `Select ${p.name}`));
   };
 
+  const page = el('div', { class: 'page' });
+  page.append(
+    el('div', { class: 'page__head' },
+      el('div', {},
+        el('h2', { class: 'page__title', text: 'Subscription Management' }),
+        el('p', { class: 'page__sub', text: 'Upgrade, downgrade or export your billing history.' })),
+      el('div', { style: 'display:flex;gap:8px' },
+        el('button', { class: 'btn btn--outline btn--sm', onclick: () => toast('Invoice export queued (PDF)') }, 'Export PDF'),
+        el('a', { class: 'btn btn--primary btn--sm', href: '#/choose-plan' }, 'Upgrade Plan'))),
+    el('div', { class: 'grid grid--sidebar' },
+      el('div', { class: 'grid grid--2' }, plans.map(planCard)),
+      el('div', { class: 'grid' },
+        card('Current plan', {},
+          el('dl', { class: 'kv' },
+            el('dt', { text: 'Plan' }), el('dd', { text: current ? current.name : 'No active plan' }),
+            el('dt', { text: 'Status' }), el('dd', { text: active.status }),
+            el('dt', { text: 'Period start' }), el('dd', { text: fmt.date(active.current_period_start) }),
+            el('dt', { text: 'Renews' }), el('dd', { text: fmt.date(active.current_period_end) }),
+            el('dt', { text: 'Auto-renew' }), el('dd', { text: active.cancel_at_period_end ? 'Off' : 'On' })),
+          el('div', { style: 'margin-top:18px' },
+            el('button', { class: 'btn btn--outline btn--block', onclick: () => toast('Plan change flow opens at checkout') }, 'Change Plan')),
+          el('div', { style: 'margin-top:10px' },
+            el('button', { class: 'btn btn--ghost btn--block', onclick: () => toast('Auto-renew updated') },
+              active.cancel_at_period_end ? 'Resume auto-renew' : 'Cancel auto-renew'))),
+        card('Subscription history', {},
+          table([
+            { label: 'Plan', render: (r) => (plans.find((p) => p.key === r.plan_key) || {}).name || r.plan_key },
+            { label: 'Status', render: (r) => chip(r.status, r.status === 'active' ? 'chip--on' : '') },
+            { label: 'Started', render: (r) => fmt.date(r.current_period_start) },
+            { label: 'Ends', render: (r) => fmt.date(r.current_period_end) },
+          ], history)))));
+  return page;
+}
+
+/** Wallet — production /wallet. */
+export async function wallet(ctx) {
+  let raw = null; let txnsRaw = []; let withdrawalsRaw = [];
+  try {
+    [raw, txnsRaw, withdrawalsRaw] = await Promise.all([api.wallet.get(), api.wallet.transactions(), api.wallet.withdrawals()]);
+  } catch {
+    return el('div', { class: 'page' },
+      card('Wallet', { note: 'nothing to read' }, notConnected('Your balance, transactions and withdrawals')));
+  }
+  const w = raw || { available_cents: 0, pending_cents: 0, withdrawable_cents: 0, total_spent_cents: 0, is_frozen: false, currency: 'USD' };
+  const txns = txnsRaw || [];
+  const withdrawals = withdrawalsRaw || [];
+  const note = el('p', { class: 'form__note' });
+
+  const page = el('div', { class: 'page' });
+  const withdrawalsCard = withdrawals.length
+    ? card('Withdrawals', {}, table([
+        { label: 'Amount', num: true, render: (r) => fmt.money(r.amount_cents) },
+        { label: 'Status', render: (r) => chip(r.status, r.status === 'paid' ? 'chip--on' : 'chip--warn') },
+        { label: 'When', render: (r) => fmt.ago(r.created_at) },
+      ], withdrawals))
+    : null;
+
+  page.append(
+    el('div', { class: 'page__head' },
+      el('div', {},
+        el('h2', { class: 'page__title', text: 'Pipnex Wallet' }),
+        el('p', { class: 'page__sub', text: 'AI credits, deposits and withdrawals.' })),
+      chip(w.is_frozen ? 'Frozen' : 'Active', w.is_frozen ? 'chip--danger' : 'chip--on')),
+    el('div', { class: 'grid grid--4' },
+      el('div', { class: 'stat' }, el('small', { text: 'Available' }), el('b', { text: fmt.money(w.available_cents) }), el('span', { text: 'ready to spend' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Pending' }), el('b', { text: fmt.money(w.pending_cents) }), el('span', { text: 'processing' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Withdrawable' }), el('b', { text: fmt.money(w.withdrawable_cents) }), el('span', { text: 'min $75.00' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Total spent' }), el('b', { text: fmt.money(w.total_spent_cents) }), el('span', { text: 'lifetime' }))));
+
+  page.append(el('div', { class: 'grid grid--sidebar' },
+    card('Transactions', { note: `${txns.length} entries` },
+      table([
+        { label: 'Type', render: (r) => chip(r.kind, r.kind === 'deposit' ? 'chip--on' : '') },
+        { label: 'Amount', num: true, render: (r) => `<span class="${r.amount_cents >= 0 ? 'pos' : 'neg'}">${r.amount_cents >= 0 ? '+' : ''}${fmt.money(r.amount_cents)}</span>` },
+        { label: 'Status', render: (r) => chip(r.status, r.status === 'settled' ? 'chip--on' : 'chip--warn') },
+        { label: 'When', render: (r) => fmt.ago(r.created_at) },
+      ], txns, { emptyTitle: 'No transactions yet', emptyText: 'Deposits and AI credit purchases appear here.' })),
+    card('Add money / Withdraw', {},
+      el('p', { class: 'card__note', text: 'Movements are not wired in this build: deposits, withdrawals and transfers need the production Stripe flow, and this client is read-only. The balances above are whatever your wallet row holds.' }),
+      el('div', { style: 'margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)' },
+        el('h3', { class: 'card__title', text: 'Frequently Asked Questions' }),
+        el('dl', { class: 'kv', style: 'margin-top:12px' },
+          el('dt', { text: 'Minimum withdrawal' }), el('dd', { text: '$75.00' }),
+          el('dt', { text: 'Payout time' }), el('dd', { text: '2–5 business days' }),
+          el('dt', { text: 'Currency' }), el('dd', { text: w.currency })))),
+    withdrawalsCard));
+  return page;
+}
+
+/** Settings — production /dashboard/settings. */
+export async function settings(ctx) {
+  const profile = await api.profile.get().catch(() => null);
+  const note = el('p', { class: 'form__note' });
+  const nameInput = el('input', { type: 'text', value: profile ? profile.display_name || '' : '', placeholder: 'Display name' });
+  const emailInput = el('input', { type: 'email', value: profile ? profile.email || '' : '', placeholder: 'Email', readonly: true });
+
+  /* ---- data source: the one read-only account connection ---- */
+  const dsNote = el('p', { class: 'form__note' });
+  const tokenInput = el('textarea', {
+    rows: '3',
+    placeholder: 'Paste the access token, or the whole sb-…-auth-token JSON',
+    style: 'font-family:var(--mono);font-size:12px',
+  });
+  const liveState = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+
+  const paintLiveState = () => {
+    liveState.innerHTML = '';
+    const info = sessionInfo();
+    liveState.append(
+      el('div', { class: 'fact' }, el('small', { text: 'STATUS' }), el('b', { class: hasSession() ? 'on' : 'off', text: hasSession() ? 'CONNECTED' : 'NOT CONNECTED' })),
+      el('div', { class: 'fact' }, el('small', { text: 'ACCOUNT' }), el('b', { text: info ? (info.email || 'signed in') : '—' })),
+      el('div', { class: 'fact' }, el('small', { text: 'USER ID' }), el('b', { text: info && info.userId ? info.userId.slice(0, 8) : '—' })));
+  };
+  paintLiveState();
   /* ---- Trish provider ---- */
   const TRISH_PRESETS = {
     openrouter: { url: 'https://openrouter.ai/api/v1', model: 'anthropic/claude-3.5-sonnet' },
@@ -112,125 +232,6 @@ export async function subscription(ctx) {
     }
   };
 
-  const page = el('div', { class: 'page' });
-  page.append(
-    el('div', { class: 'page__head' },
-      el('div', {},
-        el('h2', { class: 'page__title', text: 'Subscription Management' }),
-        el('p', { class: 'page__sub', text: 'Upgrade, downgrade or export your billing history.' })),
-      el('div', { style: 'display:flex;gap:8px' },
-        el('button', { class: 'btn btn--outline btn--sm', onclick: () => toast('Invoice export queued (PDF)') }, 'Export PDF'),
-        el('a', { class: 'btn btn--primary btn--sm', href: '#/choose-plan' }, 'Upgrade Plan'))),
-    el('div', { class: 'grid grid--sidebar' },
-      el('div', { class: 'grid grid--2' }, plans.map(planCard)),
-      el('div', { class: 'grid' },
-        card('Current plan', {},
-          el('dl', { class: 'kv' },
-            el('dt', { text: 'Plan' }), el('dd', { text: current ? current.name : 'No active plan' }),
-            el('dt', { text: 'Status' }), el('dd', { text: active.status }),
-            el('dt', { text: 'Period start' }), el('dd', { text: fmt.date(active.current_period_start) }),
-            el('dt', { text: 'Renews' }), el('dd', { text: fmt.date(active.current_period_end) }),
-            el('dt', { text: 'Auto-renew' }), el('dd', { text: active.cancel_at_period_end ? 'Off' : 'On' })),
-          el('div', { style: 'margin-top:18px' },
-            el('button', { class: 'btn btn--outline btn--block', onclick: () => toast('Plan change flow opens at checkout') }, 'Change Plan')),
-          el('div', { style: 'margin-top:10px' },
-            el('button', { class: 'btn btn--ghost btn--block', onclick: () => toast('Auto-renew updated') },
-              active.cancel_at_period_end ? 'Resume auto-renew' : 'Cancel auto-renew'))),
-        card('Subscription history', {},
-          table([
-            { label: 'Plan', render: (r) => (plans.find((p) => p.key === r.plan_key) || {}).name || r.plan_key },
-            { label: 'Status', render: (r) => chip(r.status, r.status === 'active' ? 'chip--on' : '') },
-            { label: 'Started', render: (r) => fmt.date(r.current_period_start) },
-            { label: 'Ends', render: (r) => fmt.date(r.current_period_end) },
-          ], history)))));
-  return page;
-}
-
-/** Wallet — production /wallet. */
-export async function wallet(ctx) {
-  const [raw, txnsRaw, withdrawalsRaw] = await Promise.all([api.wallet.get(), api.wallet.transactions(), api.wallet.withdrawals()]);
-  const w = raw || { available_cents: 0, pending_cents: 0, withdrawable_cents: 0, total_spent_cents: 0, is_frozen: false, currency: 'USD' };
-  const txns = txnsRaw || [];
-  const withdrawals = withdrawalsRaw || [];
-  const note = el('p', { class: 'form__note' });
-
-  const page = el('div', { class: 'page' });
-  const withdrawalsCard = withdrawals.length
-    ? card('Withdrawals', {}, table([
-        { label: 'Amount', num: true, render: (r) => fmt.money(r.amount_cents) },
-        { label: 'Status', render: (r) => chip(r.status, r.status === 'paid' ? 'chip--on' : 'chip--warn') },
-        { label: 'When', render: (r) => fmt.ago(r.created_at) },
-      ], withdrawals))
-    : null;
-
-  page.append(
-    el('div', { class: 'page__head' },
-      el('div', {},
-        el('h2', { class: 'page__title', text: 'Pipnex Wallet' }),
-        el('p', { class: 'page__sub', text: 'AI credits, deposits and withdrawals.' })),
-      chip(w.is_frozen ? 'Frozen' : 'Active', w.is_frozen ? 'chip--danger' : 'chip--on')),
-    el('div', { class: 'grid grid--4' },
-      el('div', { class: 'stat' }, el('small', { text: 'Available' }), el('b', { text: fmt.money(w.available_cents) }), el('span', { text: 'ready to spend' })),
-      el('div', { class: 'stat' }, el('small', { text: 'Pending' }), el('b', { text: fmt.money(w.pending_cents) }), el('span', { text: 'processing' })),
-      el('div', { class: 'stat' }, el('small', { text: 'Withdrawable' }), el('b', { text: fmt.money(w.withdrawable_cents) }), el('span', { text: 'min $75.00' })),
-      el('div', { class: 'stat' }, el('small', { text: 'Total spent' }), el('b', { text: fmt.money(w.total_spent_cents) }), el('span', { text: 'lifetime' }))));
-
-  page.append(el('div', { class: 'grid grid--sidebar' },
-    card('Transactions', { note: `${txns.length} entries` },
-      table([
-        { label: 'Type', render: (r) => chip(r.kind, r.kind === 'deposit' ? 'chip--on' : '') },
-        { label: 'Amount', num: true, render: (r) => `<span class="${r.amount_cents >= 0 ? 'pos' : 'neg'}">${r.amount_cents >= 0 ? '+' : ''}${fmt.money(r.amount_cents)}</span>` },
-        { label: 'Status', render: (r) => chip(r.status, r.status === 'settled' ? 'chip--on' : 'chip--warn') },
-        { label: 'When', render: (r) => fmt.ago(r.created_at) },
-      ], txns, { emptyTitle: 'No transactions yet', emptyText: 'Deposits and AI credit purchases appear here.' })),
-    card('Add money / Withdraw', {},
-      el('div', { class: 'form' },
-        field('Amount (USD)', el('input', { type: 'number', min: '1', step: '1', placeholder: '50', id: 'wAmount' })),
-        el('div', { style: 'display:flex;gap:8px' },
-          el('button', { class: 'btn btn--primary', style: 'flex:1', onclick: () => {
-            const v = document.getElementById('wAmount').value;
-            note.textContent = v ? `Deposit of $${v} started (demo — no payment processor in this build)` : 'Enter an amount first.';
-            note.className = 'form__note' + (v ? ' is-ok' : ' is-bad');
-          } }, 'Add money'),
-          el('button', { class: 'btn btn--outline', style: 'flex:1', onclick: () => toast('Withdrawal needs $75.00 available') }, 'Withdraw')),
-        note,
-        el('div', { style: 'margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)' },
-          el('button', { class: 'btn btn--ghost btn--block', onclick: () => toast('Transfer to another Pipnex wallet') }, 'Transfer to wallet'))),
-      el('div', { style: 'margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)' },
-        el('h3', { class: 'card__title', text: 'Frequently Asked Questions' }),
-        el('dl', { class: 'kv', style: 'margin-top:12px' },
-          el('dt', { text: 'Minimum withdrawal' }), el('dd', { text: '$75.00' }),
-          el('dt', { text: 'Payout time' }), el('dd', { text: '2–5 business days' }),
-          el('dt', { text: 'Currency' }), el('dd', { text: w.currency })))),
-    withdrawalsCard));
-  return page;
-}
-
-/** Settings — production /dashboard/settings. */
-export async function settings(ctx) {
-  const profile = await api.profile.get();
-  const note = el('p', { class: 'form__note' });
-  const nameInput = el('input', { type: 'text', value: profile.display_name });
-  const emailInput = el('input', { type: 'email', value: profile.email, readonly: true });
-
-  /* ---- data source: demo data vs the live Supabase project ---- */
-  const dsNote = el('p', { class: 'form__note' });
-  const tokenInput = el('textarea', {
-    rows: '3',
-    placeholder: 'Paste the access token, or the whole sb-…-auth-token JSON',
-    style: 'font-family:var(--mono);font-size:12px',
-  });
-  const liveState = el('div', { class: 'factgrid', style: 'margin-top:12px' });
-
-  const paintLiveState = () => {
-    liveState.innerHTML = '';
-    const info = sessionInfo();
-    liveState.append(
-      el('div', { class: 'fact' }, el('small', { text: 'MODE' }), el('b', { class: hasSession() ? 'on' : 'off', text: getMode() === 'live' ? 'LIVE' : 'DEMO' })),
-      el('div', { class: 'fact' }, el('small', { text: 'ACCOUNT' }), el('b', { text: info ? (info.email || 'signed in') : '—' })),
-      el('div', { class: 'fact' }, el('small', { text: 'USER ID' }), el('b', { text: info && info.userId ? info.userId.slice(0, 8) : '—' })));
-  };
-  paintLiveState();
 
   const marketStatus = el('div', { class: 'factgrid', style: 'margin-top:12px' });
   market.health().then((h) => {
@@ -353,21 +354,8 @@ export async function settings(ctx) {
     marketStatus,
     el('p', { class: 'form__note', style: 'margin-top:10px', text: `Endpoint: ${market.base}` }));
 
-  const dataSource = card('Data source', { note: 'read-only' },
-    el('p', { class: 'card__note', text: 'Demo mode serves the mock adapter. Live mode reads your own rows from the Pipnex Supabase project through PostgREST — reads only, never writes.' }),
-    el('div', { style: 'margin-top:14px' },
-      switchRow('Live Supabase', 'Use the signed-in session instead of demo data', getMode() === 'live' && hasSession(), (on) => {
-        if (on && !hasSession()) {
-          dsNote.textContent = 'Paste a session token below first.';
-          dsNote.className = 'form__note is-bad';
-          return;
-        }
-        setMode(on ? 'live' : 'mock');
-        paintLiveState();
-        dsNote.textContent = on ? 'Live mode on — reloading from Supabase.' : 'Demo mode on.';
-        dsNote.className = 'form__note is-ok';
-        setTimeout(() => location.reload(), 600);
-      })),
+  const dataSource = card('Account connection', { note: 'read-only' },
+    el('p', { class: 'card__note', text: 'Every row on these pages comes from your own account in the Pipnex Supabase project through PostgREST — reads only, never writes. There is no demo data: without a session the pages say what is missing.' }),
     el('div', { style: 'margin-top:16px' },
       field('Session token', tokenInput),
       el('div', { style: 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap' },
@@ -378,32 +366,32 @@ export async function settings(ctx) {
             dsNote.className = 'form__note is-bad';
             return;
           }
-          setMode('live');
           paintLiveState();
-          dsNote.textContent = `Signed in as ${session.email || session.userId}. Switching to live data…`;
+          dsNote.textContent = `Signed in as ${session.email || session.userId}. Loading your rows…`;
           dsNote.className = 'form__note is-ok';
           setTimeout(() => location.reload(), 700);
-        } }, 'Use this session'),
+        } }, 'Connect'),
         el('button', { class: 'btn btn--outline btn--sm', onclick: () => {
           clearSession();
-          setMode('mock');
           tokenInput.value = '';
           paintLiveState();
-          dsNote.textContent = 'Session cleared — back to demo data.';
+          dsNote.textContent = 'Session cleared. Pages will show what they cannot read.';
           dsNote.className = 'form__note';
-        } }, 'Sign out')),
+        } }, 'Disconnect')),
       liveState,
       dsNote));
 
   /* ---- signal delivery preferences (moved here from Pulse Signals) ---- */
-  const prefs = await api.signals.preferences();
+  const prefs = await api.signals.preferences().catch(() => null);
   const deliveryCard = card('Signal delivery', {},
-    switchRow('In-app alerts', 'Show signals inside PipNex', prefs.in_app, (v) => toast(`In-app alerts ${v ? 'on' : 'off'}`)),
-    switchRow('Browser push', 'Push notifications in this browser', prefs.push, (v) => toast(`Browser push ${v ? 'on' : 'off'}`)),
-    switchRow('Email', 'Send a copy to your email', prefs.email, (v) => toast(`Email delivery ${v ? 'on' : 'off'}`)),
-    el('div', { style: 'margin-top:16px' },
-      el('label', { class: 'field' }, el('span', { text: 'Symbols' }),
-        el('input', { value: prefs.symbols.join(', '), onchange: () => toast('Symbol watchlist saved') }))));
+    prefs ? el('div', {},
+      switchRow('In-app alerts', 'Show signals inside PipNex', prefs.in_app, (v) => toast(`In-app alerts ${v ? 'on' : 'off'}`)),
+      switchRow('Browser push', 'Push notifications in this browser', prefs.push, (v) => toast(`Browser push ${v ? 'on' : 'off'}`)),
+      switchRow('Email', 'Send a copy to your email', prefs.email, (v) => toast(`Email delivery ${v ? 'on' : 'off'}`)),
+      el('div', { style: 'margin-top:16px' },
+        el('label', { class: 'field' }, el('span', { text: 'Symbols' }),
+          el('input', { value: prefs.symbols.join(', '), onchange: () => toast('Symbol watchlist saved') }))))
+      : notConnected('Signal delivery preferences'));
 
   const group = (title, ...cards) => el('section', { class: 'settings-group' },
     el('h2', { class: 'settings-group__title', text: title }),
@@ -420,7 +408,7 @@ export async function settings(ctx) {
         el('div', { class: 'form' },
           field('Display name', nameInput),
           field('Email', emailInput),
-          field('Account ID', el('input', { type: 'text', value: profile.account_id, readonly: true })),
+          field('Account ID', el('input', { type: 'text', value: profile ? profile.account_id || '' : '', placeholder: 'Not connected', readonly: true })),
           el('button', { class: 'btn btn--primary', style: 'justify-self:start', onclick: () => {
             note.textContent = 'Profile saved.';
             note.className = 'form__note is-ok';
@@ -465,9 +453,12 @@ export async function settings(ctx) {
     group('Signals & alerts',
       deliveryCard,
       card('Notifications', {},
-        switchRow('Promotions', 'Offers and partner campaigns', profile.email_preferences.promotions, () => toast('Preference saved')),
-        switchRow('Announcements', 'Product news', profile.email_preferences.announcements, () => toast('Preference saved')),
-        switchRow('System updates', 'Security and downtime notices', profile.email_preferences.system_updates, () => toast('Preference saved')))),
+        profile && profile.email_preferences
+          ? el('div', {},
+            switchRow('Promotions', 'Offers and partner campaigns', Boolean(profile.email_preferences.promotions), () => toast('Preference saved')),
+            switchRow('Announcements', 'Product news', Boolean(profile.email_preferences.announcements), () => toast('Preference saved')),
+            switchRow('System updates', 'Security and downtime notices', Boolean(profile.email_preferences.system_updates), () => toast('Preference saved')))
+          : notConnected('Your notifications'))),
 
     group('Appearance',
       card('Interface', {},

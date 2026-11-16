@@ -1,5 +1,5 @@
 /**
- * Live adapter — the same API surface as the mock in `data.js`, implemented
+ * Live adapter — the API surface `data.js` proxies, implemented
  * against the production Supabase project over PostgREST.
  *
  * Reads only. Every call is a GET; nothing here writes, and row-level
@@ -79,7 +79,7 @@ async function rest(table, query = '') {
 
 const enc = encodeURIComponent;
 
-/** Live API — identical method names to the mock adapter. */
+/** Live API — one method per table/row set the pages read. */
 export const liveApi = {
   profile: {
     async get() {
@@ -220,8 +220,7 @@ export const liveApi = {
       } catch { return []; }
     },
   },
-  // No local catch here: data.js's proxy falls back to the mock rows when a
-  // live call rejects, so a missing `eas` table degrades instead of blanking.
+  // No local catch here: a failure surfaces as an error the page states on its face.
   ea: {
     async list() {
       return rest('eas', 'select=*&order=priority_score.desc');

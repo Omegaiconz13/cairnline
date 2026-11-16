@@ -1,5 +1,5 @@
 import { api, fmt } from '../data.js';
-import { el, card, metric, chip, toast } from '../ui.js';
+import { el, card, metric, chip, toast, notConnected } from '../ui.js';
 import { market, px } from '../market.js';
 
 /** TradingView's free ticker-tape widget: a moving ribbon, click-through to the chart. */
@@ -44,9 +44,14 @@ function tickerTape() {
 
 /** Overview — the operator's landing surface: ribbon, snapshot, today's signal. */
 export async function overview(ctx) {
-  const [profile, usage, wallet] = await Promise.all([
-    api.profile.get(), api.usage.today(), api.wallet.get(),
-  ]);
+  let profile = null; let usage = null; let wallet = null;
+  try {
+    [profile, usage, wallet] = await Promise.all([
+      api.profile.get(), api.usage.today(), api.wallet.get(),
+    ]);
+  } catch {
+    /* No session: the snapshot below states that instead of inventing rows. */
+  }
   const walletCents = (wallet && wallet.available_cents) || 0;
 
   const page = el('div', { class: 'page' });
@@ -58,7 +63,7 @@ export async function overview(ctx) {
       el('p', { text: 'Your all-in-one AI trading intelligence platform.' }))));
 
   /* ---- snapshot ---- */
-  page.append(card('Quick Performance Snapshot', { note: 'Today' },
+  page.append(usage ? card('Quick Performance Snapshot', { note: 'Today' },
     el('div', { class: 'metrics' },
       metric('AI Analyses Today', String(usage.analyses)),
       metric('Signals Generated', String(usage.signals)),
@@ -68,7 +73,9 @@ export async function overview(ctx) {
       metric('Auto-Trading', usage.auto_trading ? 'ON' : 'OFF', { small: true }),
       metric('Copy Trading', usage.copy_trading, { small: true })),
     el('div', { class: 'snapshot__cta' },
-      el('button', { class: 'btn btn--primary', onclick: () => { location.hash = '#/chart'; } }, 'Start AI Trading'))));
+      el('button', { class: 'btn btn--primary', onclick: () => { location.hash = '#/chart'; } }, 'Start AI Trading')))
+    : card('Quick Performance Snapshot', { note: 'nothing to read' },
+      notConnected('Today’s analyses, signals and balance')));
 
 
   /* ---- Signal of the Day: entry, exit, confidence. Nothing else. ---- */
@@ -204,8 +211,8 @@ export async function overview(ctx) {
 
   /* ---- referral program ---- */
   const limit = ctx.permissions.dailyUploadLimit;
-  const refLink = `https://pipnex-ai.com/auth?ref=${profile.account_id}`;
-  page.append(card('Referral Program', { note: 'earn when your referrals subscribe' },
+  const refLink = profile ? `https://pipnex-ai.com/auth?ref=${profile.account_id}` : null;
+  page.append(profile ? card('Referral Program', { note: 'earn when your referrals subscribe' },
     el('div', { class: 'grid grid--2', style: 'align-items:start' },
       el('div', {},
         el('dl', { class: 'kv' },
@@ -215,7 +222,8 @@ export async function overview(ctx) {
       el('div', { class: 'refstats' },
         el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Balance' }), el('div', { class: 'metric__v metric__v--sm', text: fmt.money(walletCents) })),
         el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Withdraw min' }), el('div', { class: 'metric__v metric__v--sm', text: '$75.00' })))),
-    el('p', { class: 'card__note', style: 'margin-top:14px', text: 'Commission: $5 Pro · $10 Ultimate · $36 Platinum, paid when a referral subscribes.' })));
+    el('p', { class: 'card__note', style: 'margin-top:14px', text: 'Commission: $5 Pro · $10 Ultimate · $36 Platinum, paid when a referral subscribes.' }))
+    : card('Referral Program', { note: 'nothing to read' }, notConnected('Your account ID and referral link')));
 
   /* ---- tools + account status ---- */
   page.append(

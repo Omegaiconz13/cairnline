@@ -30,16 +30,17 @@ each step, running from a plain static server with no build step.
 **[inferred]** Not a competing product: a faithful, editable reconstruction. The differentiator of
 the real product is the Pipnex "Market Brain" — Smart Money Concepts chart reads with a
 confidence-scored trade plan — plus the Trade Lens Chrome extension that applies it inside
-TradingView. The clone's own differentiator is legibility: readable vanilla source, a
-Supabase-shaped data layer and an honest split between real data, live reads and demo rows.
+TradingView. The clone's own differentiator is legibility: readable vanilla source and a data layer
+that shows only real reads — no demo rows, no generated series.
 
 ## Operating Context
 
 - Static site served from `app/` (`index.html`, `styles.css`, `app.js`, plus `app/dashboard/`).
 - `server/market_service.py` (Flask-free, plain HTTP on `:8788`) supplies real bars and indicator
   values from yfinance so the browser keeps working around CORS.
-- Live data mode reads the production Supabase project through PostgREST, GET only, using an access
-  token the user pastes in Settings. Every live call falls back to mock rows.
+- Account data reads the production Supabase project through PostgREST, GET only, using an access
+  token pasted in Settings. There is **no demo, mock or simulated data anywhere**: with no session
+  a page states what it cannot read (`NO_ACCOUNT`) instead of inventing rows.
 - Reference material for the rebuild lives in `/home/omega/pipnex-reference` (captured DOM, tokens,
   measured layout, full-page screenshots at 1440/768/390).
 
@@ -77,10 +78,11 @@ local work, not a Pipnex asset.
 
 ## Product Principles
 
-1. **Walkable before impressive.** Every production route reachable and recognisable, even when a
-   page has to run on clearly labelled demo data.
-2. **Label the truth.** Real feed, live read, cached value and simulated series are visibly
-   different things; never dress mock numbers as market data.
+1. **Walkable before impressive.** Every production route reachable and recognisable — with an
+   honest empty state where a real source is absent.
+2. **Label the truth.** Real feed, live read and cached value are visibly different things. Nothing
+   is fabricated to fill a layout: no seeded catalogues, no generated price series, no chart
+   mockups that look like live product screens.
 3. **The data layer is the contract.** Pages speak PostgREST column names so swapping sources stays
    a one-file change.
 4. **No build step, no magic.** What ships is what a reader can open and edit.

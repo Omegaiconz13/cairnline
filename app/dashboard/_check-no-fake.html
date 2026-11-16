@@ -1,0 +1,56 @@
+<!doctype html><meta charset="utf-8"><title>no fabricated data</title>
+<body style="font:13px ui-monospace,monospace;background:#050505;color:#e6e6e6;padding:20px">
+<pre id="results">running…</pre>
+<script type="module">
+import { permissionsFor } from './js/data.js';
+import { overview } from './js/pages/overview.js';
+import { subscription, wallet, settings } from './js/pages/account.js';
+import { referral, tutorials } from './js/pages/content.js';
+import { bots } from './js/pages/trading.js';
+import { eaMarketplace } from './js/pages/marketplace.js';
+
+const out = [];
+const check = (ok, label, detail = '') => out.push(`${ok ? 'PASS' : 'FAIL'} ${label}${detail ? ' — ' + detail : ''}`);
+const body = (p) => fetch(p).then((r) => r.text());
+
+const dataJs = await body('./js/data.js');
+check(!/const mock\s*=/.test(dataJs), 'data.js has no mock fixture block');
+check(!/mockApi/.test(dataJs), 'data.js has no mock adapter');
+check(/NO_ACCOUNT/.test(dataJs), 'missing account is a named error, not fake rows');
+
+const uiJs = await body('./js/ui.js');
+check(!/Math\.sin/.test(uiJs), 'ui.js has no generated candlestick series');
+
+const landing = await body('../index.html');
+check(!/class="mock/.test(landing), 'landing page has no fake chart mockup');
+check(!/1\.0842|87%/.test(landing), 'landing page states no invented price or confidence');
+
+const routerJs = await body('./js/router.js');
+check(!/synthetic/.test(routerJs), 'router has no simulated-index route');
+const synth = await fetch('./js/pages/synthetic.js');
+check(synth.status === 404, 'simulated-index page is gone');
+
+const ctx = { permissions: permissionsFor(null, []) };
+const pages = { overview, subscription, wallet, settings, referral, tutorials, bots, 'ea-marketplace': eaMarketplace };
+const host = document.createElement('div');
+document.body.append(host);
+
+for (const [name, fn] of Object.entries(pages)) {
+  host.replaceChildren();
+  try {
+    host.append(await fn(ctx));
+  } catch (err) {
+    check(false, `#/${name} throws instead of showing an empty state`, String(err.message || err).slice(0, 80));
+    continue;
+  }
+  await new Promise((r) => setTimeout(r, 60));
+  const text = host.innerText;
+  check(/Not connected to an account/.test(text), `#/${name} states it has nothing to read`);
+  check(!/Something went wrong/.test(text), `#/${name} renders without an error card`);
+  for (const bad of ['Aurora Scalper', 'Volatility 75', 'Omega Iconz', 'nandejeclinton', 'EquityGuardian', '87%']) {
+    if (text.includes(bad)) check(false, `#/${name} still shows "${bad}"`);
+  }
+}
+check(!/Aurora Scalper|EquityGuardian/.test(await body('./js/pages/marketplace.js')), 'marketplace.js ships no seeded EA catalogue');
+document.getElementById('results').textContent = out.join('\n');
+</script>

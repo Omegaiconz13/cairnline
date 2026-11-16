@@ -1,5 +1,5 @@
 import { api, fmt } from '../data.js';
-import { el, card, chip, table, toast } from '../ui.js';
+import { el, card, chip, table, toast, notConnected } from '../ui.js';
 
 /** Trade Lens — production /lens (Chrome extension product page). */
 export async function lens(ctx) {
@@ -32,7 +32,11 @@ export async function lens(ctx) {
 
 /** Referral — production /referral. */
 export async function referral(ctx) {
-  const profile = await api.profile.get();
+  const profile = await api.profile.get().catch(() => null);
+  if (!profile) {
+    return el('div', { class: 'page' },
+      card('Referral Program', { note: 'nothing to read' }, notConnected('Your referral link and commissions')));
+  }
   const link = `https://pipnex-ai.com/?ref=${profile.account_id}`;
   const page = el('div', { class: 'page' });
   page.append(
@@ -69,7 +73,11 @@ export async function referral(ctx) {
 
 /** Tutorials — production /tutorials (from the `tutorials` table). */
 export async function tutorials(ctx) {
-  const list = await api.tutorials.list();
+  const list = await api.tutorials.list().catch(() => null);
+  if (!list) {
+    return el('div', { class: 'page' },
+      card('Tutorials', { note: 'nothing to read' }, notConnected('The tutorial library')));
+  }
   const cats = ['All', ...new Set(list.map((t) => t.category))];
   const grid = el('div', { class: 'grid grid--4' });
   const render = (filter) => {

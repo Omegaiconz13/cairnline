@@ -1,232 +1,38 @@
 /**
- * Data layer — Supabase-shaped API with a mock adapter.
+ * Data layer — live, read-only Supabase adapter only.
  *
- * Every method mirrors the production schema (pipnex-ai.com, Supabase project
- * jwaplyyxkxfrhmbcycmc): column names, plan catalogue and plan limits come from
- * the live `plans` table, so swapping `mock` for a real `supabase-js` client is a
- * one-file change and the pages need no edits.
- */
-
-const now = Date.now();
-const days = (n) => new Date(now - n * 86400000).toISOString();
-
-/* ------------------------------------------------------------------ mock */
-
-const mock = {
-  profile: {
-    id: '8aa02895-8758-4628-bfe3-8ac80f03594c',
-    display_name: 'Omega Iconz',
-    first_name: 'Omega',
-    last_name: 'Iconz',
-    email: 'nandejeclinton@gmail.com',
-    account_id: 'OME4770',
-    plan_id: null,
-    points: 0,
-    country: 'Uganda',
-    country_code: 'UG',
-    is_on_trial: false,
-    trial_started_at: days(263),
-    active_session_id: '016d7756-1d28-4042-886b-a149f5dbea4b',
-    last_active_at: new Date().toISOString(),
-    email_preferences: { promotions: true, announcements: true, system_updates: true },
-    created_at: days(263),
-  },
-
-  plans: [
-    { key: 'basic', name: 'Basic', price_cents: 999, currency: 'USD', mt5_limit: 1, daily_upload_limit: 3, voice_limit: 0, ea_download_level: 'none', auto_trading_allowed: false, priority_score: 1, mobile_price_cents: 1499 },
-    { key: 'pro', name: 'Pro', price_cents: 4999, currency: 'USD', mt5_limit: 3, daily_upload_limit: 12, voice_limit: 10, ea_download_level: 'site_brand', auto_trading_allowed: true, priority_score: 2, mobile_price_cents: 6999 },
-    { key: 'ultimate', name: 'Ultimate', price_cents: 9999, currency: 'USD', mt5_limit: 5, daily_upload_limit: 24, voice_limit: 999999, ea_download_level: 'user_brand', auto_trading_allowed: true, priority_score: 10, mobile_price_cents: 14999 },
-    { key: 'platinum', name: 'Platinum', price_cents: 29999, currency: 'USD', mt5_limit: -1, daily_upload_limit: -1, voice_limit: -1, ea_download_level: 'user_brand', auto_trading_allowed: true, priority_score: 100, mobile_price_cents: 39999 },
-  ],
-
-  subscription: {
-    id: 'sub_demo_0001',
-    plan_key: 'pro',
-    status: 'active',
-    current_period_start: days(11),
-    current_period_end: days(19),
-    cancel_at_period_end: false,
-    provider: 'stripe',
-  },
-
-  wallets: {
-    id: 'wal_demo_0001',
-    user_id: '8aa02895-8758-4628-bfe3-8ac80f03594c',
-    available_cents: 0,
-    pending_cents: 0,
-    reserved_cents: 0,
-    withdrawable_cents: 0,
-    total_deposited_cents: 0,
-    total_withdrawn_cents: 0,
-    total_spent_cents: 0,
-    currency: 'USD',
-    is_frozen: false,
-  },
-
-  usage_today: { analyses: 0, signals: 0, charts: 0, preferred_strategy: null, avg_confidence: null, auto_trading: false, copy_trading: 'Not Configured' },
-
-  analysis_history: [
-    { id: 'an_1', symbol: 'XAUUSD', interval: 'M15', bias: 'long', confidence: 87, entry: 3412.4, stop_loss: 3401.2, take_profit: 3448.9, created_at: days(1) },
-    { id: 'an_2', symbol: 'EURUSD', interval: 'H1', bias: 'short', confidence: 74, entry: 1.0842, stop_loss: 1.0871, take_profit: 1.0784, created_at: days(2) },
-    { id: 'an_3', symbol: 'GBPJPY', interval: 'M30', bias: 'long', confidence: 61, entry: 198.42, stop_loss: 197.85, take_profit: 199.7, created_at: days(4) },
-    { id: 'an_4', symbol: 'USDJPY', interval: 'M5', bias: 'neutral', confidence: 48, entry: 151.22, stop_loss: 150.9, take_profit: 151.8, created_at: days(6) },
-  ],
-
-  cloud_bots: [],
-  cloud_bot_trades: [],
-
-  trades: [
-    { id: 'tr_1', symbol: 'XAUUSD', side: 'long', qty: 0.5, price: 3408.1, pnl: 42.6, status: 'closed', opened_at: days(3), closed_at: days(3) },
-    { id: 'tr_2', symbol: 'EURUSD', side: 'short', qty: 1.0, price: 1.0864, pnl: -12.3, status: 'closed', opened_at: days(9), closed_at: days(9) },
-    { id: 'tr_3', symbol: 'GBPUSD', side: 'long', qty: 0.8, price: 1.2712, pnl: 0, status: 'open', opened_at: days(0), closed_at: null },
-  ],
-
-  strategies: [
-    { id: 'st_1', name: 'SMC London Breakout', symbol: 'XAUUSD', status: 'draft', win_rate: null, created_at: days(5) },
-    { id: 'st_2', name: 'Asia Range Reversal', symbol: 'EURUSD', status: 'backtesting', win_rate: 58.4, created_at: days(12) },
-  ],
-
-  pulse_signal_preferences: { email: true, push: true, in_app: true, symbols: ['XAUUSD', 'EURUSD'], interval: 'M15' },
-
-  // Deliberately empty: signals are computed live from real bars by the
-  // market service (see js/market.js basketSignals), never replayed as stored
-  // demo rows. In live mode this reads strategy_signal_deliveries instead.
-  signals: [],
-
-  wallet_transactions: [
-    { id: 'wt_1', kind: 'deposit', amount_cents: 5000, status: 'settled', created_at: days(14) },
-    { id: 'wt_2', kind: 'spend', amount_cents: -1200, status: 'settled', created_at: days(10) },
-    { id: 'wt_3', kind: 'deposit', amount_cents: 2500, status: 'settled', created_at: days(6) },
-  ],
-
-  withdrawal_requests: [],
-
-  tutorials: [
-    { id: 't1', title: 'PIPNEX AI - Official Platform Introduction | Getting Started', slug: 'official-introduction', youtube_id: '_JOyWOaFXgE', category: 'Getting Started', duration_label: '0.46s', sort_order: 1, is_published: true },
-    { id: 't2', title: 'PIPNEX AI - How to Create Your Account | Sign Up', slug: 'create-account', youtube_id: 'AHuqLWjXePE', category: 'Getting Started', duration_label: '0.50s', sort_order: 2, is_published: true },
-    { id: 't3', title: 'PIPNEX AI - How to Sign In | Access Your Account', slug: 'sign-in', youtube_id: 'fO_iEGZ2Bf0', category: 'Getting Started', duration_label: '0.37s', sort_order: 3, is_published: true },
-    { id: 't4', title: 'PIPNEX AI - Signal of the Day | AI-Powered Trading Setups', slug: 'signal-of-the-day', youtube_id: 'wiBbXjG_QFc', category: 'Signal Of The Day', duration_label: '0.42s', sort_order: 4, is_published: true },
-    { id: 't5', title: 'PIPNEX AI - AI Trading | AI-Powered Market Analysis & Execution', slug: 'ai-trading', youtube_id: 'rmE6hfg4mes', category: 'AI Trading', duration_label: '1.48s', sort_order: 13, is_published: true },
-    { id: 't6', title: 'PIPNEX AI - Upload Chart | AI Pattern Recognition', slug: 'upload-chart', youtube_id: 'wFsW1nWL5Mk', category: 'Upload Chart', duration_label: '0.58s', sort_order: 6, is_published: true },
-  ],
-
-  referrals: [],
-
-  feature_flags: [
-    { feature_key: 'voice_ai_interaction', display_name: 'Voice-based AI Interaction', enabled: true },
-    { feature_key: 'auto_trading', display_name: 'Auto Trading', enabled: true },
-    { feature_key: 'trade_lens', display_name: 'Pipnex Trade Lens', enabled: true },
-  ],
-
-  // `/ea-marketplace` catalogue. `plan_required` is the cheapest plan that may
-  // install the EA; `price_cents: 0` means it ships with the plan rather than
-  // being sold separately. `equity` drives the card sparkline.
-  ea_marketplace: [
-    { id: 'ea_1', name: 'Aurora Scalper X', author: 'Pipnex Labs', version: '2.1.4', symbol: 'XAUUSD', timeframe: 'M5', price_cents: 0, plan_required: 'ultimate', win_rate: 71.4, profit_factor: 1.86, trades: 1842, max_dd: 6.8, rating: 4.7, reviews: 214, badge: 'Featured', tags: ['scalping', 'gold', 'smc'], description: 'Liquidity-sweep entries on gold with an AI confidence filter and a hard daily loss cap.', equity: [100, 104, 103, 109, 114, 112, 120, 126, 124, 133, 141, 148], updated_at: days(6) },
-    { id: 'ea_2', name: 'London Open Sniper', author: 'K. Mercer', version: '1.8.0', symbol: 'GBPUSD', timeframe: 'M15', price_cents: 8900, plan_required: 'pro', win_rate: 64.2, profit_factor: 1.52, trades: 726, max_dd: 9.1, rating: 4.4, reviews: 96, badge: null, tags: ['breakout', 'session'], description: 'One trade per session at the London open, stop tucked behind the Asian range.', equity: [100, 101, 105, 103, 108, 107, 113, 111, 118, 116, 124, 127], updated_at: days(11) },
-    { id: 'ea_3', name: 'Gold Liquidity Sweep', author: 'SMC Collective', version: '3.0.2', symbol: 'XAUUSD', timeframe: 'M15', price_cents: 0, plan_required: 'platinum', win_rate: 74.9, profit_factor: 2.11, trades: 2410, max_dd: 5.2, rating: 4.9, reviews: 508, badge: 'Top rated', tags: ['gold', 'order blocks'], description: 'Order-block retests after a sweep of the prior session high or low, sized to 0.5% risk.', equity: [100, 106, 110, 109, 118, 127, 125, 136, 149, 158, 166, 181], updated_at: days(2) },
-    { id: 'ea_4', name: 'Asia Range Reversal', author: 'Pipnex Labs', version: '1.3.7', symbol: 'EURUSD', timeframe: 'M30', price_cents: 4900, plan_required: 'pro', win_rate: 58.4, profit_factor: 1.31, trades: 1184, max_dd: 11.4, rating: 4.1, reviews: 63, badge: null, tags: ['mean reversion', 'range'], description: 'Fades the first push out of the Asian range when momentum diverges from the AI bias.', equity: [100, 103, 101, 106, 104, 109, 106, 112, 115, 113, 119, 122], updated_at: days(19) },
-    { id: 'ea_5', name: 'Trish Neural Grid', author: 'Pipnex Labs', version: '1.0.9', symbol: 'USDJPY', timeframe: 'H1', price_cents: 0, plan_required: 'ultimate', win_rate: 67.8, profit_factor: 1.64, trades: 962, max_dd: 7.9, rating: 4.5, reviews: 137, badge: 'New', tags: ['ai', 'grid', 'carry'], description: 'Trish V6 sizes a soft grid around the H1 bias and unwinds the basket on a regime flip.', equity: [100, 102, 106, 105, 110, 115, 114, 121, 125, 128, 133, 139], updated_at: days(1) },
-    { id: 'ea_6', name: 'NY Session Momentum', author: 'Blackwood Quant', version: '2.6.1', symbol: 'NAS100', timeframe: 'M5', price_cents: 12900, plan_required: 'basic', win_rate: 61.9, profit_factor: 1.44, trades: 3105, max_dd: 13.2, rating: 4.2, reviews: 182, badge: null, tags: ['indices', 'momentum'], description: 'First-pullback continuation after the 14:30 UTC cash open, flat by 20:00 UTC.', equity: [100, 98, 104, 101, 110, 107, 116, 113, 122, 128, 125, 134], updated_at: days(27) },
-  ],
-
-  ea_downloads: [
-    { id: 'dl_1', ea_id: 'ea_4', name: 'Asia Range Reversal', version: '1.3.7', symbol: 'EURUSD', plan_required: 'pro', status: 'installed', downloaded_at: days(8) },
-  ],
-
-  mt5_accounts: [],
-  custom_broker_sessions: [],
-};
-
-/* ------------------------------------------------------------------ api */
-
-const delay = (ms = 140) => new Promise((r) => setTimeout(r, ms));
-const clone = (v) => JSON.parse(JSON.stringify(v));
-
-const mockApi = {
-  profile: {
-    async get() { await delay(); return clone(mock.profile); },
-  },
-  plans: {
-    async list() { await delay(); return clone(mock.plans); },
-    async get(key) { await delay(); return clone(mock.plans.find((p) => p.key === key) || null); },
-  },
-  subscription: {
-    async get() { await delay(); return clone(mock.subscription); },
-    async history() { await delay(); return clone([mock.subscription]); },
-  },
-  wallet: {
-    async get() { await delay(); return clone(mock.wallets); },
-    async transactions() { await delay(); return clone(mock.wallet_transactions); },
-    async withdrawals() { await delay(); return clone(mock.withdrawal_requests); },
-  },
-  usage: {
-    async today() { await delay(); return clone(mock.usage_today); },
-  },
-  analysis: {
-    async list({ limit = 20 } = {}) { await delay(); return clone(mock.analysis_history.slice(0, limit)); },
-  },
-  bots: {
-    async list() { await delay(); return clone(mock.cloud_bots); },
-    async trades() { await delay(); return clone(mock.cloud_bot_trades); },
-  },
-  trades: {
-    async list() { await delay(); return clone(mock.trades); },
-  },
-  strategies: {
-    async list() { await delay(); return clone(mock.strategies); },
-  },
-  signals: {
-    async list() { await delay(); return clone(mock.signals); },
-    async preferences() { await delay(); return clone(mock.pulse_signal_preferences); },
-  },
-  tutorials: {
-    async list() { await delay(); return clone(mock.tutorials); },
-  },
-  referrals: {
-    async list() { await delay(); return clone(mock.referrals); },
-  },
-  featureFlags: {
-    async list() { await delay(); return clone(mock.feature_flags); },
-  },
-  ea: {
-    async list() { await delay(); return clone(mock.ea_marketplace); },
-    async downloads() { await delay(); return clone(mock.ea_downloads); },
-  },
-  mt5: {
-    async accounts() { await delay(); return clone(mock.mt5_accounts); },
-    async brokerSessions() { await delay(); return clone(mock.custom_broker_sessions); },
-  },
-};
-
-/* ------------------------------------------------------- mode switching */
-
-/**
- * `api` delegates to the live Supabase adapter when a session is present and
- * the user switched to Live, otherwise to the mock. Every live call falls back
- * to mock data on error so one failing table never blanks a page.
+ * There are no demo rows and no generated values anywhere in this layer: every
+ * number on screen comes from the signed-in account over PostgREST (GET only,
+ * RLS enforced by Postgres) or it is absent. When no session is connected the
+ * `api` methods reject with `code: 'NO_ACCOUNT'` and the page shows what it is
+ * missing instead of inventing it.
+ *
+ * Column names, plan limits and table names mirror the production schema so a
+ * page never learns where its data came from.
  */
 import { liveApi, hasSession, setSession, loadStoredSession, clearSession, sessionInfo } from './supabase.js';
 
-const mode = { current: 'mock' };
-
-export function getMode() { return mode.current; }
-export function setMode(next) { mode.current = next === 'live' && hasSession() ? 'live' : 'mock'; }
 export { setSession, loadStoredSession, clearSession, sessionInfo, hasSession };
 
-const active = () => (mode.current === 'live' && hasSession() ? liveApi : mockApi);
+export const NO_ACCOUNT = 'NO_ACCOUNT';
+
+/** True when a call failed for lack of a session rather than a real error. */
+export const isNoAccount = (err) => Boolean(err && err.code === NO_ACCOUNT);
 
 export const api = new Proxy({}, {
   get(_, group) {
     return new Proxy({}, {
       get(_, method) {
-        const source = active();
-        const live = source[group] && source[group][method];
-        const fallback = mockApi[group] && mockApi[group][method];
-        if (mode.current === 'live' && hasSession() && typeof live === 'function') {
-          return (...args) => live(...args).catch(() => (typeof fallback === 'function' ? fallback(...args) : undefined));
-        }
-        return typeof live === 'function' ? live.bind(source[group]) : live;
+        const fn = liveApi[group] && liveApi[group][method];
+        if (typeof fn !== 'function') return undefined;
+        return (...args) => {
+          if (!hasSession()) {
+            const err = new Error('No account connected');
+            err.code = NO_ACCOUNT;
+            return Promise.reject(err);
+          }
+          return fn.apply(liveApi[group], args);
+        };
       },
     });
   },
@@ -235,25 +41,25 @@ export const api = new Proxy({}, {
 /* ---------------------------------------------------------- permissions */
 
 /** Mirrors the production RPC `get_user_permissions` / `can_user_perform_action`. */
-export function permissionsFor(planKey, planList) {
-  const plans = planList || mock.plans;
-  const plan = plans.find((p) => p.key === planKey) || plans[0];
-  const key = plan ? plan.key : 'basic';
+export function permissionsFor(planKey, planList = []) {
+  const plans = planList || [];
+  const plan = plans.find((p) => p.key === planKey) || plans[0] || null;
+  const key = plan ? plan.key : null;
   const unlimited = (n) => n === -1 || n >= 999999;
   return {
     planKey: key,
     planName: plan ? plan.name : 'No plan',
-    active: key !== 'basic',
-    mt5Limit: plan ? plan.mt5_limit : 1,
-    dailyUploadLimit: plan ? plan.daily_upload_limit : 3,
+    active: Boolean(plan) && key !== 'basic',
+    mt5Limit: plan ? plan.mt5_limit : 0,
+    dailyUploadLimit: plan ? plan.daily_upload_limit : 0,
     voiceLimit: plan ? plan.voice_limit : 0,
     unlimitedVoice: plan ? unlimited(plan.voice_limit) : false,
     autoTrading: Boolean(plan && plan.auto_trading_allowed) && key === 'platinum',
     priorityScore: plan ? plan.priority_score : 0,
     tradeLens: key === 'platinum',
     manageBots: key === 'platinum',
-    pulseSignals: key !== 'basic',
-    aiTrading: key !== 'basic',
+    pulseSignals: Boolean(plan) && key !== 'basic',
+    aiTrading: Boolean(plan) && key !== 'basic',
   };
 }
 
