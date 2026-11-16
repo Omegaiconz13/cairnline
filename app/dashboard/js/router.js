@@ -9,6 +9,7 @@ import { lens, referral, tutorials, support } from './pages/content.js';
 import { research } from './pages/research.js';
 import { propFirm, edgeStats } from './pages/tools.js';
 import { eaMarketplace } from './pages/marketplace.js';
+import { syntheticChart } from './pages/synthetic.js';
 
 const ROUTES = {
   overview: { title: 'PipNex Dashboard', render: overview },
@@ -18,6 +19,7 @@ const ROUTES = {
   'auto-trading': { title: 'Auto Trading', render: autoTrading },
   signals: { title: 'Pulse Signals', render: signals },
   'ea-marketplace': { title: 'EA Marketplace', render: eaMarketplace },
+  'synthetic-chart': { title: 'Synthetic Indices', render: syntheticChart },
   subscription: { title: 'Subscription', render: subscription },
   wallet: { title: 'Wallet', render: wallet },
   settings: { title: 'Settings', render: settings },

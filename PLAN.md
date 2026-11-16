@@ -159,6 +159,7 @@ same signatures against PostgREST + RPCs.
 | 4 | Trade Lens, Referral, Tutorials, Contact Support | **done** |
 | 5 | Live Supabase adapter (read-only), verified against production | **done** |
 | 6 | EA Marketplace (`#/ea-marketplace`) — catalogue, plan-gated install, `ea_downloads` record, publish form | **done** |
+| 7 | Synthetic Indices (`#/synthetic-chart`) — 7 simulated series, index/timeframe switch, instrument spec, position-size maths | **done** |
 
 ### Live data mode (shipped)
 
@@ -195,7 +196,20 @@ platinum-locked for this user.
   candlesticks and sparklines (no charting dependency).
 - `app/dashboard/js/pages/` — overview, terminal (+upload), trading (bots/auto-trading/signals),
   account (subscription/wallet/settings), content (lens/referral/tutorials/support),
-  research, tools (prop-firm/edge-stats), marketplace.
+  research, tools (prop-firm/edge-stats), marketplace, synthetic.
+
+**Synthetic Indices** (`#/synthetic-chart`, phase 7): seven Deriv-style series drawn from a seeded
+walk per (instrument, timeframe) — no broker feed exists, so the page states "Simulated series",
+keeps the tradeability row at `No — simulation only`, and labels the spec table illustrative. The
+position-size panel is real arithmetic over the spec (`risk$ / (stop pts × tick)`, with a min-lot
+warning). Chart is a pixel-measured SVG with a price scale, time axis and last-price tag; labels
+scale up and time ticks thin out below 560 px. Functional check: `app/dashboard/_check-synthetic.html`
+(10 assertions), page-overflow probe: `app/dashboard/_check-overflow.html`. Screenshots in
+`checks/synthetic-chart/`.
+
+Layout fix carried by phase 7: `.page` now declares `grid-template-columns: minmax(0, 1fr)`, so a
+page can no longer push the document wider than the viewport (the implicit `auto` column sized to
+max-content). Verified at 390 px: `scrollWidth == clientWidth == 375`.
 
 **EA Marketplace** (`#/ea-marketplace`, added in phase 6): six EAs in `ea_marketplace`, filtered by
 category tabs and a live search box; installing is gated on plan rank (`basic < pro < ultimate <
