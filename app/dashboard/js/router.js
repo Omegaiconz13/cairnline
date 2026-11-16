@@ -8,6 +8,7 @@ import { subscription, wallet, settings } from './pages/account.js';
 import { lens, referral, tutorials, support } from './pages/content.js';
 import { research } from './pages/research.js';
 import { propFirm, edgeStats } from './pages/tools.js';
+import { eaMarketplace } from './pages/marketplace.js';
 
 const ROUTES = {
   overview: { title: 'PipNex Dashboard', render: overview },
@@ -16,6 +17,7 @@ const ROUTES = {
   bots: { title: 'Manage Bots', render: bots },
   'auto-trading': { title: 'Auto Trading', render: autoTrading },
   signals: { title: 'Pulse Signals', render: signals },
+  'ea-marketplace': { title: 'EA Marketplace', render: eaMarketplace },
   subscription: { title: 'Subscription', render: subscription },
   wallet: { title: 'Wallet', render: wallet },
   settings: { title: 'Settings', render: settings },

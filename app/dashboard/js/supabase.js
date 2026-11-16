@@ -220,6 +220,16 @@ export const liveApi = {
       } catch { return []; }
     },
   },
+  // No local catch here: data.js's proxy falls back to the mock rows when a
+  // live call rejects, so a missing `eas` table degrades instead of blanking.
+  ea: {
+    async list() {
+      return rest('eas', 'select=*&order=priority_score.desc');
+    },
+    async downloads() {
+      return rest('ea_downloads', `user_id=eq.${enc(session.userId)}&select=*`);
+    },
+  },
   mt5: {
     async accounts() {
       try {

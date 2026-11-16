@@ -158,6 +158,7 @@ same signatures against PostgREST + RPCs.
 | 3 | Pulse Signals, Subscription, Wallet, Settings | **done** |
 | 4 | Trade Lens, Referral, Tutorials, Contact Support | **done** |
 | 5 | Live Supabase adapter (read-only), verified against production | **done** |
+| 6 | EA Marketplace (`#/ea-marketplace`) — catalogue, plan-gated install, `ea_downloads` record, publish form | **done** |
 
 ### Live data mode (shipped)
 
@@ -193,7 +194,14 @@ platinum-locked for this user.
 - `app/dashboard/js/ui.js` — `el()`, `card()`, `table()`, `switchRow()`, plus hand-drawn SVG
   candlesticks and sparklines (no charting dependency).
 - `app/dashboard/js/pages/` — overview, terminal (+upload), trading (bots/auto-trading/signals),
-  account (subscription/wallet/settings), content (lens/referral/tutorials/support).
+  account (subscription/wallet/settings), content (lens/referral/tutorials/support),
+  research, tools (prop-firm/edge-stats), marketplace.
+
+**EA Marketplace** (`#/ea-marketplace`, added in phase 6): six EAs in `ea_marketplace`, filtered by
+category tabs and a live search box; installing is gated on plan rank (`basic < pro < ultimate <
+platinum`) and appends a row to `ea_downloads`. The live adapter reads `eas` + `ea_downloads` and
+falls back to the mock rows through `data.js`'s per-call fallback. Functional check:
+`app/dashboard/_check-marketplace.html` (9 assertions, run headless — see `checks/ea-marketplace/`).
 
 **Live in the browser**: `http://127.0.0.1:36249/dashboard/` (craft-anything's preview server) and
 `http://192.168.1.108:8766/dashboard/` (LAN copy for a phone).

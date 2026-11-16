@@ -118,6 +118,22 @@ const mock = {
     { feature_key: 'trade_lens', display_name: 'Pipnex Trade Lens', enabled: true },
   ],
 
+  // `/ea-marketplace` catalogue. `plan_required` is the cheapest plan that may
+  // install the EA; `price_cents: 0` means it ships with the plan rather than
+  // being sold separately. `equity` drives the card sparkline.
+  ea_marketplace: [
+    { id: 'ea_1', name: 'Aurora Scalper X', author: 'Pipnex Labs', version: '2.1.4', symbol: 'XAUUSD', timeframe: 'M5', price_cents: 0, plan_required: 'ultimate', win_rate: 71.4, profit_factor: 1.86, trades: 1842, max_dd: 6.8, rating: 4.7, reviews: 214, badge: 'Featured', tags: ['scalping', 'gold', 'smc'], description: 'Liquidity-sweep entries on gold with an AI confidence filter and a hard daily loss cap.', equity: [100, 104, 103, 109, 114, 112, 120, 126, 124, 133, 141, 148], updated_at: days(6) },
+    { id: 'ea_2', name: 'London Open Sniper', author: 'K. Mercer', version: '1.8.0', symbol: 'GBPUSD', timeframe: 'M15', price_cents: 8900, plan_required: 'pro', win_rate: 64.2, profit_factor: 1.52, trades: 726, max_dd: 9.1, rating: 4.4, reviews: 96, badge: null, tags: ['breakout', 'session'], description: 'One trade per session at the London open, stop tucked behind the Asian range.', equity: [100, 101, 105, 103, 108, 107, 113, 111, 118, 116, 124, 127], updated_at: days(11) },
+    { id: 'ea_3', name: 'Gold Liquidity Sweep', author: 'SMC Collective', version: '3.0.2', symbol: 'XAUUSD', timeframe: 'M15', price_cents: 0, plan_required: 'platinum', win_rate: 74.9, profit_factor: 2.11, trades: 2410, max_dd: 5.2, rating: 4.9, reviews: 508, badge: 'Top rated', tags: ['gold', 'order blocks'], description: 'Order-block retests after a sweep of the prior session high or low, sized to 0.5% risk.', equity: [100, 106, 110, 109, 118, 127, 125, 136, 149, 158, 166, 181], updated_at: days(2) },
+    { id: 'ea_4', name: 'Asia Range Reversal', author: 'Pipnex Labs', version: '1.3.7', symbol: 'EURUSD', timeframe: 'M30', price_cents: 4900, plan_required: 'pro', win_rate: 58.4, profit_factor: 1.31, trades: 1184, max_dd: 11.4, rating: 4.1, reviews: 63, badge: null, tags: ['mean reversion', 'range'], description: 'Fades the first push out of the Asian range when momentum diverges from the AI bias.', equity: [100, 103, 101, 106, 104, 109, 106, 112, 115, 113, 119, 122], updated_at: days(19) },
+    { id: 'ea_5', name: 'Trish Neural Grid', author: 'Pipnex Labs', version: '1.0.9', symbol: 'USDJPY', timeframe: 'H1', price_cents: 0, plan_required: 'ultimate', win_rate: 67.8, profit_factor: 1.64, trades: 962, max_dd: 7.9, rating: 4.5, reviews: 137, badge: 'New', tags: ['ai', 'grid', 'carry'], description: 'Trish V6 sizes a soft grid around the H1 bias and unwinds the basket on a regime flip.', equity: [100, 102, 106, 105, 110, 115, 114, 121, 125, 128, 133, 139], updated_at: days(1) },
+    { id: 'ea_6', name: 'NY Session Momentum', author: 'Blackwood Quant', version: '2.6.1', symbol: 'NAS100', timeframe: 'M5', price_cents: 12900, plan_required: 'basic', win_rate: 61.9, profit_factor: 1.44, trades: 3105, max_dd: 13.2, rating: 4.2, reviews: 182, badge: null, tags: ['indices', 'momentum'], description: 'First-pullback continuation after the 14:30 UTC cash open, flat by 20:00 UTC.', equity: [100, 98, 104, 101, 110, 107, 116, 113, 122, 128, 125, 134], updated_at: days(27) },
+  ],
+
+  ea_downloads: [
+    { id: 'dl_1', ea_id: 'ea_4', name: 'Asia Range Reversal', version: '1.3.7', symbol: 'EURUSD', plan_required: 'pro', status: 'installed', downloaded_at: days(8) },
+  ],
+
   mt5_accounts: [],
   custom_broker_sessions: [],
 };
@@ -172,6 +188,10 @@ const mockApi = {
   },
   featureFlags: {
     async list() { await delay(); return clone(mock.feature_flags); },
+  },
+  ea: {
+    async list() { await delay(); return clone(mock.ea_marketplace); },
+    async downloads() { await delay(); return clone(mock.ea_downloads); },
   },
   mt5: {
     async accounts() { await delay(); return clone(mock.mt5_accounts); },
