@@ -1,0 +1,478 @@
+import { api, fmt, getMode, setMode, setSession, clearSession, hasSession, sessionInfo } from '../data.js';
+import { el, card, chip, table, switchRow, toast, field } from '../ui.js';
+import { market } from '../market.js';
+
+/** Subscription — production /subscription. */
+export async function subscription(ctx) {
+  const [plans, sub, history] = await Promise.all([api.plans.list(), api.subscription.get(), api.subscription.history()]);
+  const active = sub || { plan_key: null, status: 'none', current_period_start: null, current_period_end: null, cancel_at_period_end: false };
+  const current = plans.find((p) => p.key === active.plan_key);
+
+  const planCard = (p) => {
+    const isCurrent = p.key === active.plan_key;
+    const features = [
+      `${p.mt5_limit === -1 ? 'Unlimited' : p.mt5_limit} MT5 account${p.mt5_limit === 1 ? '' : 's'}`,
+      `${p.daily_upload_limit === -1 ? 'Unlimited' : p.daily_upload_limit} chart uploads / day`,
+      p.voice_limit === -1 || p.voice_limit >= 999999 ? 'Unlimited voice requests' : `${p.voice_limit} voice requests / day`,
+      p.auto_trading_allowed ? 'Auto trading & cloud bots' : 'AI analysis only',
+      `${p.ea_download_level === 'user_brand' ? 'User-branded' : p.ea_download_level === 'site_brand' ? 'Site-branded' : 'No'} EA download`,
+    ];
+    return el('article', { class: `plan ${isCurrent ? 'is-current' : ''}` },
+      el('div', { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px' },
+        el('h3', { text: p.name }),
+        isCurrent ? chip('Current plan', 'chip--on') : chip(`Priority ${p.priority_score}`, '')),
+      el('div', { class: 'plan__price' }, `${fmt.money(p.price_cents)}`, el('small', { text: ' /month' })),
+      el('ul', { class: 'plan__list' }, features.map((f) => el('li', { text: f }))),
+      el('a', { class: `btn ${isCurrent ? 'btn--outline' : 'btn--primary'} btn--block`, href: isCurrent ? '#/subscription' : '#/choose-plan' },
+        isCurrent ? 'Manage plan' : `Select ${p.name}`));
+  };
+
+  /* ---- Trish provider ---- */
+  const TRISH_PRESETS = {
+    openrouter: { url: 'https://openrouter.ai/api/v1', model: 'anthropic/claude-3.5-sonnet' },
+    openai: { url: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+    ollama: { url: 'http://127.0.0.1:11434/v1', model: 'llama3.1' },
+    hermes: { url: 'http://127.0.0.1:8642/v1', model: 'hermes-agent' },
+  };
+  const TRISH_DOTS = '••••••••••••';
+  const trishNote = el('p', { class: 'form__note' });
+  const trishFacts = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+  const trishBackend = el('select', {},
+    el('option', { value: 'direct', text: 'Direct (this app runs the tools)' }),
+    el('option', { value: 'hermes', text: 'Hermes gateway (skills + memory)' }));
+  const trishBase = el('input', { type: 'text', placeholder: 'https://openrouter.ai/api/v1' });
+  const trishModel = el('input', { type: 'text', placeholder: 'anthropic/claude-3.5-sonnet' });
+  const trishKey = el('input', { type: 'password', placeholder: 'sk-…', autocomplete: 'off', spellcheck: 'false' });
+  trishKey.addEventListener('focus', () => { if (trishKey.value === TRISH_DOTS) trishKey.value = ''; });
+  trishKey.addEventListener('blur', () => { if (!trishKey.value && trishKey.dataset.stored === '1') trishKey.value = TRISH_DOTS; });
+
+  const paintTrish = (t) => {
+    trishFacts.innerHTML = '';
+    const on = Boolean(t && t.configured);
+    trishKey.dataset.stored = t && t.has_key ? '1' : '0';
+    if (t && t.has_key && !trishKey.value) trishKey.value = TRISH_DOTS;
+    if (t && t.backend) trishBackend.value = t.backend;
+    if (t && t.base_url) trishBase.value = t.base_url;
+    if (t && t.model) trishModel.value = t.model;
+    trishFacts.append(
+      el('div', { class: 'fact' }, el('small', { text: 'STATE' }), el('b', { class: on ? 'on' : 'off', text: on ? 'READY' : 'NOT SET' })),
+      el('div', { class: 'fact' }, el('small', { text: 'BACKEND' }), el('b', { text: t && t.backend ? t.backend : 'direct' })),
+      el('div', { class: 'fact' }, el('small', { text: 'KEY' }), el('b', { class: t && t.has_key ? 'on' : 'off', text: t && t.has_key ? (t.key_hint || 'SET') : 'NONE' })));
+  };
+  market.trishConfig().then((c) => paintTrish(c.trish)).catch(() => paintTrish(null));
+
+  const saveTrish = async () => {
+    const payload = {
+      backend: trishBackend.value,
+      base_url: trishBase.value.trim(),
+      model: trishModel.value.trim(),
+    };
+    if (trishKey.value && trishKey.value !== TRISH_DOTS) payload.api_key = trishKey.value.trim();
+    if (!payload.base_url) {
+      trishNote.textContent = 'Base URL is required.';
+      trishNote.className = 'form__note is-bad';
+      return;
+    }
+    try {
+      const res = await market.setTrishConfig(payload);
+      trishKey.value = TRISH_DOTS;
+      paintTrish(res.trish);
+      trishNote.textContent = 'Saved. Trish is ready in AI Trading.';
+      trishNote.className = 'form__note is-ok';
+      toast('Trish provider saved');
+    } catch (err) {
+      trishNote.textContent = `Not saved: ${String(err.message || err).slice(0, 160)}`;
+      trishNote.className = 'form__note is-bad';
+    }
+  };
+
+  const testTrish = async () => {
+    trishNote.textContent = 'Asking Trish…';
+    trishNote.className = 'form__note';
+    try {
+      const res = await market.trishChat([{ role: 'user', content: 'Reply with exactly: ready' }], {});
+      trishNote.textContent = `Working — model replied: ${String(res.reply || '').slice(0, 80) || '(empty)'}`;
+      trishNote.className = 'form__note is-ok';
+    } catch (err) {
+      trishNote.textContent = `Failed: ${String(err.message || err).slice(0, 200)}`;
+      trishNote.className = 'form__note is-bad';
+    }
+  };
+
+  const removeTrish = async () => {
+    try {
+      const res = await market.clearTrish();
+      trishKey.value = '';
+      paintTrish(res.trish);
+      trishNote.textContent = 'Provider removed.';
+      trishNote.className = 'form__note is-ok';
+    } catch (err) {
+      trishNote.textContent = String(err.message || err).slice(0, 160);
+      trishNote.className = 'form__note is-bad';
+    }
+  };
+
+  const page = el('div', { class: 'page' });
+  page.append(
+    el('div', { class: 'page__head' },
+      el('div', {},
+        el('h2', { class: 'page__title', text: 'Subscription Management' }),
+        el('p', { class: 'page__sub', text: 'Upgrade, downgrade or export your billing history.' })),
+      el('div', { style: 'display:flex;gap:8px' },
+        el('button', { class: 'btn btn--outline btn--sm', onclick: () => toast('Invoice export queued (PDF)') }, 'Export PDF'),
+        el('a', { class: 'btn btn--primary btn--sm', href: '#/choose-plan' }, 'Upgrade Plan'))),
+    el('div', { class: 'grid grid--sidebar' },
+      el('div', { class: 'grid grid--2' }, plans.map(planCard)),
+      el('div', { class: 'grid' },
+        card('Current plan', {},
+          el('dl', { class: 'kv' },
+            el('dt', { text: 'Plan' }), el('dd', { text: current ? current.name : 'No active plan' }),
+            el('dt', { text: 'Status' }), el('dd', { text: active.status }),
+            el('dt', { text: 'Period start' }), el('dd', { text: fmt.date(active.current_period_start) }),
+            el('dt', { text: 'Renews' }), el('dd', { text: fmt.date(active.current_period_end) }),
+            el('dt', { text: 'Auto-renew' }), el('dd', { text: active.cancel_at_period_end ? 'Off' : 'On' })),
+          el('div', { style: 'margin-top:18px' },
+            el('button', { class: 'btn btn--outline btn--block', onclick: () => toast('Plan change flow opens at checkout') }, 'Change Plan')),
+          el('div', { style: 'margin-top:10px' },
+            el('button', { class: 'btn btn--ghost btn--block', onclick: () => toast('Auto-renew updated') },
+              active.cancel_at_period_end ? 'Resume auto-renew' : 'Cancel auto-renew'))),
+        card('Subscription history', {},
+          table([
+            { label: 'Plan', render: (r) => (plans.find((p) => p.key === r.plan_key) || {}).name || r.plan_key },
+            { label: 'Status', render: (r) => chip(r.status, r.status === 'active' ? 'chip--on' : '') },
+            { label: 'Started', render: (r) => fmt.date(r.current_period_start) },
+            { label: 'Ends', render: (r) => fmt.date(r.current_period_end) },
+          ], history)))));
+  return page;
+}
+
+/** Wallet — production /wallet. */
+export async function wallet(ctx) {
+  const [raw, txnsRaw, withdrawalsRaw] = await Promise.all([api.wallet.get(), api.wallet.transactions(), api.wallet.withdrawals()]);
+  const w = raw || { available_cents: 0, pending_cents: 0, withdrawable_cents: 0, total_spent_cents: 0, is_frozen: false, currency: 'USD' };
+  const txns = txnsRaw || [];
+  const withdrawals = withdrawalsRaw || [];
+  const note = el('p', { class: 'form__note' });
+
+  const page = el('div', { class: 'page' });
+  const withdrawalsCard = withdrawals.length
+    ? card('Withdrawals', {}, table([
+        { label: 'Amount', num: true, render: (r) => fmt.money(r.amount_cents) },
+        { label: 'Status', render: (r) => chip(r.status, r.status === 'paid' ? 'chip--on' : 'chip--warn') },
+        { label: 'When', render: (r) => fmt.ago(r.created_at) },
+      ], withdrawals))
+    : null;
+
+  page.append(
+    el('div', { class: 'page__head' },
+      el('div', {},
+        el('h2', { class: 'page__title', text: 'Pipnex Wallet' }),
+        el('p', { class: 'page__sub', text: 'AI credits, deposits and withdrawals.' })),
+      chip(w.is_frozen ? 'Frozen' : 'Active', w.is_frozen ? 'chip--danger' : 'chip--on')),
+    el('div', { class: 'grid grid--4' },
+      el('div', { class: 'stat' }, el('small', { text: 'Available' }), el('b', { text: fmt.money(w.available_cents) }), el('span', { text: 'ready to spend' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Pending' }), el('b', { text: fmt.money(w.pending_cents) }), el('span', { text: 'processing' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Withdrawable' }), el('b', { text: fmt.money(w.withdrawable_cents) }), el('span', { text: 'min $75.00' })),
+      el('div', { class: 'stat' }, el('small', { text: 'Total spent' }), el('b', { text: fmt.money(w.total_spent_cents) }), el('span', { text: 'lifetime' }))));
+
+  page.append(el('div', { class: 'grid grid--sidebar' },
+    card('Transactions', { note: `${txns.length} entries` },
+      table([
+        { label: 'Type', render: (r) => chip(r.kind, r.kind === 'deposit' ? 'chip--on' : '') },
+        { label: 'Amount', num: true, render: (r) => `<span class="${r.amount_cents >= 0 ? 'pos' : 'neg'}">${r.amount_cents >= 0 ? '+' : ''}${fmt.money(r.amount_cents)}</span>` },
+        { label: 'Status', render: (r) => chip(r.status, r.status === 'settled' ? 'chip--on' : 'chip--warn') },
+        { label: 'When', render: (r) => fmt.ago(r.created_at) },
+      ], txns, { emptyTitle: 'No transactions yet', emptyText: 'Deposits and AI credit purchases appear here.' })),
+    card('Add money / Withdraw', {},
+      el('div', { class: 'form' },
+        field('Amount (USD)', el('input', { type: 'number', min: '1', step: '1', placeholder: '50', id: 'wAmount' })),
+        el('div', { style: 'display:flex;gap:8px' },
+          el('button', { class: 'btn btn--primary', style: 'flex:1', onclick: () => {
+            const v = document.getElementById('wAmount').value;
+            note.textContent = v ? `Deposit of $${v} started (demo — no payment processor in this build)` : 'Enter an amount first.';
+            note.className = 'form__note' + (v ? ' is-ok' : ' is-bad');
+          } }, 'Add money'),
+          el('button', { class: 'btn btn--outline', style: 'flex:1', onclick: () => toast('Withdrawal needs $75.00 available') }, 'Withdraw')),
+        note,
+        el('div', { style: 'margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)' },
+          el('button', { class: 'btn btn--ghost btn--block', onclick: () => toast('Transfer to another Pipnex wallet') }, 'Transfer to wallet'))),
+      el('div', { style: 'margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)' },
+        el('h3', { class: 'card__title', text: 'Frequently Asked Questions' }),
+        el('dl', { class: 'kv', style: 'margin-top:12px' },
+          el('dt', { text: 'Minimum withdrawal' }), el('dd', { text: '$75.00' }),
+          el('dt', { text: 'Payout time' }), el('dd', { text: '2–5 business days' }),
+          el('dt', { text: 'Currency' }), el('dd', { text: w.currency })))),
+    withdrawalsCard));
+  return page;
+}
+
+/** Settings — production /dashboard/settings. */
+export async function settings(ctx) {
+  const profile = await api.profile.get();
+  const note = el('p', { class: 'form__note' });
+  const nameInput = el('input', { type: 'text', value: profile.display_name });
+  const emailInput = el('input', { type: 'email', value: profile.email, readonly: true });
+
+  /* ---- data source: demo data vs the live Supabase project ---- */
+  const dsNote = el('p', { class: 'form__note' });
+  const tokenInput = el('textarea', {
+    rows: '3',
+    placeholder: 'Paste the access token, or the whole sb-…-auth-token JSON',
+    style: 'font-family:var(--mono);font-size:12px',
+  });
+  const liveState = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+
+  const paintLiveState = () => {
+    liveState.innerHTML = '';
+    const info = sessionInfo();
+    liveState.append(
+      el('div', { class: 'fact' }, el('small', { text: 'MODE' }), el('b', { class: hasSession() ? 'on' : 'off', text: getMode() === 'live' ? 'LIVE' : 'DEMO' })),
+      el('div', { class: 'fact' }, el('small', { text: 'ACCOUNT' }), el('b', { text: info ? (info.email || 'signed in') : '—' })),
+      el('div', { class: 'fact' }, el('small', { text: 'USER ID' }), el('b', { text: info && info.userId ? info.userId.slice(0, 8) : '—' })));
+  };
+  paintLiveState();
+
+  const marketStatus = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+  market.health().then((h) => {
+    marketStatus.innerHTML = '';
+    const p = h.providers || {};
+    marketStatus.append(
+      el('div', { class: 'fact' }, el('small', { text: 'YFINANCE' }), el('b', { class: p.yfinance ? 'on' : 'off', text: p.yfinance ? 'READY' : 'NO' })),
+      el('div', { class: 'fact' }, el('small', { text: 'PINETS' }), el('b', { class: p.pinets ? 'on' : 'off', text: p.pinets ? 'READY' : 'NO' })),
+      el('div', { class: 'fact' }, el('small', { text: 'LSE KEY' }),
+        el('b', { class: p.lse ? 'on' : p.lse_configured ? '' : 'off',
+          text: p.lse ? 'ACTIVE' : p.lse_configured ? 'INVALID' : 'NONE' })));
+  }).catch(() => {
+    marketStatus.append(el('div', { class: 'fact' }, el('small', { text: 'MARKET SERVICE' }),
+      el('b', { class: 'off', text: 'OFFLINE' })));
+  });
+
+  /* ---- providers: LSE Data 3.0 primary, yfinance fallback ---- */
+  const lseNote = el('p', { class: 'form__note' });
+  const DOTS = '••••••••••••••••••••';
+  const lseKeyInput = el('input', {
+    type: 'password',
+    placeholder: 'lse_live_…',
+    autocomplete: 'off',
+    spellcheck: 'false',
+    style: 'font-family:var(--mono);font-size:12px',
+  });
+  // A stored key shows as filled dots; focusing clears them so a new key can be typed.
+  lseKeyInput.addEventListener('focus', () => {
+    if (lseKeyInput.value === DOTS) lseKeyInput.value = '';
+  });
+  lseKeyInput.addEventListener('blur', () => {
+    if (!lseKeyInput.value && lseKeyInput.dataset.stored === '1') lseKeyInput.value = DOTS;
+  });
+  const lseFacts = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+
+  const paintLse = (st) => {
+    lseFacts.innerHTML = '';
+    const configured = Boolean(st && st.configured);
+    lseKeyInput.dataset.stored = configured ? '1' : '0';
+    if (configured && !lseKeyInput.value) lseKeyInput.value = DOTS;
+    if (!configured && lseKeyInput.value === DOTS) lseKeyInput.value = '';
+    const ok = Boolean(st && st.ok);
+    lseFacts.append(
+      el('div', { class: 'fact' }, el('small', { text: 'PRIMARY' }),
+        el('b', { class: configured && ok ? 'on' : 'off', text: configured && ok ? 'LSE DATA' : 'YFINANCE' })),
+      el('div', { class: 'fact' }, el('small', { text: 'LSE KEY' }),
+        el('b', { class: configured ? 'on' : 'off', text: configured ? (st.key_hint || 'SET') : 'NONE' })),
+      el('div', { class: 'fact' }, el('small', { text: 'PLAN' }),
+        el('b', { text: st && st.plan ? String(st.plan).toUpperCase() : '—' })),
+      el('div', { class: 'fact' }, el('small', { text: 'CALLS / MIN' }),
+        el('b', { text: st && st.calls_per_minute ? String(st.calls_per_minute) : '—' })));
+    if (st && st.weekly && st.weekly.allowance_bytes > 0) {
+      const used = (st.weekly.used_bytes || 0) / 1e9;
+      const cap = st.weekly.allowance_bytes / 1e9;
+      lseFacts.append(el('div', { class: 'fact' }, el('small', { text: 'WEEKLY' }),
+        el('b', { text: `${used.toFixed(2)} / ${cap.toFixed(1)} GB` })));
+    }
+    if (st && st.withheld) {
+      lseNote.textContent = `Key withheld: ${st.withheld}`;
+      lseNote.className = 'form__note is-bad';
+    } else if (st && st.error) {
+      lseNote.textContent = `Key rejected: ${st.error}`;
+      lseNote.className = 'form__note is-bad';
+    }
+  };
+
+  const refreshLse = () => market.config()
+    .then((c) => paintLse(c.lse))
+    .catch(() => paintLse(null));
+  refreshLse();
+
+  const saveLse = async () => {
+    const key = lseKeyInput.value.trim();
+    if (!key || key === DOTS) {
+      lseNote.textContent = 'Paste a key first.';
+      lseNote.className = 'form__note is-bad';
+      return;
+    }
+    lseNote.textContent = 'Validating with LSE…';
+    lseNote.className = 'form__note';
+    try {
+      const res = await market.setLseKey(key);
+      lseKeyInput.value = DOTS;
+      paintLse(res.lse);
+      lseNote.textContent = `Saved. LSE Data is now the primary provider (plan: ${res.plan || 'unknown'}).`;
+      lseNote.className = 'form__note is-ok';
+      toast('LSE key saved — LSE Data is now primary');
+    } catch (err) {
+      lseNote.textContent = `Not saved: ${String(err.message || err).slice(0, 160)}`;
+      lseNote.className = 'form__note is-bad';
+    }
+  };
+
+  const removeLse = async () => {
+    try {
+      const res = await market.clearLseKey();
+      lseKeyInput.value = '';
+      paintLse(res.lse);
+      lseNote.textContent = 'Key removed — yfinance is the provider again.';
+      lseNote.className = 'form__note is-ok';
+      toast('LSE key removed');
+    } catch (err) {
+      lseNote.textContent = `Could not remove: ${String(err.message || err).slice(0, 160)}`;
+      lseNote.className = 'form__note is-bad';
+    }
+  };
+
+  const marketCard = card('Market data providers', {},
+    el('p', { class: 'card__note', text: 'Bars and quotes come from LSE Data 3.0 when a key is set, and fall back to yfinance automatically. Indicators are PineTS running real Pine Script; the public record is LuxAlgo market-trackers-data (CC0).' }),
+    el('div', { style: 'margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end' },
+      el('label', { class: 'field', style: 'flex:1;min-width:240px' },
+        el('span', { text: 'LSE Data API key' }), lseKeyInput),
+      el('button', { class: 'btn btn--primary btn--sm', onclick: saveLse }, 'Save key'),
+      el('button', { class: 'btn btn--outline btn--sm', onclick: removeLse }, 'Remove')),
+    el('p', { class: 'card__note', style: 'margin-top:8px', text: 'The key is validated against LSE, then stored server-side in server/config.json (mode 600) — it is never embedded in a page or returned by any request. Get one free at londonstrategicedge.com.' }),
+    lseNote,
+    lseFacts,
+    el('div', { style: 'margin-top:14px' },
+      el('button', { class: 'btn btn--outline btn--sm', onclick: () => market.health().then(() => toast('Market service reachable')).catch(() => toast('Market service offline — run python3 server/market_service.py')) }, 'Check service')),
+    marketStatus,
+    el('p', { class: 'form__note', style: 'margin-top:10px', text: `Endpoint: ${market.base}` }));
+
+  const dataSource = card('Data source', { note: 'read-only' },
+    el('p', { class: 'card__note', text: 'Demo mode serves the mock adapter. Live mode reads your own rows from the Pipnex Supabase project through PostgREST — reads only, never writes.' }),
+    el('div', { style: 'margin-top:14px' },
+      switchRow('Live Supabase', 'Use the signed-in session instead of demo data', getMode() === 'live' && hasSession(), (on) => {
+        if (on && !hasSession()) {
+          dsNote.textContent = 'Paste a session token below first.';
+          dsNote.className = 'form__note is-bad';
+          return;
+        }
+        setMode(on ? 'live' : 'mock');
+        paintLiveState();
+        dsNote.textContent = on ? 'Live mode on — reloading from Supabase.' : 'Demo mode on.';
+        dsNote.className = 'form__note is-ok';
+        setTimeout(() => location.reload(), 600);
+      })),
+    el('div', { style: 'margin-top:16px' },
+      field('Session token', tokenInput),
+      el('div', { style: 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap' },
+        el('button', { class: 'btn btn--primary btn--sm', onclick: () => {
+          const session = setSession(tokenInput.value);
+          if (!session) {
+            dsNote.textContent = 'That token could not be read.';
+            dsNote.className = 'form__note is-bad';
+            return;
+          }
+          setMode('live');
+          paintLiveState();
+          dsNote.textContent = `Signed in as ${session.email || session.userId}. Switching to live data…`;
+          dsNote.className = 'form__note is-ok';
+          setTimeout(() => location.reload(), 700);
+        } }, 'Use this session'),
+        el('button', { class: 'btn btn--outline btn--sm', onclick: () => {
+          clearSession();
+          setMode('mock');
+          tokenInput.value = '';
+          paintLiveState();
+          dsNote.textContent = 'Session cleared — back to demo data.';
+          dsNote.className = 'form__note';
+        } }, 'Sign out')),
+      liveState,
+      dsNote));
+
+  /* ---- signal delivery preferences (moved here from Pulse Signals) ---- */
+  const prefs = await api.signals.preferences();
+  const deliveryCard = card('Signal delivery', {},
+    switchRow('In-app alerts', 'Show signals inside PipNex', prefs.in_app, (v) => toast(`In-app alerts ${v ? 'on' : 'off'}`)),
+    switchRow('Browser push', 'Push notifications in this browser', prefs.push, (v) => toast(`Browser push ${v ? 'on' : 'off'}`)),
+    switchRow('Email', 'Send a copy to your email', prefs.email, (v) => toast(`Email delivery ${v ? 'on' : 'off'}`)),
+    el('div', { style: 'margin-top:16px' },
+      el('label', { class: 'field' }, el('span', { text: 'Symbols' }),
+        el('input', { value: prefs.symbols.join(', '), onchange: () => toast('Symbol watchlist saved') }))));
+
+  const group = (title, ...cards) => el('section', { class: 'settings-group' },
+    el('h2', { class: 'settings-group__title', text: title }),
+    el('div', { class: 'grid grid--2' }, ...cards));
+
+  const page = el('div', { class: 'page' });
+  page.append(
+    el('div', { class: 'page__head' },
+      el('div', {},
+        el('h2', { class: 'page__title', text: 'Settings' }))),
+
+    group('Account',
+      card('Profile', {},
+        el('div', { class: 'form' },
+          field('Display name', nameInput),
+          field('Email', emailInput),
+          field('Account ID', el('input', { type: 'text', value: profile.account_id, readonly: true })),
+          el('button', { class: 'btn btn--primary', style: 'justify-self:start', onclick: () => {
+            note.textContent = 'Profile saved.';
+            note.className = 'form__note is-ok';
+          } }, 'Save changes'),
+          note)),
+      card('Broker connection', {},
+        el('div', { class: 'empty', style: 'padding:22px 8px' },
+          el('h3', { text: 'No MT5 accounts connected' }),
+          el('p', { text: 'Connect a broker account to run analysis on your own chart and enable auto trading.' }),
+          el('button', { class: 'btn btn--outline btn--sm', onclick: () => toast('MT5 connection flow opens in the next phase') }, 'Connect MT5')))),
+
+    group('Data',
+      dataSource,
+      marketCard),
+
+    group('Trish — assistant runtime',
+      card('Provider', {},
+        el('p', { class: 'card__note', text: 'Trish runs on any OpenAI-compatible endpoint: OpenRouter, OpenAI, Anthropic via proxy, Ollama, LM Studio or a local Hermes gateway. Nothing is sent anywhere until you save one.' }),
+        el('div', { class: 'form form--2', style: 'margin-top:14px' },
+          field('Backend', trishBackend),
+          field('Model', trishModel),
+          field('Base URL', trishBase),
+          field('API key', trishKey)),
+        trishNote,
+        trishFacts,
+        el('div', { style: 'margin-top:14px;display:flex;gap:10px;flex-wrap:wrap' },
+          el('button', { class: 'btn btn--primary btn--sm', onclick: saveTrish }, 'Save provider'),
+          el('button', { class: 'btn btn--outline btn--sm', onclick: testTrish }, 'Test'),
+          el('button', { class: 'btn btn--outline btn--sm', onclick: removeTrish }, 'Remove')),
+        el('p', { class: 'card__note', style: 'margin-top:10px', text: 'The key is stored server-side in server/config.json (mode 600) and never returned by any request.' })),
+      card('What she can do', {},
+        el('p', { class: 'card__note', text: 'Tools she can call, all backed by real Pipnex data:' }),
+        el('div', { class: 'tools', style: 'margin-top:10px' },
+          el('div', { class: 'tool' }, el('b', { text: 'get_quote' }), el('small', { text: 'Live price and session change' })),
+          el('div', { class: 'tool' }, el('b', { text: 'get_indicators' }), el('small', { text: 'Pine EMA/RSI/ATR/MACD + bias' })),
+          el('div', { class: 'tool' }, el('b', { text: 'get_signals' }), el('small', { text: 'Ranked basket' })),
+          el('div', { class: 'tool' }, el('b', { text: 'get_cot' }), el('small', { text: 'CFTC positioning' })),
+          el('div', { class: 'tool' }, el('b', { text: 'get_calendar' }), el('small', { text: 'Macro events' })),
+          el('div', { class: 'tool' }, el('b', { text: 'position_size' }), el('small', { text: 'Size from equity and stop' })),
+          el('div', { class: 'tool' }, el('b', { text: 'risk_gate' }), el('small', { text: 'PASS or BLOCK, final' }))))),
+
+    group('Signals & alerts',
+      deliveryCard,
+      card('Notifications', {},
+        switchRow('Promotions', 'Offers and partner campaigns', profile.email_preferences.promotions, () => toast('Preference saved')),
+        switchRow('Announcements', 'Product news', profile.email_preferences.announcements, () => toast('Preference saved')),
+        switchRow('System updates', 'Security and downtime notices', profile.email_preferences.system_updates, () => toast('Preference saved')))),
+
+    group('Appearance',
+      card('Interface', {},
+        switchRow('Dark theme', 'Always on in the operator surface', true, (v) => toast(`Dark theme ${v ? 'on' : 'off'}`)),
+        switchRow('Reduce motion', 'Respect the system preference', false, (v) => toast(`Reduced motion ${v ? 'on' : 'off'}`)),
+        switchRow('Compact tables', 'Denser rows in data grids', false, (v) => toast(`Compact tables ${v ? 'on' : 'off'}`)))));
+  return page;
+}

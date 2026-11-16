@@ -1,0 +1,21 @@
+{
+  "revision": 1,
+  "brief": {
+    "question": "Rebuild pipnex-ai.com as a dark aurora static site",
+    "purpose": "Recreate the original's structure, copy and layout rhythm in a dark aurora visual language",
+    "targets": [
+      "/home/omega/pipnex-reference"
+    ],
+    "constraints": [
+      "Static site only (index.html, styles.css, app.js); vanilla JS; no build step",
+      "No copied raster/logos — use CSS/SVG mockups",
+      "Use exact tokens from brief.md"
+    ],
+    "done_when": "index.html + styles.css + app.js in app/; pages served as static files look right; rebuild_check passes"
+  },
+  "plan": [],
+  "hypotheses": [],
+  "findings": [],
+  "handoff": null,
+  "updated": "2026-11-11T07:25:28Z"
+}

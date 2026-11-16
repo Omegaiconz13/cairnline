@@ -1,0 +1,4 @@
+node_modules/
+__pycache__/
+agent-session.jsonl
+server/cache/

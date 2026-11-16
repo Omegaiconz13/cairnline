@@ -1,0 +1,5117 @@
+{
+  "a11y": {
+    "images_without_alt": 0,
+    "landmarks": {
+      "banner": 6,
+      "contentinfo": 1,
+      "main": 1,
+      "navigation": 2
+    },
+    "lang": "en",
+    "unnamed_controls": 0,
+    "unnamed_examples": []
+  },
+  "assets": {
+    "background_images": [],
+    "fonts": [
+      "https://fonts.googleapis.com/css2"
+    ],
+    "images": [],
+    "inline_scripts": 1,
+    "requests": [
+      {
+        "bytes": 1331,
+        "type": "link",
+        "url": "https://fonts.googleapis.com/css2"
+      },
+      {
+        "bytes": 24576,
+        "type": "link",
+        "url": "http://127.0.0.1:8765/styles.css"
+      },
+      {
+        "bytes": 5906,
+        "type": "script",
+        "url": "http://127.0.0.1:8765/app.js"
+      }
+    ],
+    "scripts": [
+      "http://127.0.0.1:8765/app.js"
+    ],
+    "stylesheets": [
+      "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap",
+      "http://127.0.0.1:8765/styles.css"
+    ]
+  },
+  "breakpoints": [
+    {
+      "count": 1,
+      "px": 760,
+      "query": "max-width 760px"
+    },
+    {
+      "count": 2,
+      "px": 900,
+      "query": "max-width 900px"
+    },
+    {
+      "count": 1,
+      "px": 1080,
+      "query": "max-width 1080px"
+    }
+  ],
+  "design": {
+    "backgrounds": [
+      {
+        "count": 18,
+        "value": "#0e1518"
+      },
+      {
+        "count": 13,
+        "value": "#35f0a8"
+      },
+      {
+        "count": 7,
+        "value": "#35f0a81f"
+      },
+      {
+        "count": 6,
+        "value": "#0a1013"
+      },
+      {
+        "count": 4,
+        "value": "#05070acc"
+      },
+      {
+        "count": 2,
+        "value": "#121c1f"
+      },
+      {
+        "count": 1,
+        "value": "#05070a"
+      },
+      {
+        "count": 1,
+        "value": "#05070ad1"
+      },
+      {
+        "count": 1,
+        "value": "#35f0a812"
+      }
+    ],
+    "css_variables": {
+      "--aurora": "#35F0A8",
+      "--aurora-deep": "#12B981",
+      "--aurora-glow": "rgba(53, 240, 168, 0.35)",
+      "--aurora-soft": "rgba(53, 240, 168, 0.12)",
+      "--bg": "#05070A",
+      "--bg-elev": "#0A1013",
+      "--body": "\"Inter\", \"DM Sans\", system-ui, sans-serif",
+      "--danger": "#FF6B6B",
+      "--display": "\"Space Grotesk\", \"Inter\", system-ui, sans-serif",
+      "--ease": "cubic-bezier(0.22, 0.68, 0, 1)",
+      "--ice": "#E9F2F1",
+      "--ice-dim": "#A9BDBB",
+      "--ink-on-aurora": "#04120C",
+      "--line": "#1C2A2B",
+      "--mono": "\"JetBrains Mono\", ui-monospace, monospace",
+      "--muted": "#7F9492",
+      "--nav-h": "65px",
+      "--pill": "9999px",
+      "--radius": "16px",
+      "--radius-l": "24px",
+      "--radius-s": "10px",
+      "--surface": "#0E1518",
+      "--surface-2": "#121C1F",
+      "--wrap": "1200px"
+    },
+    "font_faces": [
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "300"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Inter",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "400"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "JetBrains Mono",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "500"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "600"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "700"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "unloaded",
+        "style": "normal",
+        "weight": "700"
+      },
+      {
+        "family": "Space Grotesk",
+        "status": "loaded",
+        "style": "normal",
+        "weight": "700"
+      }
+    ],
+    "font_sizes": [
+      {
+        "count": 72,
+        "value": "14px"
+      },
+      {
+        "count": 33,
+        "value": "15px"
+      },
+      {
+        "count": 31,
+        "value": "12px"
+      },
+      {
+        "count": 24,
+        "value": "11px"
+      },
+      {
+        "count": 21,
+        "value": "13px"
+      },
+      {
+        "count": 15,
+        "value": "10px"
+      },
+      {
+        "count": 13,
+        "value": "20px"
+      },
+      {
+        "count": 9,
+        "value": "18px"
+      },
+      {
+        "count": 8,
+        "value": "17px"
+      },
+      {
+        "count": 7,
+        "value": "48px"
+      },
+      {
+        "count": 4,
+        "value": "22px"
+      },
+      {
+        "count": 3,
+        "value": "38px"
+      },
+      {
+        "count": 2,
+        "value": "16px"
+      },
+      {
+        "count": 2,
+        "value": "60px"
+      },
+      {
+        "count": 2,
+        "value": "9px"
+      },
+      {
+        "count": 2,
+        "value": "42px"
+      }
+    ],
+    "font_weights": [
+      {
+        "count": 136,
+        "value": "400"
+      },
+      {
+        "count": 54,
+        "value": "600"
+      },
+      {
+        "count": 42,
+        "value": "700"
+      },
+      {
+        "count": 18,
+        "value": "500"
+      }
+    ],
+    "fonts": [
+      {
+        "count": 168,
+        "value": "Inter, \"DM Sans\", system-ui, sans-serif"
+      },
+      {
+        "count": 48,
+        "value": "\"Space Grotesk\", Inter, system-ui, sans-serif"
+      },
+      {
+        "count": 34,
+        "value": "\"JetBrains Mono\", ui-monospace, monospace"
+      }
+    ],
+    "max_widths": [
+      {
+        "count": 2,
+        "value": "720px"
+      },
+      {
+        "count": 1,
+        "value": "583.199px"
+      },
+      {
+        "count": 1,
+        "value": "782.266px"
+      },
+      {
+        "count": 1,
+        "value": "780px"
+      },
+      {
+        "count": 1,
+        "value": "420px"
+      },
+      {
+        "count": 1,
+        "value": "300.289px"
+      }
+    ],
+    "radii": [
+      {
+        "count": 36,
+        "value": "9999px"
+      },
+      {
+        "count": 13,
+        "value": "16px"
+      },
+      {
+        "count": 11,
+        "value": "10px"
+      },
+      {
+        "count": 9,
+        "value": "50%"
+      },
+      {
+        "count": 6,
+        "value": "12px"
+      },
+      {
+        "count": 1,
+        "value": "0px 0px 10px"
+      },
+      {
+        "count": 1,
+        "value": "24px"
+      }
+    ],
+    "shadows": [
+      {
+        "count": 8,
+        "value": "rgba(53, 240, 168, 0.35) 0px 8px 24px -12px"
+      },
+      {
+        "count": 4,
+        "value": "rgba(53, 240, 168, 0.12) 0px 0px 0px 10px, rgba(53, 240, 168, 0.35) 0px 16px 40px -18px"
+      },
+      {
+        "count": 3,
+        "value": "rgba(53, 240, 168, 0.35) 0px 0px 10px 0px"
+      },
+      {
+        "count": 2,
+        "value": "rgba(53, 240, 168, 0.12) 0px 0px 0px 4px, rgba(53, 240, 168, 0.35) 0px 0px 18px 0px"
+      },
+      {
+        "count": 1,
+        "value": "rgba(53, 240, 168, 0.35) 0px 40px 90px -60px, rgba(233, 242, 241, 0.05) 0px 1px 0px 0px inset"
+      },
+      {
+        "count": 1,
+        "value": "rgba(53, 240, 168, 0.35) 0px 30px 80px -60px"
+      },
+      {
+        "count": 1,
+        "value": "rgba(53, 240, 168, 0.35) 0px 0px 18px 0px"
+      }
+    ],
+    "spacing": [
+      {
+        "count": 79,
+        "value": "8px"
+      },
+      {
+        "count": 64,
+        "value": "16px"
+      },
+      {
+        "count": 60,
+        "value": "18px"
+      },
+      {
+        "count": 59,
+        "value": "26px"
+      },
+      {
+        "count": 34,
+        "value": "10px"
+      },
+      {
+        "count": 34,
+        "value": "13px"
+      },
+      {
+        "count": 32,
+        "value": "20px"
+      },
+      {
+        "count": 30,
+        "value": "12px"
+      },
+      {
+        "count": 26,
+        "value": "6px"
+      },
+      {
+        "count": 25,
+        "value": "14px"
+      },
+      {
+        "count": 22,
+        "value": "9px"
+      },
+      {
+        "count": 18,
+        "value": "104px"
+      },
+      {
+        "count": 17,
+        "value": "22px"
+      },
+      {
+        "count": 16,
+        "value": "24px"
+      },
+      {
+        "count": 12,
+        "value": "3px"
+      },
+      {
+        "count": 9,
+        "value": "4px"
+      },
+      {
+        "count": 8,
+        "value": "62.5312px"
+      },
+      {
+        "count": 8,
+        "value": "15px"
+      },
+      {
+        "count": 4,
+        "value": "34px"
+      },
+      {
+        "count": 4,
+        "value": "5px"
+      },
+      {
+        "count": 3,
+        "value": "54px"
+      },
+      {
+        "count": 2,
+        "value": "28px"
+      },
+      {
+        "count": 2,
+        "value": "7px"
+      },
+      {
+        "count": 2,
+        "value": "46px"
+      }
+    ],
+    "text_colors": [
+      {
+        "count": 81,
+        "value": "#a9bdbb"
+      },
+      {
+        "count": 71,
+        "value": "#e9f2f1"
+      },
+      {
+        "count": 54,
+        "value": "#7f9492"
+      },
+      {
+        "count": 31,
+        "value": "#35f0a8"
+      },
+      {
+        "count": 12,
+        "value": "#04120c"
+      },
+      {
+        "count": 1,
+        "value": "#00000000"
+      }
+    ]
+  },
+  "forms": [
+    {
+      "action": "",
+      "fields": [
+        {
+          "label": "NAME *",
+          "name": "name",
+          "placeholder": "",
+          "required": true,
+          "tag": "input",
+          "type": "text"
+        },
+        {
+          "label": "EMAIL *",
+          "name": "email",
+          "placeholder": "",
+          "required": true,
+          "tag": "input",
+          "type": "email"
+        },
+        {
+          "label": "MESSAGE *",
+          "name": "message",
+          "placeholder": "",
+          "required": true,
+          "tag": "textarea",
+          "type": "textarea"
+        },
+        {
+          "label": "",
+          "name": "",
+          "placeholder": "",
+          "required": false,
+          "tag": "button",
+          "type": "submit"
+        }
+      ],
+      "method": "get"
+    },
+    {
+      "action": "",
+      "fields": [
+        {
+          "label": "Email address",
+          "name": "email",
+          "placeholder": "Your email",
+          "required": true,
+          "tag": "input",
+          "type": "email"
+        },
+        {
+          "label": "",
+          "name": "",
+          "placeholder": "",
+          "required": false,
+          "tag": "button",
+          "type": "submit"
+        }
+      ],
+      "method": "get"
+    }
+  ],
+  "headings": [
+    {
+      "level": 1,
+      "text": "Pipnex AI — Your Smarter Forex Trading Partner"
+    },
+    {
+      "level": 2,
+      "text": "Get the Pipnex AI App"
+    },
+    {
+      "level": 2,
+      "text": "Why Traders Choose PipNex"
+    },
+    {
+      "level": 3,
+      "text": "AI Market Analysis"
+    },
+    {
+      "level": 3,
+      "text": "Chart Upload & Analysis"
+    },
+    {
+      "level": 3,
+      "text": "Live TradingView Charts"
+    },
+    {
+      "level": 3,
+      "text": "Backtesting Studio"
+    },
+    {
+      "level": 3,
+      "text": "AI Strategy Builder"
+    },
+    {
+      "level": 3,
+      "text": "PipNex PropPass"
+    },
+    {
+      "level": 2,
+      "text": "Learn Pipnex in minutes"
+    },
+    {
+      "level": 2,
+      "text": "Pipnex Trade Lens"
+    },
+    {
+      "level": 2,
+      "text": "Your Trading Dashboard"
+    },
+    {
+      "level": 3,
+      "text": "Live TradingView Charts"
+    },
+    {
+      "level": 3,
+      "text": "AI Analysis Panel"
+    },
+    {
+      "level": 3,
+      "text": "Chart Upload"
+    },
+    {
+      "level": 3,
+      "text": "Backtesting Studio"
+    },
+    {
+      "level": 3,
+      "text": "AI Strategy Builder"
+    },
+    {
+      "level": 3,
+      "text": "PipNex PropPass"
+    },
+    {
+      "level": 3,
+      "text": "Market Heatmap"
+    },
+    {
+      "level": 3,
+      "text": "Position Size Calculator"
+    },
+    {
+      "level": 2,
+      "text": "Simple, Transparent Pricing"
+    },
+    {
+      "level": 3,
+      "text": "Pro"
+    },
+    {
+      "level": 3,
+      "text": "Ultimate"
+    },
+    {
+      "level": 3,
+      "text": "Platinum"
+    },
+    {
+      "level": 2,
+      "text": "Refer Friends, Earn Real Money"
+    },
+    {
+      "level": 2,
+      "text": "About PipNex"
+    },
+    {
+      "level": 3,
+      "text": "Our Vision"
+    },
+    {
+      "level": 3,
+      "text": "Our Technology"
+    },
+    {
+      "level": 3,
+      "text": "User Benefits"
+    },
+    {
+      "level": 3,
+      "text": "Our Commitment"
+    },
+    {
+      "level": 2,
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "level": 2,
+      "text": "Have questions?"
+    }
+  ],
+  "health": {
+    "errors": [],
+    "failed_requests": []
+  },
+  "lang": "en",
+  "layouts": [
+    {
+      "blocks": [
+        {
+          "background": "#05070ad1",
+          "h": 65,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 1425,
+          "y": 125
+        },
+        {
+          "column": {
+            "max_w": 583,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 583,
+            "x": 421
+          },
+          "h": 8718,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 5,
+          "tag": "main",
+          "w": 1425,
+          "y": 65
+        },
+        {
+          "column": {
+            "max_w": 583,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 583,
+            "x": 421
+          },
+          "h": 1041,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            78,
+            0,
+            96,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 1425,
+          "y": 65
+        },
+        {
+          "background": "#0a1013",
+          "h": 112,
+          "heading": "Get the Pipnex AI App",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 1425,
+          "y": 1106
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 720,
+            "x": 353
+          },
+          "h": 967,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 3,
+          "tag": "section",
+          "w": 1425,
+          "y": 1218
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 720,
+            "x": 353
+          },
+          "h": 124,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 720,
+          "y": 1322
+        },
+        {
+          "h": 226,
+          "heading": "AI Market Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1500
+        },
+        {
+          "h": 226,
+          "heading": "Chart Upload & Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1500
+        },
+        {
+          "h": 226,
+          "heading": "Live TradingView Charts",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1500
+        },
+        {
+          "h": 249,
+          "heading": "Backtesting Studio",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1744
+        },
+        {
+          "h": 249,
+          "heading": "AI Strategy Builder",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1744
+        },
+        {
+          "h": 249,
+          "heading": "PipNex PropPass",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 388,
+          "y": 1744
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 720,
+            "x": 353
+          },
+          "h": 764,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 4,
+          "tag": "section",
+          "w": 1425,
+          "y": 2185
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 720,
+            "x": 353
+          },
+          "h": 151,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 720,
+          "y": 2290
+        },
+        {
+          "column": {
+            "max_w": 420,
+            "pad": [
+              22,
+              22
+            ],
+            "w": 420,
+            "x": 845
+          },
+          "h": 541,
+          "heading": "Pipnex Trade Lens",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 1425,
+          "y": 2948
+        },
+        {
+          "background": "#0a1013",
+          "h": 728,
+          "heading": "Your Trading Dashboard",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 1425,
+          "y": 3489
+        },
+        {
+          "h": 1311,
+          "heading": "Simple, Transparent Pricing",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 1425,
+          "y": 4218
+        },
+        {
+          "h": 75,
+          "heading": "Pro",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 334,
+          "y": 4656
+        },
+        {
+          "h": 75,
+          "heading": "Ultimate",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 334,
+          "y": 4656
+        },
+        {
+          "h": 75,
+          "heading": "Platinum",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 334,
+          "y": 4656
+        },
+        {
+          "background": "#0a1013",
+          "h": 504,
+          "heading": "Refer Friends, Earn Real Money",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 1425,
+          "y": 5528
+        },
+        {
+          "h": 911,
+          "heading": "About PipNex",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 5,
+          "tag": "section",
+          "w": 1425,
+          "y": 6032
+        },
+        {
+          "background": "#0a1013",
+          "h": 1075,
+          "heading": "Frequently Asked Questions",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 1425,
+          "y": 6943
+        },
+        {
+          "h": 764,
+          "heading": "Have questions?",
+          "pad": [
+            104,
+            0,
+            104,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 1425,
+          "y": 8019
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 300,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 300,
+            "x": 113
+          },
+          "h": 407,
+          "pad": [
+            64,
+            0,
+            0,
+            0
+          ],
+          "per_row": 3,
+          "tag": "footer",
+          "w": 1425,
+          "y": 8783
+        },
+        {
+          "h": 213,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "nav",
+          "w": 184,
+          "y": 8848
+        }
+      ],
+      "page_h": 9190,
+      "page_w": 1425,
+      "type": {
+        "body": 20,
+        "h1": 60,
+        "h2": 22,
+        "h3": 20
+      },
+      "width": 1440
+    },
+    {
+      "blocks": [
+        {
+          "background": "#05070ad1",
+          "h": 65,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 753,
+          "y": 1949
+        },
+        {
+          "column": {
+            "max_w": 408,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 408,
+            "x": 172
+          },
+          "h": 10488,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 3,
+          "tag": "main",
+          "w": 753,
+          "y": 65
+        },
+        {
+          "column": {
+            "max_w": 408,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 408,
+            "x": 172
+          },
+          "h": 973,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            56,
+            0,
+            76,
+            0
+          ],
+          "per_row": 3,
+          "tag": "section",
+          "w": 753,
+          "y": 65
+        },
+        {
+          "background": "#0a1013",
+          "h": 112,
+          "heading": "Get the Pipnex AI App",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 753,
+          "y": 1038
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 705,
+            "x": 24
+          },
+          "h": 1182,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 753,
+          "y": 1150
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 705,
+            "x": 24
+          },
+          "h": 112,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 705,
+          "y": 1234
+        },
+        {
+          "h": 249,
+          "heading": "AI Market Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1400
+        },
+        {
+          "h": 249,
+          "heading": "Chart Upload & Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1400
+        },
+        {
+          "h": 226,
+          "heading": "Live TradingView Charts",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1667
+        },
+        {
+          "h": 226,
+          "heading": "Backtesting Studio",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1667
+        },
+        {
+          "h": 249,
+          "heading": "AI Strategy Builder",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1910
+        },
+        {
+          "h": 249,
+          "heading": "PipNex PropPass",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 344,
+          "y": 1910
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 705,
+            "x": 24
+          },
+          "h": 1061,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 753,
+          "y": 2331
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 705,
+            "x": 24
+          },
+          "h": 139,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 705,
+          "y": 2416
+        },
+        {
+          "column": {
+            "max_w": 420,
+            "pad": [
+              22,
+              22
+            ],
+            "w": 420,
+            "x": 167
+          },
+          "h": 753,
+          "heading": "Pipnex Trade Lens",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 753,
+          "y": 3392
+        },
+        {
+          "background": "#0a1013",
+          "h": 935,
+          "heading": "Your Trading Dashboard",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 753,
+          "y": 4145
+        },
+        {
+          "h": 1936,
+          "heading": "Simple, Transparent Pricing",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 753,
+          "y": 5080
+        },
+        {
+          "h": 75,
+          "heading": "Pro",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 290,
+          "y": 5487
+        },
+        {
+          "h": 75,
+          "heading": "Ultimate",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 290,
+          "y": 5487
+        },
+        {
+          "h": 75,
+          "heading": "Platinum",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 290,
+          "y": 6164
+        },
+        {
+          "background": "#0a1013",
+          "h": 783,
+          "heading": "Refer Friends, Earn Real Money",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 753,
+          "y": 7016
+        },
+        {
+          "h": 1019,
+          "heading": "About PipNex",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 3,
+          "tag": "section",
+          "w": 753,
+          "y": 7799
+        },
+        {
+          "background": "#0a1013",
+          "h": 1023,
+          "heading": "Frequently Asked Questions",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 753,
+          "y": 8818
+        },
+        {
+          "h": 712,
+          "heading": "Have questions?",
+          "pad": [
+            84,
+            0,
+            84,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 753,
+          "y": 9841
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 300,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 300,
+            "x": 24
+          },
+          "h": 603,
+          "pad": [
+            64,
+            0,
+            0,
+            0
+          ],
+          "per_row": 2,
+          "tag": "footer",
+          "w": 753,
+          "y": 10553
+        },
+        {
+          "h": 180,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "nav",
+          "w": 333,
+          "y": 10618
+        }
+      ],
+      "page_h": 11157,
+      "page_w": 753,
+      "type": {
+        "body": 20,
+        "h1": 42,
+        "h2": 22,
+        "h3": 20
+      },
+      "width": 768
+    },
+    {
+      "blocks": [
+        {
+          "background": "#05070ad1",
+          "h": 65,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 390,
+          "y": 3316
+        },
+        {
+          "column": {
+            "max_w": 415,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 13845,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 2,
+          "tag": "main",
+          "w": 390,
+          "y": 65
+        },
+        {
+          "column": {
+            "max_w": 415,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 1132,
+          "heading": "Pipnex AI — Your Smarter Forex Trading Partner",
+          "pad": [
+            56,
+            0,
+            76,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 390,
+          "y": 65
+        },
+        {
+          "background": "#0a1013",
+          "h": 183,
+          "heading": "Get the Pipnex AI App",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 1197
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 1909,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 1380
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 158,
+          "heading": "Why Traders Choose PipNex",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 354,
+          "y": 1448
+        },
+        {
+          "h": 249,
+          "heading": "AI Market Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 1642
+        },
+        {
+          "h": 226,
+          "heading": "Chart Upload & Analysis",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 1909
+        },
+        {
+          "h": 226,
+          "heading": "Live TradingView Charts",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 2152
+        },
+        {
+          "h": 226,
+          "heading": "Backtesting Studio",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 2396
+        },
+        {
+          "h": 249,
+          "heading": "AI Strategy Builder",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 2640
+        },
+        {
+          "h": 226,
+          "heading": "PipNex PropPass",
+          "pad": [
+            26,
+            24,
+            26,
+            24
+          ],
+          "per_row": 1,
+          "tag": "article",
+          "w": 354,
+          "y": 2907
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 1676,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 3289
+        },
+        {
+          "column": {
+            "max_w": 720,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 151,
+          "heading": "Learn Pipnex in minutes",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 354,
+          "y": 3358
+        },
+        {
+          "column": {
+            "max_w": 420,
+            "pad": [
+              22,
+              22
+            ],
+            "w": 354,
+            "x": 18
+          },
+          "h": 829,
+          "heading": "Pipnex Trade Lens",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 390,
+          "y": 4965
+        },
+        {
+          "background": "#0a1013",
+          "h": 1379,
+          "heading": "Your Trading Dashboard",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 5794
+        },
+        {
+          "h": 2512,
+          "heading": "Simple, Transparent Pricing",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 390,
+          "y": 7173
+        },
+        {
+          "h": 75,
+          "heading": "Pro",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 300,
+          "y": 7601
+        },
+        {
+          "h": 75,
+          "heading": "Ultimate",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 300,
+          "y": 8189
+        },
+        {
+          "h": 75,
+          "heading": "Platinum",
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "header",
+          "w": 300,
+          "y": 8857
+        },
+        {
+          "background": "#0a1013",
+          "h": 883,
+          "heading": "Refer Friends, Earn Real Money",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 390,
+          "y": 9684
+        },
+        {
+          "h": 1500,
+          "heading": "About PipNex",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 2,
+          "tag": "section",
+          "w": 390,
+          "y": 10567
+        },
+        {
+          "background": "#0a1013",
+          "h": 1076,
+          "heading": "Frequently Asked Questions",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 12067
+        },
+        {
+          "h": 767,
+          "heading": "Have questions?",
+          "pad": [
+            68,
+            0,
+            68,
+            0
+          ],
+          "per_row": 1,
+          "tag": "section",
+          "w": 390,
+          "y": 13143
+        },
+        {
+          "background": "#0a1013",
+          "column": {
+            "max_w": 300,
+            "pad": [
+              0,
+              0
+            ],
+            "w": 300,
+            "x": 18
+          },
+          "h": 989,
+          "pad": [
+            64,
+            0,
+            0,
+            0
+          ],
+          "per_row": 2,
+          "tag": "footer",
+          "w": 390,
+          "y": 13910
+        },
+        {
+          "h": 129,
+          "pad": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "per_row": 1,
+          "tag": "nav",
+          "w": 354,
+          "y": 14187
+        }
+      ],
+      "page_h": 14898,
+      "page_w": 390,
+      "type": {
+        "body": 17,
+        "h1": 32,
+        "h2": 22,
+        "h3": 20
+      },
+      "width": 390
+    }
+  ],
+  "links": [
+    {
+      "href": "http://127.0.0.1:8765/#main",
+      "text": "Skip to content"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#top",
+      "text": "pipnex AI"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#features",
+      "text": "Features"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "How to Use"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Pricing"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#trade-lens",
+      "text": "Lens"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "text": "Dashboard"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#about",
+      "text": "About"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Sign In"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Get Started Free"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#trade-lens",
+      "text": "NEW Pipnex Trade Lens: AI chart analysis inside TradingView"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "text": "Go to Dashboard"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "Introducing Trish V6.0"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "GET IT ON Google Play"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "text": "Learn More About Our Features"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "0.46s GETTING STARTED PIPNEX AI - Official Platform Introduction | Getting Started"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "0.50s GETTING STARTED PIPNEX AI - How to Create Your Account | Sign Up"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "0.37s GETTING STARTED PIPNEX AI - How to Sign In | Access Your Account"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "0.42s SIGNAL OF THE DAY PIPNEX AI - Signal of the Day | AI-Powered Trading Setups"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "text": "Watch tutorials"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Explore Trade Lens"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Install"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Sign Up to Access Your Dashboard"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Get Started"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Get Started"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Go Elite"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#about",
+      "text": "Learn about our referral program"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Start Earning Now"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#top",
+      "text": "pipnex AI"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "GET IT ON Google Play"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#features",
+      "text": "Features"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#pricing",
+      "text": "Pricing"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#about",
+      "text": "About Us"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#contact",
+      "text": "Sign In"
+    },
+    {
+      "href": "tel:+447462221694",
+      "text": "+44 7462 221694"
+    },
+    {
+      "href": "mailto:support@pipnex-ai.com",
+      "text": "support@pipnex-ai.com"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#faq",
+      "text": "Privacy"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#faq",
+      "text": "Terms"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#faq",
+      "text": "Refund"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#faq",
+      "text": "Privacy Policy"
+    },
+    {
+      "href": "http://127.0.0.1:8765/#faq",
+      "text": "Terms of Service"
+    }
+  ],
+  "meta": {
+    "description": "Connect your MT5 account, run AI trading bots 24/7 on free VPS, use prompt trading and Smart Money Concepts chart analysis.",
+    "icons": [
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2305070A'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%2335F0A8'/%3E%3C/svg%3E"
+    ],
+    "og_image": "",
+    "og_title": "",
+    "theme_color": "#05070A"
+  },
+  "outline": [
+    {
+      "background": "#35f0a8",
+      "box": {
+        "h": 48,
+        "w": 152,
+        "x": -9999,
+        "y": 0
+      },
+      "class": "skip",
+      "color": "#04120c",
+      "depth": 2,
+      "font": "16px 600",
+      "href": "http://127.0.0.1:8765/#main",
+      "tag": "a",
+      "text": "Skip to content"
+    },
+    {
+      "background": "#05070ad1",
+      "box": {
+        "h": 65,
+        "w": 1425,
+        "x": 0,
+        "y": 1398
+      },
+      "class": "nav",
+      "color": "#e9f2f1",
+      "depth": 2,
+      "display": "block",
+      "font": "16px 400",
+      "id": "top",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 103,
+        "x": 113,
+        "y": 1415
+      },
+      "class": "brand",
+      "color": "#e9f2f1",
+      "depth": 4,
+      "font": "20px 700",
+      "href": "http://127.0.0.1:8765/#top",
+      "tag": "a",
+      "text": "pipnex AI"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 457,
+        "x": 243,
+        "y": 1420
+      },
+      "class": "nav__links",
+      "color": "#e9f2f1",
+      "depth": 4,
+      "display": "flex",
+      "flex": "row",
+      "font": "16px 400",
+      "id": "navLinks",
+      "tag": "nav"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 58,
+        "x": 243,
+        "y": 1420
+      },
+      "color": "#35f0a8",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#features",
+      "tag": "a",
+      "text": "Features"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 77,
+        "x": 327,
+        "y": 1420
+      },
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "How to Use"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 47,
+        "x": 430,
+        "y": 1420
+      },
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Pricing"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 32,
+        "x": 503,
+        "y": 1420
+      },
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#trade-lens",
+      "tag": "a",
+      "text": "Lens"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 73,
+        "x": 561,
+        "y": 1420
+      },
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "tag": "a",
+      "text": "Dashboard"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 40,
+        "x": 660,
+        "y": 1420
+      },
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 500",
+      "href": "http://127.0.0.1:8765/#about",
+      "tag": "a",
+      "text": "About"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 88,
+        "x": 1062,
+        "y": 1409
+      },
+      "class": "btn btn--ghost",
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Sign In"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 152,
+        "x": 1160,
+        "y": 1409
+      },
+      "class": "btn btn--primary",
+      "color": "#04120c",
+      "depth": 5,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Get Started Free"
+    },
+    {
+      "box": {
+        "h": 8718,
+        "w": 1425,
+        "x": 0,
+        "y": 65
+      },
+      "color": "#e9f2f1",
+      "depth": 2,
+      "display": "block",
+      "font": "16px 400",
+      "id": "main",
+      "tag": "main"
+    },
+    {
+      "box": {
+        "h": 1041,
+        "w": 1425,
+        "x": 0,
+        "y": 65
+      },
+      "class": "hero",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "section"
+    },
+    {
+      "background": "#35f0a812",
+      "box": {
+        "h": 39,
+        "w": 446,
+        "x": 489,
+        "y": 143
+      },
+      "class": "pill pill--new",
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "13px 400",
+      "href": "http://127.0.0.1:8765/#trade-lens",
+      "tag": "a",
+      "text": "NEW Pipnex Trade Lens: AI chart analysis inside TradingView"
+    },
+    {
+      "box": {
+        "h": 14,
+        "w": 14,
+        "x": 907,
+        "y": 156
+      },
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "13px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 180,
+        "w": 583,
+        "x": 421,
+        "y": 208
+      },
+      "class": "hero__title",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "60px 700",
+      "tag": "h1",
+      "text": "Pipnex AI — Your Smarter Forex Trading Partner"
+    },
+    {
+      "box": {
+        "h": 56,
+        "w": 782,
+        "x": 321,
+        "y": 412
+      },
+      "class": "hero__lead",
+      "color": "#a9bdbb",
+      "depth": 5,
+      "font": "20px 400",
+      "tag": "p",
+      "text": "PipNex leverages advanced AI and machine learning to analyze Forex markets, detect trends, and suggest high-probability trade setups — all in real-time."
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 175,
+        "x": 500,
+        "y": 502
+      },
+      "class": "btn btn--primary btn--lg",
+      "color": "#04120c",
+      "depth": 6,
+      "font": "15px 600",
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "tag": "a",
+      "text": "Go to Dashboard"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 237,
+        "x": 688,
+        "y": 502
+      },
+      "class": "btn btn--outline btn--lg",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "15px 600",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "Introducing Trish V6.0"
+    },
+    {
+      "box": {
+        "h": 14,
+        "w": 14,
+        "x": 715,
+        "y": 520
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 600",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 37,
+        "w": 1200,
+        "x": 113,
+        "y": 585
+      },
+      "class": "chips",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "display": "flex",
+      "flex": "row",
+      "font": "16px 400",
+      "tag": "ul"
+    },
+    {
+      "box": {
+        "h": 179,
+        "w": 746,
+        "x": 339,
+        "y": 744
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 112,
+        "w": 1425,
+        "x": 0,
+        "y": 1106
+      },
+      "class": "appband reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 33,
+        "w": 337,
+        "x": 113,
+        "y": 1133
+      },
+      "class": "appband__title",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "22px 700",
+      "tag": "h2",
+      "text": "Get the Pipnex AI App"
+    },
+    {
+      "box": {
+        "h": 21,
+        "w": 337,
+        "x": 113,
+        "y": 1170
+      },
+      "class": "appband__sub",
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "tag": "p",
+      "text": "Charts, signals and your dashboard in your pocket."
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 47,
+        "w": 151,
+        "x": 1162,
+        "y": 1138
+      },
+      "class": "store",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "GET IT ON Google Play"
+    },
+    {
+      "box": {
+        "h": 20,
+        "w": 20,
+        "x": 1181,
+        "y": 1152
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 967,
+        "w": 1425,
+        "x": 0,
+        "y": 1218
+      },
+      "class": "section",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "features",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 124,
+        "w": 720,
+        "x": 353,
+        "y": 1322
+      },
+      "class": "section__head reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 1322
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "FEATURES"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 1352
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Why Traders Choose PipNex"
+    },
+    {
+      "box": {
+        "h": 27,
+        "w": 720,
+        "x": 353,
+        "y": 1419
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Powerful AI-driven features designed to elevate your Forex trading strategy."
+    },
+    {
+      "box": {
+        "h": 226,
+        "w": 388,
+        "x": 113,
+        "y": 1500
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 149,
+        "y": 1538
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 138,
+        "y": 1589
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "AI Market Analysis"
+    },
+    {
+      "box": {
+        "h": 70,
+        "w": 338,
+        "x": 138,
+        "y": 1629
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Real-time AI analysis of Forex pairs with entry, stop-loss, and exit recommendations powered by advanced machine learning."
+    },
+    {
+      "box": {
+        "h": 226,
+        "w": 388,
+        "x": 519,
+        "y": 1500
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 555,
+        "y": 1538
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 544,
+        "y": 1589
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Chart Upload & Analysis"
+    },
+    {
+      "box": {
+        "h": 70,
+        "w": 338,
+        "x": 544,
+        "y": 1629
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Upload any chart screenshot and let our AI detect patterns, identify trends, and suggest optimal trade setups."
+    },
+    {
+      "box": {
+        "h": 226,
+        "w": 388,
+        "x": 925,
+        "y": 1500
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 961,
+        "y": 1538
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 950,
+        "y": 1589
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Live TradingView Charts"
+    },
+    {
+      "box": {
+        "h": 70,
+        "w": 338,
+        "x": 950,
+        "y": 1629
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Interactive TradingView charts embedded in your dashboard for comprehensive live market monitoring."
+    },
+    {
+      "box": {
+        "h": 249,
+        "w": 388,
+        "x": 113,
+        "y": 1744
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 149,
+        "y": 1782
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 138,
+        "y": 1833
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Backtesting Studio"
+    },
+    {
+      "box": {
+        "h": 70,
+        "w": 338,
+        "x": 138,
+        "y": 1873
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Test your trading strategies on historical data with comprehensive performance metrics and detailed trade analysis."
+    },
+    {
+      "box": {
+        "h": 249,
+        "w": 388,
+        "x": 519,
+        "y": 1744
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 555,
+        "y": 1782
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 544,
+        "y": 1833
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "AI Strategy Builder"
+    },
+    {
+      "box": {
+        "h": 93,
+        "w": 338,
+        "x": 544,
+        "y": 1873
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Build professional trading bots & Expert Advisors (EAs) in minutes. Define rules, indicators, and risk parameters with AI assistance."
+    },
+    {
+      "box": {
+        "h": 249,
+        "w": 388,
+        "x": 925,
+        "y": 1744
+      },
+      "class": "card reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "article"
+    },
+    {
+      "box": {
+        "h": 22,
+        "w": 22,
+        "x": 961,
+        "y": 1782
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 338,
+        "x": 950,
+        "y": 1833
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "PipNex PropPass"
+    },
+    {
+      "box": {
+        "h": 70,
+        "w": 338,
+        "x": 950,
+        "y": 1873
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Pass prop firm challenges with AI auto-trading, drawdown tracking, and 24/7 compliance monitoring."
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 1200,
+        "x": 113,
+        "y": 2039
+      },
+      "class": "section__cta reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "16px 400",
+      "tag": "p",
+      "text": "Learn More About Our Features"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 255,
+        "x": 585,
+        "y": 2039
+      },
+      "class": "btn btn--outline",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#dashboard",
+      "tag": "a",
+      "text": "Learn More About Our Features"
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 764,
+        "w": 1425,
+        "x": 0,
+        "y": 2185
+      },
+      "class": "section section--alt",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "how-to-use",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 151,
+        "w": 720,
+        "x": 353,
+        "y": 2291
+      },
+      "class": "section__head reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 2291
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "HOW TO USE"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 2321
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Learn Pipnex in minutes"
+    },
+    {
+      "box": {
+        "h": 54,
+        "w": 720,
+        "x": 353,
+        "y": 2388
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Short walkthrough videos covering setup, connecting MT5, AI chart analysis and running bots — watch them right here."
+    },
+    {
+      "box": {
+        "h": 260,
+        "w": 287,
+        "x": 113,
+        "y": 2497
+      },
+      "class": "video reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "0.46s GETTING STARTED PIPNEX AI - Official Platform Introduction | Getting Started"
+    },
+    {
+      "box": {
+        "h": 260,
+        "w": 287,
+        "x": 417,
+        "y": 2499
+      },
+      "class": "video reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "0.50s GETTING STARTED PIPNEX AI - How to Create Your Account | Sign Up"
+    },
+    {
+      "box": {
+        "h": 260,
+        "w": 287,
+        "x": 722,
+        "y": 2501
+      },
+      "class": "video reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "0.37s GETTING STARTED PIPNEX AI - How to Sign In | Access Your Account"
+    },
+    {
+      "box": {
+        "h": 260,
+        "w": 287,
+        "x": 1026,
+        "y": 2508
+      },
+      "class": "video reveal is-in",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "0.42s SIGNAL OF THE DAY PIPNEX AI - Signal of the Day | AI-Powered Trading Setups"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 144,
+        "x": 640,
+        "y": 2819
+      },
+      "class": "btn btn--ghost",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#how-to-use",
+      "tag": "a",
+      "text": "Watch tutorials"
+    },
+    {
+      "box": {
+        "h": 541,
+        "w": 1425,
+        "x": 0,
+        "y": 2948
+      },
+      "class": "section",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "trade-lens",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 629,
+        "x": 113,
+        "y": 3070
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "NOW ON THE CHROME WEB STORE"
+    },
+    {
+      "box": {
+        "h": 63,
+        "w": 629,
+        "x": 113,
+        "y": 3101
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "42px 700",
+      "tag": "h2",
+      "text": "Pipnex Trade Lens"
+    },
+    {
+      "box": {
+        "h": 108,
+        "w": 629,
+        "x": 113,
+        "y": 3182
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "A Chrome extension that reads your live TradingView chart and runs it through the Pipnex Market Brain — structure, order blocks, liquidity sweeps and a confidence-scored trade plan, right beside the c"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 171,
+        "x": 294,
+        "y": 3324
+      },
+      "class": "btn btn--primary",
+      "color": "#04120c",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Explore Trade Lens"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 83,
+        "x": 478,
+        "y": 3324
+      },
+      "class": "btn btn--outline",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Install"
+    },
+    {
+      "box": {
+        "h": 20,
+        "w": 629,
+        "x": 113,
+        "y": 3384
+      },
+      "class": "lens__note",
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Included with Platinum — no extra subscription."
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 728,
+        "w": 1425,
+        "x": 0,
+        "y": 3489
+      },
+      "class": "section section--alt",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "dashboard",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 3612
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "DASHBOARD"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 3643
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Your Trading Dashboard"
+    },
+    {
+      "box": {
+        "h": 27,
+        "w": 720,
+        "x": 353,
+        "y": 3710
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Everything you need to trade smarter, all in one powerful interface."
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 134,
+        "y": 3814
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "Live TradingView Charts"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 134,
+        "y": 3844
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Monitor any Forex pair in real-time with interactive charts"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 437,
+        "y": 3814
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "AI Analysis Panel"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 437,
+        "y": 3844
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Get instant trade suggestions and market insights"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 741,
+        "y": 3814
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "Chart Upload"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 741,
+        "y": 3844
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Drag & drop chart images for AI pattern recognition"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 1044,
+        "y": 3814
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "Backtesting Studio"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 1044,
+        "y": 3844
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Test strategies on historical data with detailed metrics"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 134,
+        "y": 3943
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "AI Strategy Builder"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 134,
+        "y": 3974
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Build custom trading strategies with AI assistance"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 437,
+        "y": 3943
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "PipNex PropPass"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 437,
+        "y": 3974
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "AI auto-trading bot that passes prop firm challenges for you"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 741,
+        "y": 3943
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "Market Heatmap"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 741,
+        "y": 3974
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Visualize market strength and currency correlations"
+    },
+    {
+      "box": {
+        "h": 23,
+        "w": 248,
+        "x": 1044,
+        "y": 3943
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 700",
+      "tag": "h3",
+      "text": "Position Size Calculator"
+    },
+    {
+      "box": {
+        "h": 39,
+        "w": 248,
+        "x": 1044,
+        "y": 3974
+      },
+      "color": "#7f9492",
+      "depth": 7,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Calculate optimal lot sizes based on your risk management"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 306,
+        "x": 560,
+        "y": 4082
+      },
+      "class": "btn btn--primary btn--lg",
+      "color": "#04120c",
+      "depth": 6,
+      "font": "15px 600",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Sign Up to Access Your Dashboard"
+    },
+    {
+      "box": {
+        "h": 1311,
+        "w": 1425,
+        "x": 0,
+        "y": 4218
+      },
+      "class": "section",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "pricing",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 4340
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "PRICING"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 4370
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Simple, Transparent Pricing"
+    },
+    {
+      "box": {
+        "h": 27,
+        "w": 720,
+        "x": 353,
+        "y": 4437
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Choose the plan that fits your trading needs. Upgrade or downgrade anytime."
+    },
+    {
+      "box": {
+        "h": 20,
+        "w": 720,
+        "x": 353,
+        "y": 4478
+      },
+      "class": "pricing__meta",
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Instant Digital Access • Cancel Anytime"
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 48,
+        "w": 261,
+        "x": 582,
+        "y": 4524
+      },
+      "class": "switch",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "role": "group",
+      "tag": "div",
+      "text": "Monthly Annual SAVE 20%"
+    },
+    {
+      "background": "#35f0a8",
+      "box": {
+        "h": 38,
+        "w": 88,
+        "x": 587,
+        "y": 4529
+      },
+      "class": "switch__opt is-active",
+      "color": "#04120c",
+      "depth": 7,
+      "font": "13px 600",
+      "tag": "button",
+      "text": "Monthly"
+    },
+    {
+      "box": {
+        "h": 38,
+        "w": 80,
+        "x": 678,
+        "y": 4529
+      },
+      "class": "switch__opt",
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "13px 600",
+      "tag": "button",
+      "text": "Annual"
+    },
+    {
+      "box": {
+        "h": 75,
+        "w": 334,
+        "x": 140,
+        "y": 4656
+      },
+      "class": "plan__head",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 33,
+        "w": 334,
+        "x": 140,
+        "y": 4656
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "22px 700",
+      "tag": "h3",
+      "text": "Pro"
+    },
+    {
+      "box": {
+        "h": 36,
+        "w": 334,
+        "x": 140,
+        "y": 4695
+      },
+      "class": "plan__sub",
+      "color": "#7f9492",
+      "depth": 8,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "For serious traders who need more power"
+    },
+    {
+      "box": {
+        "h": 57,
+        "w": 334,
+        "x": 140,
+        "y": 4749
+      },
+      "class": "plan__price",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "16px 400",
+      "tag": "p",
+      "text": "$49.99 /month"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 334,
+        "x": 140,
+        "y": 4826
+      },
+      "class": "btn btn--outline plan__cta",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Get Started"
+    },
+    {
+      "box": {
+        "h": 263,
+        "w": 334,
+        "x": 140,
+        "y": 4890
+      },
+      "class": "plan__list",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "grid",
+      "font": "16px 400",
+      "grid": "334px",
+      "tag": "ul"
+    },
+    {
+      "box": {
+        "h": 75,
+        "w": 334,
+        "x": 546,
+        "y": 4656
+      },
+      "class": "plan__head",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 33,
+        "w": 334,
+        "x": 546,
+        "y": 4656
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "22px 700",
+      "tag": "h3",
+      "text": "Ultimate"
+    },
+    {
+      "box": {
+        "h": 36,
+        "w": 334,
+        "x": 546,
+        "y": 4695
+      },
+      "class": "plan__sub",
+      "color": "#7f9492",
+      "depth": 8,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Maximum performance and unlimited features"
+    },
+    {
+      "box": {
+        "h": 57,
+        "w": 334,
+        "x": 546,
+        "y": 4749
+      },
+      "class": "plan__price",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "16px 400",
+      "tag": "p",
+      "text": "$99.99 /month"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 334,
+        "x": 546,
+        "y": 4826
+      },
+      "class": "btn btn--primary plan__cta",
+      "color": "#04120c",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Get Started"
+    },
+    {
+      "box": {
+        "h": 344,
+        "w": 334,
+        "x": 546,
+        "y": 4890
+      },
+      "class": "plan__list",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "grid",
+      "font": "16px 400",
+      "grid": "334px",
+      "tag": "ul"
+    },
+    {
+      "box": {
+        "h": 75,
+        "w": 334,
+        "x": 952,
+        "y": 4656
+      },
+      "class": "plan__head",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "header"
+    },
+    {
+      "box": {
+        "h": 33,
+        "w": 334,
+        "x": 952,
+        "y": 4656
+      },
+      "color": "#e9f2f1",
+      "depth": 8,
+      "font": "22px 700",
+      "tag": "h3",
+      "text": "Platinum"
+    },
+    {
+      "box": {
+        "h": 36,
+        "w": 334,
+        "x": 952,
+        "y": 4695
+      },
+      "class": "plan__sub",
+      "color": "#7f9492",
+      "depth": 8,
+      "font": "13px 400",
+      "tag": "p",
+      "text": "Run bots 24/7 without PC • Free VPS included"
+    },
+    {
+      "box": {
+        "h": 57,
+        "w": 334,
+        "x": 952,
+        "y": 4749
+      },
+      "class": "plan__price",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "16px 400",
+      "tag": "p",
+      "text": "$299.99 /month"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 334,
+        "x": 952,
+        "y": 4826
+      },
+      "class": "btn btn--outline plan__cta",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Go Elite"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 334,
+        "x": 952,
+        "y": 4890
+      },
+      "class": "plan__plus",
+      "color": "#35f0a8",
+      "depth": 7,
+      "font": "12px 600",
+      "tag": "p",
+      "text": "Everything in Ultimate, PLUS:"
+    },
+    {
+      "box": {
+        "h": 475,
+        "w": 334,
+        "x": 952,
+        "y": 4936
+      },
+      "class": "plan__list",
+      "color": "#e9f2f1",
+      "depth": 7,
+      "display": "grid",
+      "font": "16px 400",
+      "grid": "334px",
+      "tag": "ul"
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 504,
+        "w": 1425,
+        "x": 0,
+        "y": 5528
+      },
+      "class": "section section--alt",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 658,
+        "x": 113,
+        "y": 5651
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "REFERRAL"
+    },
+    {
+      "box": {
+        "h": 63,
+        "w": 658,
+        "x": 113,
+        "y": 5682
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "42px 700",
+      "tag": "h2",
+      "text": "Refer Friends, Earn Real Money"
+    },
+    {
+      "box": {
+        "h": 54,
+        "w": 658,
+        "x": 113,
+        "y": 5763
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Share Pipnex with your friends and earn cash rewards when they subscribe. Your earnings are withdrawable directly to your preferred payment method."
+    },
+    {
+      "box": {
+        "h": 36,
+        "w": 658,
+        "x": 113,
+        "y": 5841
+      },
+      "class": "ref__points",
+      "color": "#e9f2f1",
+      "depth": 6,
+      "display": "flex",
+      "flex": "row",
+      "font": "16px 400",
+      "tag": "ul"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 263,
+        "x": 113,
+        "y": 5903
+      },
+      "class": "btn btn--ghost",
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#about",
+      "tag": "a",
+      "text": "Learn about our referral program"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 164,
+        "x": 388,
+        "y": 5903
+      },
+      "class": "btn btn--primary",
+      "color": "#04120c",
+      "depth": 7,
+      "font": "14px 600",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Start Earning Now"
+    },
+    {
+      "box": {
+        "h": 911,
+        "w": 1425,
+        "x": 0,
+        "y": 6032
+      },
+      "class": "section",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "about",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 6154
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "ABOUT"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 6184
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "About PipNex"
+    },
+    {
+      "box": {
+        "h": 81,
+        "w": 720,
+        "x": 353,
+        "y": 6251
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "We're revolutionizing Forex trading by combining artificial intelligence with proven trading strategies. Our mission is to make institutional-grade trading analysis accessible to every trader."
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 541,
+        "x": 138,
+        "y": 6413
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Our Vision"
+    },
+    {
+      "box": {
+        "h": 47,
+        "w": 541,
+        "x": 138,
+        "y": 6453
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "PipNex empowers traders with AI-driven chart analysis, market heatmaps, and smart signals for smarter Forex trading."
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 541,
+        "x": 747,
+        "y": 6413
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Our Technology"
+    },
+    {
+      "box": {
+        "h": 47,
+        "w": 541,
+        "x": 747,
+        "y": 6453
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Advanced AI analyzes your charts, provides multi-timeframe insights, backtesting tools, and voice-powered trading assistance."
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 541,
+        "x": 138,
+        "y": 6572
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "User Benefits"
+    },
+    {
+      "box": {
+        "h": 47,
+        "w": 541,
+        "x": 138,
+        "y": 6612
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Access smart chart analysis, position calculators, and AI-powered signals to trade with confidence."
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 541,
+        "x": 747,
+        "y": 6572
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "20px 700",
+      "tag": "h3",
+      "text": "Our Commitment"
+    },
+    {
+      "box": {
+        "h": 47,
+        "w": 541,
+        "x": 747,
+        "y": 6612
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p",
+      "text": "Complete privacy protection, secure data handling, and transparent AI-powered analysis you can trust."
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 1075,
+        "w": 1425,
+        "x": 0,
+        "y": 6943
+      },
+      "class": "section section--alt",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "faq",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 7066
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "FAQ"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 7097
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Frequently Asked Questions"
+    },
+    {
+      "box": {
+        "h": 54,
+        "w": 720,
+        "x": 353,
+        "y": 7164
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "Got questions? We've got answers. Find quick answers to common questions about PipNex."
+    },
+    {
+      "box": {
+        "h": 66,
+        "w": 818,
+        "x": 304,
+        "y": 7339
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 66,
+        "w": 818,
+        "x": 304,
+        "y": 7423
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 818,
+        "x": 304,
+        "y": 7507
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 66,
+        "w": 818,
+        "x": 304,
+        "y": 7591
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 818,
+        "x": 304,
+        "y": 7675
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 818,
+        "x": 304,
+        "y": 7759
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 66,
+        "w": 818,
+        "x": 304,
+        "y": 7843
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 90,
+        "w": 818,
+        "x": 304,
+        "y": 7927
+      },
+      "color": "#a9bdbb",
+      "depth": 7,
+      "font": "15px 400",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 764,
+        "w": 1425,
+        "x": 0,
+        "y": 8019
+      },
+      "class": "section",
+      "color": "#e9f2f1",
+      "depth": 3,
+      "display": "block",
+      "font": "16px 400",
+      "id": "contact",
+      "tag": "section"
+    },
+    {
+      "box": {
+        "h": 17,
+        "w": 720,
+        "x": 353,
+        "y": 8141
+      },
+      "class": "eyebrow",
+      "color": "#35f0a8",
+      "depth": 6,
+      "font": "11px 600",
+      "tag": "p",
+      "text": "GET IN TOUCH"
+    },
+    {
+      "box": {
+        "h": 49,
+        "w": 720,
+        "x": 353,
+        "y": 8171
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "48px 700",
+      "tag": "h2",
+      "text": "Have questions?"
+    },
+    {
+      "box": {
+        "h": 54,
+        "w": 720,
+        "x": 353,
+        "y": 8238
+      },
+      "class": "section__lead",
+      "color": "#a9bdbb",
+      "depth": 6,
+      "font": "18px 400",
+      "tag": "p",
+      "text": "We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+    },
+    {
+      "box": {
+        "h": 351,
+        "w": 860,
+        "x": 283,
+        "y": 8328
+      },
+      "class": "form",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "display": "grid",
+      "font": "16px 400",
+      "grid": "422px 422px",
+      "id": "contactForm",
+      "tag": "form"
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 51,
+        "w": 422,
+        "x": 283,
+        "y": 8354
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 400",
+      "name": "name",
+      "placeholder": "",
+      "tag": "input",
+      "type": "text"
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 51,
+        "w": 422,
+        "x": 721,
+        "y": 8354
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 400",
+      "name": "email",
+      "placeholder": "",
+      "tag": "input",
+      "type": "email"
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 141,
+        "w": 860,
+        "x": 283,
+        "y": 8447
+      },
+      "color": "#e9f2f1",
+      "depth": 7,
+      "font": "15px 400",
+      "name": "message",
+      "placeholder": "",
+      "tag": "textarea",
+      "type": "textarea"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 860,
+        "x": 283,
+        "y": 8603
+      },
+      "class": "field--wide form__note",
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "13px 400",
+      "id": "formNote",
+      "role": "status",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 42,
+        "w": 142,
+        "x": 283,
+        "y": 8637
+      },
+      "class": "btn btn--primary",
+      "color": "#04120c",
+      "depth": 6,
+      "font": "14px 600",
+      "tag": "button",
+      "text": "Send Message"
+    },
+    {
+      "background": "#0a1013",
+      "box": {
+        "h": 407,
+        "w": 1425,
+        "x": 0,
+        "y": 8783
+      },
+      "class": "footer",
+      "color": "#e9f2f1",
+      "depth": 2,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "footer"
+    },
+    {
+      "box": {
+        "h": 30,
+        "w": 103,
+        "x": 113,
+        "y": 8848
+      },
+      "class": "brand",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "20px 700",
+      "href": "http://127.0.0.1:8765/#top",
+      "tag": "a",
+      "text": "pipnex AI"
+    },
+    {
+      "box": {
+        "h": 67,
+        "w": 300,
+        "x": 113,
+        "y": 8894
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "14px 400",
+      "tag": "p",
+      "text": "Your AI-powered trading companion. Discover smarter ways to analyze markets and trade with confidence."
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 47,
+        "w": 151,
+        "x": 113,
+        "y": 8981
+      },
+      "class": "store",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "16px 400",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "GET IT ON Google Play"
+    },
+    {
+      "box": {
+        "h": 20,
+        "w": 20,
+        "x": 132,
+        "y": 8995
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "16px 400",
+      "tag": "svg"
+    },
+    {
+      "box": {
+        "h": 213,
+        "w": 184,
+        "x": 521,
+        "y": 8848
+      },
+      "class": "footer__col",
+      "color": "#e9f2f1",
+      "depth": 4,
+      "display": "block",
+      "font": "16px 400",
+      "tag": "nav"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 184,
+        "x": 521,
+        "y": 8848
+      },
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "12px 700",
+      "tag": "h4",
+      "text": "QUICK LINKS"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 184,
+        "x": 521,
+        "y": 8882
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#features",
+      "tag": "a",
+      "text": "Features"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 184,
+        "x": 521,
+        "y": 8906
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#pricing",
+      "tag": "a",
+      "text": "Pricing"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 184,
+        "x": 521,
+        "y": 8930
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#about",
+      "tag": "a",
+      "text": "About Us"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 184,
+        "x": 521,
+        "y": 8953
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#contact",
+      "tag": "a",
+      "text": "Sign In"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 263,
+        "x": 746,
+        "y": 8848
+      },
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "12px 700",
+      "tag": "h4",
+      "text": "CONTACT & LEGAL"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 263,
+        "x": 746,
+        "y": 8953
+      },
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "href": "tel:+447462221694",
+      "tag": "a",
+      "text": "+44 7462 221694"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 263,
+        "x": 746,
+        "y": 9001
+      },
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "href": "mailto:support@pipnex-ai.com",
+      "tag": "a",
+      "text": "support@pipnex-ai.com"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 49,
+        "x": 746,
+        "y": 9037
+      },
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#faq",
+      "tag": "a",
+      "text": "Privacy"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 41,
+        "x": 809,
+        "y": 9037
+      },
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#faq",
+      "tag": "a",
+      "text": "Terms"
+    },
+    {
+      "box": {
+        "h": 24,
+        "w": 47,
+        "x": 864,
+        "y": 9037
+      },
+      "color": "#7f9492",
+      "depth": 6,
+      "font": "14px 400",
+      "href": "http://127.0.0.1:8765/#faq",
+      "tag": "a",
+      "text": "Refund"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 263,
+        "x": 1049,
+        "y": 8848
+      },
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "12px 700",
+      "tag": "h4",
+      "text": "STAY CONNECTED"
+    },
+    {
+      "box": {
+        "h": 48,
+        "w": 263,
+        "x": 1049,
+        "y": 8882
+      },
+      "color": "#e9f2f1",
+      "depth": 5,
+      "font": "16px 400",
+      "tag": "p",
+      "text": "Subscribe to our newsletter for exclusive offers and updates."
+    },
+    {
+      "box": {
+        "h": 51,
+        "w": 263,
+        "x": 1049,
+        "y": 8944
+      },
+      "class": "news",
+      "color": "#e9f2f1",
+      "depth": 5,
+      "display": "flex",
+      "flex": "row",
+      "font": "16px 400",
+      "id": "newsForm",
+      "tag": "form"
+    },
+    {
+      "background": "#0e1518",
+      "box": {
+        "h": 51,
+        "w": 185,
+        "x": 1049,
+        "y": 8944
+      },
+      "color": "#e9f2f1",
+      "depth": 6,
+      "font": "15px 400",
+      "name": "email",
+      "placeholder": "Your email",
+      "tag": "input",
+      "type": "email"
+    },
+    {
+      "box": {
+        "h": 51,
+        "w": 71,
+        "x": 1242,
+        "y": 8944
+      },
+      "class": "btn btn--primary",
+      "color": "#04120c",
+      "depth": 6,
+      "font": "14px 600",
+      "tag": "button",
+      "text": "Join"
+    },
+    {
+      "box": {
+        "h": 16,
+        "w": 263,
+        "x": 1049,
+        "y": 9005
+      },
+      "class": "news__note",
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "12px 400",
+      "id": "newsNote",
+      "role": "status",
+      "tag": "p"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 79,
+        "x": 1113,
+        "y": 9138
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "12px 400",
+      "href": "http://127.0.0.1:8765/#faq",
+      "tag": "a",
+      "text": "Privacy Policy"
+    },
+    {
+      "box": {
+        "h": 18,
+        "w": 97,
+        "x": 1216,
+        "y": 9138
+      },
+      "color": "#7f9492",
+      "depth": 5,
+      "font": "12px 400",
+      "href": "http://127.0.0.1:8765/#faq",
+      "tag": "a",
+      "text": "Terms of Service"
+    }
+  ],
+  "page": {
+    "h": 9190,
+    "w": 1425
+  },
+  "text": "Skip to content pipnex AI Features How to Use Pricing Lens Dashboard About Sign In Get Started Free NEW Pipnex Trade Lens: AI chart analysis inside TradingView Pipnex AI — Your Smarter Forex Trading Partner PipNex leverages advanced AI and machine learning to analyze Forex markets, detect trends, and suggest high-probability trade setups — all in real-time. Go to Dashboard Introducing Trish V6.0 AI MARKET ANALYSIS GLOBAL MARKET COVERAGE FAST RESPONSIVE UI EUR/USD 1.0842 +0.42% SMC Structure break of structure Liquidity sweep detected Plan long · 1.0812 → 1.0910 Get the Pipnex AI App Charts, signals and your dashboard in your pocket. GET IT ON Google Play FEATURES Why Traders Choose PipNex Powerful AI-driven features designed to elevate your Forex trading strategy. AI Market Analysis Real-time AI analysis of Forex pairs with entry, stop-loss, and exit recommendations powered by advanced machine learning. Chart Upload & Analysis Upload any chart screenshot and let our AI detect patterns, identify trends, and suggest optimal trade setups. Live TradingView Charts Interactive TradingView charts embedded in your dashboard for comprehensive live market monitoring. Backtesting Studio Test your trading strategies on historical data with comprehensive performance metrics and detailed trade analysis. AI Strategy Builder Build professional trading bots & Expert Advisors (EAs) in minutes. Define rules, indicators, and risk parameters with AI assistance. PipNex PropPass Pass prop firm challenges with AI auto-trading, drawdown tracking, and 24/7 compliance monitoring. Learn More About Our Features HOW TO USE Learn Pipnex in minutes Short walkthrough videos covering setup, connecting MT5, AI chart analysis and running bots — watch them right here. 0.46s GETTING STARTED PIPNEX AI - Official Platform Introduction | Getting Started 0.50s GETTING STARTED PIPNEX AI - How to Create Your Account | Sign Up 0.37s GETTING STARTED PIPNEX AI - How to Sign In | Access Your Account 0.42s SIGNAL OF THE DAY PIPNEX AI - Signal of the Day | AI-Powered Trading Setups Watch tutorials NOW ON THE CHROME WEB STORE Pipnex Trade Lens A Chrome extension that reads your live TradingView chart and runs it through the Pipnex Market Brain — structure, order blocks, liquidity sweeps and a confidence-scored trade plan, right beside the chart you already trade. Explore Trade Lens Install Included with Platinum — no extra subscription. Confidence 87% Structure HH / HL Order block 1.0788 – 1.0801 Liquidity sweep yes Plan long · 1.0812 → 1.0910 DASHBOARD Your Trading Dashboard Everything you need to trade smarter, all in one powerful interface. Live TradingView Charts Monitor any Forex pair in real-time with interactive charts AI Analysis Panel Get instant trade suggestions and market insights Chart Upload Drag & drop chart images for AI pattern recognition Backtesting Studio Test strategies on historical data with detailed metrics AI Strategy Builder Build custom trading strategies with AI assistance PipNex PropPass AI auto-trading bot that passes prop firm challenges for you Market Heatmap Visualize market strength and currency correlations Position Size Calculator Calculate optimal lot sizes based on your risk management Sign Up to Access Your Dashboard PRICING Simple, Transparent Pricing Choose the plan that fits your trading needs. Upgrade or downgrade anytime. Instant Digital Access • Cancel Anytime Monthly Annual SAVE 20% Pro For serious traders who need more power $49.99 /month Get Started 12 Chart Uploads per day Advanced Chart Analysis Multi-Timeframe Analysis PipNex Pulse Signals (1/day, in-app + email) Position Size Calculator 2 Custom AI Setups per day Smart Chart Analyzer 24/7 Priority Support 2× Faster Processing MOST POPULAR Ultimate Maximum performance and unlimited features $99.99 /month Get Started 24 Chart Uploads per day Multi-Timeframe Analysis Signal of the Day (90%+ accurate AI signal daily) PipNex Pulse Signals (2/day, in-app + email) AI News Trading Analysis (NFP/CPI) AI Strategy Builder PipNex PropPass Smart Chart Analyzer 10× Faster Processing Unlimited Custom Setups 24/7 Priority Support ELITE Platinum Run bots 24/7 without PC • Free VPS included $299.99 /month Go Elite Everything in Ultimate, PLUS: Pipnex Trade Lens — AI chart analysis inside TradingView Unlimited PipNex Pulse Signals (in-app + email) Direct AI Chart Analysis (no uploads) Prompt Trading UI MT5 Account Connection Run Bots Without PC (Cloud Bots) Auto Trading (5,000 AI credits included with payment) FREE VPS Included ($50/mo value) Voice-based AI Interaction AI generates & executes strategies Unlimited MT5 accounts (10) 24/7 Bot Monitoring & Alerts Priority AI processing White-glove support REFERRAL Refer Friends, Earn Real Money Share Pipnex with your friends and earn cash rewards when they subscribe. Your earnings are withdrawable directly to your preferred payment method. Earn Cash Per Referral Easy Withdrawals Learn about our referral program Start Earning Now THIS MONTH $420.00 6 referrals · paid out NEXT PAYOUT $150.00 2 pending ABOUT About PipNex We're revolutionizing Forex trading by combining artificial intelligence with proven trading strategies. Our mission is to make institutional-grade trading analysis accessible to every trader. Our Vision PipNex empowers traders with AI-driven chart analysis, market heatmaps, and smart signals for smarter Forex trading. Our Technology Advanced AI analyzes your charts, provides multi-timeframe insights, backtesting tools, and voice-powered trading assistance. User Benefits Access smart chart analysis, position calculators, and AI-powered signals to trade with confidence. Our Commitment Complete privacy protection, secure data handling, and transparent AI-powered analysis you can trust. AI ANALYSIS ENGINE Processing market data PATTERN ENGINE SMC MARKET MONITORING 24/7 BROKER CONNECT MT5 MARKET DATA Live Chart analysis, prompt-based trading and automated MT5 execution in one workspace. FAQ Frequently Asked Questions Got questions? We've got answers. Find quick answers to common questions about PipNex. What is PipNex? How does the AI chart analysis work? What markets does PipNex support? Is there a free trial available? Can I cancel my subscription anytime? What payment methods do you accept? How accurate is the AI analysis? Do you offer refunds? GET IN TOUCH Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible. NAME * EMAIL * MESSAGE * Send Message pipnex AI Your AI-powered trading companion. Discover smarter ways to analyze markets and trade with confidence. GET IT ON Google Play QUICK LINKS Features Pricing About Us Sign In CONTACT & LEGAL St Aldate's, Pembroke St, Oxford, England Mon–Fri: 9:00 AM – 5:30 PM GMT +44 7462 221694 support@pipnex-ai.com Privacy Terms Refund STAY CONNECTED Subscribe to our newsletter for exclusive offers and updates. Join © 2026 PipNex. All rights reserved. Privacy Policy | Terms of Service",
+  "title": "Pipnex AI — Your Smarter Forex Trading Partner",
+  "unreadable_stylesheets": 1,
+  "url": "http://127.0.0.1:8765/",
+  "viewport": {
+    "h": 900,
+    "w": 1440
+  }
+}

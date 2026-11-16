@@ -1,0 +1,194 @@
+{
+  "count": 27,
+  "entries": [
+    {
+      "name": "trish-desk-method",
+      "description": "The PipNex desk method: how Trish reads a market, builds a plan and decides. Load this first for any trading question \u2014 it defines the order of work and what she must refuse.",
+      "layer": "L1",
+      "path": "skills/trish/trish-desk-method/SKILL.md",
+      "chars": 1598
+    },
+    {
+      "name": "pipnex-chart-read",
+      "description": "Read a PipNex chart: the seeded EMA 9/21/50 + RSI studies, how to interpret the bias summary, and how the confidence number is produced. Use for 'what is X doing', 'read this chart', 'is it bullish'.",
+      "layer": "L3",
+      "path": "skills/trish/pipnex-chart-read/SKILL.md",
+      "chars": 1227
+    },
+    {
+      "name": "pipnex-news-gate",
+      "description": "Check the macro calendar before a plan is taken: which high-impact prints are near, and whether a stop is likely to be jumped. Use for 'is there news', 'can I take this now', 'why is it moving'.",
+      "layer": "L3",
+      "path": "skills/trish/pipnex-news-gate/SKILL.md",
+      "chars": 886
+    },
+    {
+      "name": "pipnex-risk-discipline",
+      "description": "The desk's risk limits and how to enforce them: max risk per trade, minimum reward:risk, when to refuse, and how to explain a BLOCK without softening it.",
+      "layer": "L3",
+      "path": "skills/trish/pipnex-risk-discipline/SKILL.md",
+      "chars": 1148
+    },
+    {
+      "name": "pipnex-signal-plan",
+      "description": "Use the PipNex basket engine: rank all pairs at one timeframe, pick the best setup, and explain why the top one beat the rest. Use for 'best trade now', 'what should I trade', 'scan the pairs'.",
+      "layer": "L3",
+      "path": "skills/trish/pipnex-signal-plan/SKILL.md",
+      "chars": 1082
+    },
+    {
+      "name": "trader-alerts",
+      "description": "Price Alerts. Rings when a price, a stop or the opening bell hits. Turns the trade plan into three alerts in one go (the stop, the target and \\\"flat by close\\\" at your flat-by time), plus above / below / stop / target levels, percent moves from the previous close, any time of day, and the NYSE opening bell, each ringing once so you are not spammed. Knows NYSE hours with the 2026 and 2027 holidays ",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-alerts/SKILL.md",
+      "chars": 7172
+    },
+    {
+      "name": "trader-alerts",
+      "description": "Price Alerts. Rings when a price target, a stop or the opening bell hits: above / below / stop rules, percent moves from the previous close, and the NYSE opening bell, each ringing once so you are not spammed. Knows NYSE hours with the 2026 and 2027 holidays and 1:00 p.m. early closes, fetches free delayed quotes (Yahoo chart JSON, Stooq CSV) one ticker at a time, and writes trader/prices.json for",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-alerts/SKILL.md",
+      "chars": 4990
+    },
+    {
+      "name": "trader-analyst",
+      "description": "The Earnings Analyst. Reads a company's reported numbers straight from SEC EDGAR (XBRL company facts from its 10-Qs and 10-Ks, plus the latest earnings 8-K and its press release) and sums up what changed: revenue, gross, operating and net margins, net income and diluted EPS, quarter by quarter, each against the same quarter a year earlier, with the trailing twelve months. Reads an earnings call tr",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-analyst/SKILL.md",
+      "chars": 5139
+    },
+    {
+      "name": "trader-analyst",
+      "description": "The Earnings Analyst. Reads a company's reported numbers straight from SEC EDGAR (XBRL company facts from its 10-Qs and 10-Ks, plus the latest earnings 8-K and its press release) and sums up what changed: revenue, gross, operating and net margins, net income and diluted EPS, quarter by quarter, each against the same quarter a year earlier, with the trailing twelve months. Writes a metrics file the",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-analyst/SKILL.md",
+      "chars": 3980
+    },
+    {
+      "name": "trader-broker",
+      "description": "Order Executor. Sends approved orders to your broker, paper trading by default, never without your yes. Shows each order as a plain ticket (a bracket shows its stop-loss, take-profit and the max loss at the stop) plus the exact JSON for Alpaca's place_stock_order, records your yes word for word, then Claude's own Allow once / Deny card asks again. Builds the sell ticket that closes a day trade by ",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-broker/SKILL.md",
+      "chars": 10392
+    },
+    {
+      "name": "trader-broker",
+      "description": "Order Executor. Places APPROVED orders through your brokerage connector, one at a time, and never without your explicit yes. Shows each order as a plain ticket plus the exact JSON for Alpaca's place_stock_order, records your yes word for word, then Claude's own Allow once / Deny card asks again. Covers setting up Alpaca's official MCP server in Claude Desktop (paper trading by default, keys in env",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-broker/SKILL.md",
+      "chars": 7617
+    },
+    {
+      "name": "trader-budget",
+      "description": "Budget Manager. Sizes every position to your budget and your max loss per trade. Reads the trade plan from trader-exit (entry, stop, target), finds the whole shares that fit inside four limits (max loss per trade, position cap, max order, cash after your buffer), says which limit decided it, and writes ONE bracket order (entry, stop-loss, take-profit) to trader/orders.json in the exact shape of Al",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-budget/SKILL.md",
+      "chars": 7743
+    },
+    {
+      "name": "trader-budget",
+      "description": "Budget Manager. Sizes every position to your budget before anything is bought: keeps a cash buffer, caps any one stock (the excess is shared out to the others), drops slices under your minimum order, rounds so every dollar is used, supports fractional or whole shares, and writes the proposed buy orders to trader/orders.json in the exact shape of Alpaca's place_stock_order (notional as a string). N",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-budget/SKILL.md",
+      "chars": 4824
+    },
+    {
+      "name": "trader-copycat",
+      "description": "The Reverse Engineer. Reads a famous investor's public SEC filings (the quarterly 13F-HR, plus Form 4 if you want the insider trades) and rebuilds their portfolio as weights you can copy: every position, its share of the fund, what they bought, added, trimmed and sold since the last quarter, with tickers matched to every CUSIP. Then it writes trader/targets.json so the budget skill can size it to ",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-copycat/SKILL.md",
+      "chars": 6825
+    },
+    {
+      "name": "trader-entry",
+      "description": "Entry Timer. Watches a setup bar by bar and tells you the moment to get in. Reads free Yahoo 1-minute or 5-minute bars, builds the opening range (the first 15 minutes by default) and calls the entry on the first completed bar that CLOSES above the range high, or above a level you give it (like a 20-day high from the scanner), with an optional volume check. Says waiting and how far, triggered with ",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-entry/SKILL.md",
+      "chars": 6761
+    },
+    {
+      "name": "trader-exit",
+      "description": "Exit Planner. Sets your stop and your target before you enter, so you know when to get out. Reads the entry from trader-entry (or a price you give), puts the stop at the opening-range midpoint by default (or the range low, your price, a percent, or a multiple of the ATR), rounds it down to the cent, and sets the target at 2R (or 1R, or your price). Refuses a stop at or above the entry, a target at",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-exit/SKILL.md",
+      "chars": 6011
+    },
+    {
+      "name": "trader-news",
+      "description": "News Monitor. Tracks breaking news on every stock you watch and flags what moves it: Yahoo Finance headlines per ticker, each company's 8-K filings on SEC EDGAR (earnings, CEO changes, deals, restatements, bankruptcy) and how far each stock is from yesterday's close. Shows only what is new since the last check, newest first, in New York time, tags each item (earnings, analyst, deal, halt, regulato",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-news/SKILL.md",
+      "chars": 4556
+    },
+    {
+      "name": "trader-news",
+      "description": "The News Monitor. Watches breaking market news and SEC filings for the stocks you hold (or are about to copy): Yahoo Finance headlines per ticker and each company's 8-K filings on SEC EDGAR (earnings, CEO changes, deals, restatements, bankruptcy). Shows only what is new since the last check, newest first, flags what touches your positions and why it matters, and never repeats an item. Use when the",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-news/SKILL.md",
+      "chars": 4178
+    },
+    {
+      "name": "trader-pelosi",
+      "description": "The Pelosi Tracker. Watches the stock trades members of Congress must disclose under the STOCK Act: reads the House Clerk's public Periodic Transaction Reports (PTRs) as soon as they are posted, alerts once per new filing, and turns each PDF into clean rows (who, owner, stock, ticker, buy or sell, options strike and expiry, trade date, amount range, how many days it took to disclose). Flags trades",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-pelosi/SKILL.md",
+      "chars": 6562
+    },
+    {
+      "name": "trader-pelosi",
+      "description": "The Pelosi Tracker. Watches the stock trades members of Congress must disclose under the STOCK Act: reads the House Clerk's public Periodic Transaction Reports (PTRs) as soon as they are posted, alerts once per new filing, and turns each PDF into clean rows (who, owner, stock, ticker, buy or sell, options strike and expiry, trade date, amount range, how many days it took to disclose). Flags trades",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-pelosi/SKILL.md",
+      "chars": 6411
+    },
+    {
+      "name": "trader-rebalance",
+      "description": "Rebalancer. Brings the portfolio back to its target weights when it drifts: values every holding at current prices, works out each stock's drift from its target in percentage points, trades only the stocks outside a band (default 5 points), keeps the cash buffer and the per-stock cap, skips tiny trades, lists sells before buys, and writes the trades to trader/orders.json as proposals. Use when the",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-rebalance/SKILL.md",
+      "chars": 4494
+    },
+    {
+      "name": "trader-risk",
+      "description": "Risk Manager. Checks every trade against your limits and stops anything over them, before it can reach the broker. For a day trade: a stop is required, the loss at the stop must fit your max loss per trade (measured from the higher of the plan's entry and a fresh price), reward:risk must meet your minimum, the day's total risk must fit your daily loss limit, no more than your trades per day, and n",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-risk/SKILL.md",
+      "chars": 8456
+    },
+    {
+      "name": "trader-risk",
+      "description": "Risk Manager. Checks every proposed order against your limits before it can reach the broker and blocks anything over them: blocked tickers, max order size, minimum order, max position percent after the fill, the cash buffer, margin, short sales, options and crypto (off unless allowed), malformed orders, duplicates and a daily order limit. Prints PASS or BLOCK with the reason for each order and re",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-risk/SKILL.md",
+      "chars": 4587
+    },
+    {
+      "name": "trader-scanner",
+      "description": "Chart Scanner. Scans thousands of charts for setups: opening-range breakouts, flags, oversold bounces. Builds the list of US-listed common stocks, ordinary shares and ADRs from Nasdaq Trader's symbol directories, runs a pre-market scan of daily closes (20-day closing-high breakout, bull flag, reclaimed the 20-day average, oversold, oversold bounce) and an intraday opening-range breakout scan on 5-",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-scanner/SKILL.md",
+      "chars": 9981
+    },
+    {
+      "name": "trader-screener",
+      "description": "The Stock Screener. Checks a list of companies against the user's own rules (revenue growth, margins, EPS, P/E, earnings yield, sector, anything in the metrics file), says exactly which rule each company passes or fails and by how much, and ranks the ones that pass into a shortlist. Reads the metrics /trader-analyst writes from SEC filings, or any CSV. Use when the user says \\\"screen for stocks\\\",",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-screener/SKILL.md",
+      "chars": 3928
+    },
+    {
+      "name": "trader-tax",
+      "description": "Tax Optimizer. Tracks cost-basis lots for every position (FIFO, highest cost first, or specific lots), shows unrealized gains and losses by lot with short or long term, works out what a sale would realize before you sell, finds tax-loss harvesting candidates over a loss threshold, checks the wash sale rule (30 days before and after, GOOG and GOOGL as one family), and writes harvest sells only as p",
+      "layer": "L2",
+      "path": "skills/trader/swing/trader-tax/SKILL.md",
+      "chars": 4761
+    },
+    {
+      "name": "trader-timemachine",
+      "description": "Time Machine. Replays every possible outcome of a trade before you risk a dollar: 10,000 simulated sessions plus every past time the setup fired. Takes the plan from trader-exit (entry, stop, target), rebuilds the rest of the day 10,000 times from the stock's own 5-minute bars over the last 60 days, and re-runs the same rule on every past session. Prints the odds of target first, stop first, or ne",
+      "layer": "L2",
+      "path": "skills/trader/day-trader/trader-timemachine/SKILL.md",
+      "chars": 8643
+    }
+  ]
+}

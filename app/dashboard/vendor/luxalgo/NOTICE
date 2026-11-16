@@ -1,0 +1,4 @@
+Prop Firm Sim core (@luxalgo/prop-firm-sim-core)
+Copyright (c) LuxAlgo — https://github.com/LuxAlgo/prop-firm-sim
+Licensed MIT (see LICENSE-prop-firm-sim-MIT).
+Bundled for the browser with esbuild; includes zod (MIT).

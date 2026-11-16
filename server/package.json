@@ -1,0 +1,9 @@
+{
+  "name": "pipnex-market-service",
+  "private": true,
+  "type": "module",
+  "description": "Real market data + PineScript indicators for the Pipnex dashboard rebuild",
+  "dependencies": {
+    "pinets": "^0.13.1"
+  }
+}
