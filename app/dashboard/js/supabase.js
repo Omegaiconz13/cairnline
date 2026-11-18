@@ -29,13 +29,13 @@ export function setSession(next) {
   if (!token) return null;
   const claims = decodeClaims(token);
   session = { accessToken: token, userId: userId || claims?.sub || null, email: email || claims?.email || null };
-  try { localStorage.setItem('pipnex_live_session', JSON.stringify(session)); } catch { /* private mode */ }
+  try { localStorage.setItem('cairnline_live_session', JSON.stringify(session)); } catch { /* private mode */ }
   return session;
 }
 
 export function loadStoredSession() {
   try {
-    const raw = localStorage.getItem('pipnex_live_session');
+    const raw = localStorage.getItem('cairnline_live_session');
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     session = parsed.accessToken ? parsed : null;
@@ -45,7 +45,7 @@ export function loadStoredSession() {
 
 export function clearSession() {
   session = null;
-  try { localStorage.removeItem('pipnex_live_session'); } catch { /* ignore */ }
+  try { localStorage.removeItem('cairnline_live_session'); } catch { /* ignore */ }
 }
 
 export const hasSession = () => Boolean(session && session.accessToken);
@@ -61,20 +61,28 @@ function decodeClaims(token) {
 /** PostgREST GET with the anon key + user bearer token. */
 async function rest(table, query = '') {
   const url = `${SUPABASE.url}/rest/v1/${table}${query ? `?${query}` : ''}`;
-  const res = await fetch(url, {
-    headers: {
-      apikey: SUPABASE.anonKey,
-      Authorization: `Bearer ${session?.accessToken || SUPABASE.anonKey}`,
-      Accept: 'application/json',
-    },
-  });
-  if (!res.ok) {
-    const err = new Error(`${table}: ${res.status}`);
-    err.status = res.status;
-    throw err;
+  // A wedged edge must reject rather than leave the live page waiting forever.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const res = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        apikey: SUPABASE.anonKey,
+        Authorization: `Bearer ${session?.accessToken || SUPABASE.anonKey}`,
+        Accept: 'application/json',
+      },
+    });
+    if (!res.ok) {
+      const err = new Error(`${table}: ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
+    const body = await res.json();
+    return Array.isArray(body) ? body : [body];
+  } finally {
+    clearTimeout(timer);
   }
-  const body = await res.json();
-  return Array.isArray(body) ? body : [body];
 }
 
 const enc = encodeURIComponent;

@@ -1,11 +1,15 @@
 /**
- * Data layer — live, read-only Supabase adapter only.
+ * Data layer — two real sources, no demo rows, no generated values.
  *
- * There are no demo rows and no generated values anywhere in this layer: every
- * number on screen comes from the signed-in account over PostgREST (GET only,
- * RLS enforced by Postgres) or it is absent. When no session is connected the
- * `api` methods reject with `code: 'NO_ACCOUNT'` and the page shows what it is
- * missing instead of inventing it.
+ * With a session: every read goes to the signed-in account over PostgREST
+ * (GET only, RLS enforced by Postgres).
+ *
+ * Without a session (local development): the desk runs against the local
+ * market service on http://127.0.0.1:8788 and the public catalogue tables,
+ * which are readable with the anon key alone. There is no local wallet, no
+ * local subscription and no local EA catalogue, so those methods answer with
+ * zeros and empty lists rather than invented rows — and `local: true` makes
+ * that visible to the page.
  *
  * Column names, plan limits and table names mirror the production schema so a
  * page never learns where its data came from.
@@ -14,27 +18,62 @@ import { liveApi, hasSession, setSession, loadStoredSession, clearSession, sessi
 
 export { setSession, loadStoredSession, clearSession, sessionInfo, hasSession };
 
-export const NO_ACCOUNT = 'NO_ACCOUNT';
+/* The desk identity shown before accounts exist. It is a label, not a user:
+   `id` stays null so nothing can mistake it for an authenticated row. */
+const LOCAL_PROFILE = Object.freeze({
+  id: null,
+  account_id: 'LOCAL-DESK',
+  display_name: 'Local desk',
+  email: null,
+  referral_count: 0,
+  local: true,
+});
 
-/** True when a call failed for lack of a session rather than a real error. */
-export const isNoAccount = (err) => Boolean(err && err.code === NO_ACCOUNT);
+const noRows = async () => [];
+
+const deskApi = {
+  profile: { get: async () => LOCAL_PROFILE },
+
+  /* Public catalogue: readable with the anon key, so it is read for real. */
+  plans: liveApi.plans,
+  tutorials: liveApi.tutorials,
+  featureFlags: liveApi.featureFlags,
+
+  /* Nothing is billed before accounts exist. */
+  subscription: { get: async () => null, history: noRows },
+
+  /* The desk account is the paper ledger; it holds no money. */
+  wallet: {
+    get: async () => ({
+      available_cents: 0,
+      pending_cents: 0,
+      withdrawable_cents: 0,
+      total_spent_cents: 0,
+      is_frozen: false,
+      currency: 'USD',
+      local: true,
+    }),
+    transactions: noRows,
+    withdrawals: noRows,
+  },
+
+  signals: {
+    preferences: async () => ({ email: true, push: true, in_app: true, symbols: [], interval: 'M15' }),
+    list: noRows,
+  },
+
+  analysis: { list: noRows },
+  bots: { list: noRows, trades: noRows },
+  trades: { list: noRows },
+  strategies: { list: noRows },
+  referrals: { list: noRows },
+  ea: { list: noRows, downloads: noRows },
+  mt5: { accounts: noRows, brokerSessions: noRows },
+};
 
 export const api = new Proxy({}, {
   get(_, group) {
-    return new Proxy({}, {
-      get(_, method) {
-        const fn = liveApi[group] && liveApi[group][method];
-        if (typeof fn !== 'function') return undefined;
-        return (...args) => {
-          if (!hasSession()) {
-            const err = new Error('No account connected');
-            err.code = NO_ACCOUNT;
-            return Promise.reject(err);
-          }
-          return fn.apply(liveApi[group], args);
-        };
-      },
-    });
+    return hasSession() ? liveApi[group] : deskApi[group];
   },
 });
 

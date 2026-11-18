@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Cairnline MCP launcher: resolves its own directory so a host can point at this
+# file without knowing where the project lives or which python3 to use.
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "${PYTHON:-python3}" "$here/../trish_mcp.py" "$@"

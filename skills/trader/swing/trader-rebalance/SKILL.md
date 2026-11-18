@@ -4,7 +4,7 @@ description: "Rebalancer. Brings the portfolio back to its target weights when i
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-rebalance
     upstream_commit: 5189e79b9a48

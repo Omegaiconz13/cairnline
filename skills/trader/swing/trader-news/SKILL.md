@@ -4,7 +4,7 @@ description: "The News Monitor. Watches breaking market news and SEC filings for
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-news
     upstream_commit: 5189e79b9a48

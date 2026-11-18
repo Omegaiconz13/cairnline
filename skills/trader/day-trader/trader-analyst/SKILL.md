@@ -4,7 +4,7 @@ description: "The Earnings Analyst. Reads a company's reported numbers straight 
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-analyst
     upstream_commit: 3d0f4ef6986f

@@ -113,7 +113,7 @@ def port_skill(src: Path, out: Path, pack: str, commit: str) -> dict | None:
         f"version: 1.0.0",
         f"license: MIT",
         f"metadata:",
-        f"  pipnex:",
+        f"  cairnline:",
         f"    pack: {pack}",
         f"    upstream: {src.name}",
         f"    upstream_commit: {commit}",

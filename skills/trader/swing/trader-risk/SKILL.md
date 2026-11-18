@@ -4,7 +4,7 @@ description: "Risk Manager. Checks every proposed order against your limits befo
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-risk
     upstream_commit: 5189e79b9a48

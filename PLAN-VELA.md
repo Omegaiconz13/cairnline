@@ -24,11 +24,11 @@ interactive indicators and fake toolbar buttons.
 - `dist/vela.global.min.js` (1.3 MB, single file) → `window.Vela` — no bundler, no import map,
   no transitive deps. The workspace is *not* in this build; that's accepted: we keep our
   symbol select, interval tabs, Trish rail and risk calculator, which are already integrated
-  with the data service and match the Pipnex theme.
+  with the data service and match the Cairnline theme.
 - Data flows through Vela's **DataProvider port**: our own provider over `market_service.py`,
   so Vela owns caching, routing, chunked history, live polling and indicator recomputation.
 
-## The Pipnex data provider
+## The Cairnline data provider
 
 Custom provider (plain object) against `/api/candles`:
 
@@ -38,7 +38,7 @@ Custom provider (plain object) against `/api/candles`:
   (`openTime`) — exactly Vela's contract — but we still sort + de-dupe defensively.
   Timeframes yfinance can't serve throw `DataUnavailableError({ reason:'timeframe', default:'60' })`.
 - `listSymbols()` — our basket (EURUSD… GBPJPY, XAUUSD→gold alias, BTC-USD) as
-  descriptors with prefix `PIPNE`, which powers Vela's symbol routing and any search UI.
+  descriptors with prefix `CAIRNLINE`, which powers Vela's symbol routing and any search UI.
 - `getSymbolInfo(ticker)` — `timezone: 'Etc/UTC'`, FX/gold `volume:false` (yfinance FX bars
   carry 0.0 volume), BTC `volume: true`.
 - No `subscribe` → Vela **polls `getBars`** automatically for the forming candle (live mode
@@ -53,7 +53,7 @@ Custom provider (plain object) against `/api/candles`:
   analysis for the rail. Our select/tabs were removed in favour of Vela's chrome (chart's
   own pan/zoom/timeframe via setMarket from our quick pills — kept, wired to `setMarket`).
 - Theme: `createTheme({ colors: { background:'#050505', text:'#F5F7F8', grid:'#1a1b1e',
-  border:'#26272A', up:'#B4FF3A', down:'#FF5A5F' }, accent:'#E50914' })`, registered as `'pipnex'`.
+  border:'#26272A', up:'#B4FF3A', down:'#FF5A5F' }, accent:'#E50914' })`, registered as `'cairnline'`.
   (up/down drive candles, wicks and current-price line; accent drives chrome.)
 - Seeded studies: EMA 9 / 21 / 50 overlays (`addNativeIndicator('ema', { inputs:{ length } })`)
   + RSI 14 in its own pane. More (BB, MACD, VWAP, Supertrend…) come free from Vela's catalog.
@@ -73,9 +73,9 @@ path, so the page degrades instead of blanking.
 |---|---|---|
 | 1 | Vendor `vela.global.min.js` + LICENSE + NOTICE under `app/dashboard/vendor/vela/` | done |
 | 2 | Script tag in `dashboard/index.html` (before modules) | done |
-| 3 | `js/vela-provider.js` — PipnexProvider over the market service | done |
+| 3 | `js/vela-provider.js` — CairnlineProvider over the market service | done |
 | 4 | `terminal()` Vela mode + slim bar + market sync + fallback | done |
-| 5 | Pipnex theme + seeded EMA×3 + RSI pane | done |
+| 5 | Cairnline theme + seeded EMA×3 + RSI pane | done |
 | 6 | Plan overlay (entry/stop/target hlines) on analyze | done |
 | 7 | Headless verification: paint, switch symbol/timeframe, indicator legend, drawings, no console errors | done |
 
@@ -84,7 +84,7 @@ path, so the page degrades instead of blanking.
 - Without the workspace there is no built-in symbol-search dropdown or persistence; state is
   per-session. The upgrade path (import map + `@luxalgo/vela-ui` + Zag) is documented above
   if wanted later.
-- The AGPL Pine addon stays out on purpose; server-side PineTS keeps the Pipnex rebuild
+- The AGPL Pine addon stays out on purpose; server-side PineTS keeps the Cairnline rebuild
   Apache-clean on the client.
 - The attribution mark must remain visible (license requirement) — it is not disabled.
 - yfinance intraday depth still applies (1m ≈ 7 days, 5m–30m ≈ 60 days), now surfaced by

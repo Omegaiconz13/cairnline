@@ -1,6 +1,7 @@
-import { api, fmt } from '../data.js';
-import { el, card, metric, chip, toast, notConnected } from '../ui.js';
+import { api, fmt, hasSession } from '../data.js';
+import { el, card, metric, chip, toast } from '../ui.js';
 import { market, px } from '../market.js';
+import { referralUrl } from '../config.js';
 
 /** TradingView's free ticker-tape widget: a moving ribbon, click-through to the chart. */
 const TV_SYMBOLS = [
@@ -43,15 +44,18 @@ function tickerTape() {
 }
 
 /** Overview — the operator's landing surface: ribbon, snapshot, today's signal. */
+const usd = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export async function overview(ctx) {
-  let profile = null; let usage = null; let wallet = null;
+  let profile = null; let wallet = null; let desk = null;
   try {
-    [profile, usage, wallet] = await Promise.all([
-      api.profile.get(), api.usage.today(), api.wallet.get(),
-    ]);
+    [profile, wallet] = await Promise.all([api.profile.get(), api.wallet.get()]);
   } catch {
-    /* No session: the snapshot below states that instead of inventing rows. */
+    /* Nothing readable: the snapshot below says so instead of inventing rows. */
   }
+  /* The paper desk is the only account there is before login exists. It is
+     read straight from the local market service, so the numbers are real. */
+  desk = await market.paper().catch(() => null);
   const walletCents = (wallet && wallet.available_cents) || 0;
 
   const page = el('div', { class: 'page' });
@@ -59,23 +63,28 @@ export async function overview(ctx) {
   /* ---- welcome + account facts, one band ---- */
   page.append(el('section', { class: 'banner' },
     el('div', {},
-      el('h2', { text: 'Welcome to PipNex' }),
+      el('h2', { text: 'Welcome to Cairnline' }),
       el('p', { text: 'Your all-in-one AI trading intelligence platform.' }))));
 
-  /* ---- snapshot ---- */
-  page.append(usage ? card('Quick Performance Snapshot', { note: 'Today' },
+  /* ---- snapshot: the paper ledger, read from /api/paper ---- */
+  const acct = desk && desk.account;
+  page.append(acct ? card('Paper Desk Snapshot', { note: `${desk.mode} · marked from ${desk.mark_source || 'live bars'}` },
     el('div', { class: 'metrics' },
-      metric('AI Analyses Today', String(usage.analyses)),
-      metric('Signals Generated', String(usage.signals)),
-      metric('Charts Analyzed', String(usage.charts)),
-      metric('Preferred Strategy', usage.preferred_strategy || 'Not Selected', { small: true }),
-      metric('AI Confidence (Avg)', usage.avg_confidence === null ? '—' : `${usage.avg_confidence}%`),
-      metric('Auto-Trading', usage.auto_trading ? 'ON' : 'OFF', { small: true }),
-      metric('Copy Trading', usage.copy_trading, { small: true })),
+      metric('Equity', `$${usd(acct.equity)}`),
+      metric('Balance', `$${usd(acct.balance)}`),
+      metric('Open P&L', `${acct.open_pnl < 0 ? '−' : ''}$${usd(Math.abs(acct.open_pnl))}`,
+        { accent: acct.open_pnl < 0 }),
+      metric('Realised Today', `$${usd(acct.day ? acct.day.realized : acct.realized_today)}`),
+      metric('Open Positions', String((acct.positions || []).length)),
+      metric('Orders Today', String(acct.day ? acct.day.orders : 0)),
+      metric('Kill Switch', acct.kill_switch && acct.kill_switch.engaged ? 'ENGAGED' : 'clear', { small: true })),
     el('div', { class: 'snapshot__cta' },
-      el('button', { class: 'btn btn--primary', onclick: () => { location.hash = '#/chart'; } }, 'Start AI Trading')))
-    : card('Quick Performance Snapshot', { note: 'nothing to read' },
-      notConnected('Today’s analyses, signals and balance')));
+      el('button', { class: 'btn btn--primary', onclick: () => { location.hash = '#/paper'; } }, 'Open Paper Desk')))
+    : card('Paper Desk Snapshot', { note: 'desk not running' },
+      el('div', { class: 'empty' },
+        el('h3', { text: 'Local desk service is not answering' }),
+        el('p', { text: 'Start it with python3 server/market_service.py — the desk then reports its own paper ledger here.' }),
+        el('p', { class: 'card__note', text: 'No balance is shown until the service returns one.' }))));
 
 
   /* ---- Signal of the Day: entry, exit, confidence. Nothing else. ---- */
@@ -211,19 +220,22 @@ export async function overview(ctx) {
 
   /* ---- referral program ---- */
   const limit = ctx.permissions.dailyUploadLimit;
-  const refLink = profile ? `https://pipnex-ai.com/auth?ref=${profile.account_id}` : null;
-  page.append(profile ? card('Referral Program', { note: 'earn when your referrals subscribe' },
+  const refLink = hasSession() ? referralUrl('/auth', profile.account_id) : null;
+  page.append(hasSession() ? card('Referral Program', { note: 'earn when your referrals subscribe' },
     el('div', { class: 'grid grid--2', style: 'align-items:start' },
       el('div', {},
         el('dl', { class: 'kv' },
           el('dt', { text: 'Your account ID' }), el('dd', { text: profile.account_id }),
           el('dt', { text: 'Referral link' }),
-          el('dd', {}, el('code', { style: 'font-size:11px', text: refLink })))),
+          el('dd', {}, el('code', { style: 'font-size:11px', text: refLink || 'not configured — see js/config.js' })))),
       el('div', { class: 'refstats' },
         el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Balance' }), el('div', { class: 'metric__v metric__v--sm', text: fmt.money(walletCents) })),
         el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Withdraw min' }), el('div', { class: 'metric__v metric__v--sm', text: '$75.00' })))),
     el('p', { class: 'card__note', style: 'margin-top:14px', text: 'Commission: $5 Pro · $10 Ultimate · $36 Platinum, paid when a referral subscribes.' }))
-    : card('Referral Program', { note: 'nothing to read' }, notConnected('Your account ID and referral link')));
+    : card('Referral Program', { note: 'needs an account' },
+      el('div', { class: 'empty' },
+        el('h3', { text: 'Referrals need an account' }),
+        el('p', { text: 'A referral link is issued per account. Accounts open in a later build; meanwhile the desk runs on a local paper ledger.' }))));
 
   /* ---- tools + account status ---- */
   page.append(
@@ -238,6 +250,12 @@ export async function overview(ctx) {
         el('a', { class: 'tool', href: '#/chart' },
           el('b', { text: 'Position Size Calculator' }),
           el('small', { text: 'Size a trade from the live ATR stop' })),
+        el('a', { class: 'tool', href: '#/options-flow' },
+          el('b', { text: 'Options Flow' }),
+          el('small', { text: 'Live prints, gamma exposure and max pain from LSE' })),
+        el('a', { class: 'tool', href: '#/paper' },
+          el('b', { text: 'Paper Desk' }),
+          el('small', { text: 'Deploy a validated strategy with server-side rails and a kill switch' })),
         el('a', { class: 'tool', href: '#/upload' },
           el('b', { text: 'Top-down Analysis' }),
           el('small', { text: 'Multi-timeframe read across attached charts' })),

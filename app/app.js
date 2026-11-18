@@ -1,4 +1,4 @@
-/* Pipnex AI — interactions (no dependencies) */
+/* Cairnline AI — interactions (no dependencies) */
 (function () {
   "use strict";
 

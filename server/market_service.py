@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PipNex market data service.
+Cairnline market data service.
 
 One local process that serves real market data and real indicator values to the
 static dashboard. The browser cannot call Yahoo directly (CORS) and PineTS needs
@@ -14,12 +14,14 @@ and stale so the UI can be honest instead of pretending.
 """
 from __future__ import annotations
 
+import gzip
 import json
 import os
 import subprocess
 import sys
 import threading
 import time
+import urllib.request
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -29,10 +31,16 @@ from urllib.parse import parse_qs, urlparse
 ROOT = Path(__file__).resolve().parent
 CACHE_DIR = ROOT / "cache"
 CACHE_DIR.mkdir(exist_ok=True)
+
+# Ceiling on a POST body, checked before any read: without it a caller could
+# make the service buffer an arbitrary amount of memory.
+MAX_BODY = 1 << 20
 PINETS_RUNNER = ROOT / "pinets_run.mjs"
 CONFIG_PATH = ROOT / "config.json"
+ENV_PATH = ROOT / ".env"          # secrets: gitignored, owner read/write only
 
-TTL = {"quotes": 30, "candles": 60, "indicators": 60, "public_record": 6 * 3600}
+TTL = {"quotes": 30, "candles": 60, "indicators": 60, "public_record": 6 * 3600,
+       "public_raw": 6 * 3600, "public_raw_patents": 24 * 3600}
 
 # Yahoo symbol aliases: the dashboard speaks broker-style pair names.
 SYMBOL_MAP = {
@@ -88,9 +96,43 @@ def save_config(cfg: dict) -> None:
         pass
 
 
+def env_file() -> dict:
+    """KEY=value pairs from server/.env (no dependency on python-dotenv)."""
+    out = {}
+    try:
+        for line in ENV_PATH.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            out[k.strip()] = v.strip().strip('"').strip("'").strip()
+    except OSError:
+        return {}
+    return out
+
+
 def lse_key() -> str | None:
-    """Env var wins (headless/CI), then the key saved from Settings."""
-    return os.environ.get("LSE_API_KEY") or load_config().get("lse_api_key") or None
+    """The key comes from the environment only: a real env var, or server/.env.
+
+    It is never read from config.json — that file is ordinary configuration and
+    safe to share, so no secret may live in it.
+    """
+    return os.environ.get("LSE_API_KEY") or env_file().get("LSE_API_KEY") or None
+
+
+def save_lse_key(key: str | None) -> None:
+    """Write (or clear) LSE_API_KEY in server/.env, owner-readable only."""
+    kept = []
+    if ENV_PATH.exists():
+        kept = [ln for ln in ENV_PATH.read_text().splitlines()
+                if not ln.strip().startswith("LSE_API_KEY=")]
+    if key:
+        kept.append(f"LSE_API_KEY={key}")
+    ENV_PATH.write_text("\n".join(kept).rstrip() + "\n")
+    try:
+        ENV_PATH.chmod(0o600)
+    except OSError:
+        pass
 
 
 def lse_client():
@@ -114,7 +156,8 @@ def lse_status() -> dict:
     if not key:
         return {"configured": False}
     hint = f"{key[:9]}…{key[-4:]}" if len(key) > 16 else "configured"
-    out = {"configured": True, "key_hint": hint, "source": "env" if os.environ.get("LSE_API_KEY") else "settings"}
+    out = {"configured": True, "key_hint": hint,
+           "source": "env" if os.environ.get("LSE_API_KEY") else "env-file"}
     try:
         client = lse_client()
         usage = client.usage()
@@ -258,6 +301,29 @@ def fetch_lse_candles(symbol: str, interval: str, period: str):
     if last_exc is not None:
         print(f"[lse] candles {symbol} {interval}: {last_exc}", file=sys.stderr)
     return None
+
+
+def aggregate_bars(bars: list[dict], factor: int) -> list[dict]:
+    """Roll `factor` consecutive bars into one (4h, which yfinance cannot serve)."""
+    out = []
+    for i in range(0, len(bars), factor):
+        chunk = bars[i:i + factor]
+        if len(chunk) < factor:
+            break               # never emit a partial bucket as a full bar
+        out.append({
+            "openTime": chunk[0]["openTime"],
+            "open": chunk[0]["open"],
+            "high": max(b["high"] for b in chunk),
+            "low": min(b["low"] for b in chunk),
+            "close": chunk[-1]["close"],
+            "volume": sum(b.get("volume") or 0 for b in chunk),
+        })
+    return out
+
+
+def bars_for_analysis(symbol: str, interval: str, period: str) -> list[dict]:
+    """Bars for the PineTS rail: the same chain the chart is served from."""
+    return live_bars(symbol, interval, period)[0] or []
 
 
 def fetch_lse_quotes(symbols: list[str]) -> dict | None:
@@ -463,30 +529,70 @@ def run_pinets(candles: list[dict], preset: str) -> dict:
 DATA_ROOT = "https://raw.githubusercontent.com/LuxAlgo/market-trackers-data/main"
 
 
-def fetch_public_record(dataset: str, ticker: str | None, limit: int) -> dict:
-    import urllib.request
+PUBLIC_DATASETS = {
+    "congress":      {"path": "congress/trades/latest.json", "date": "transactedAt"},
+    "insider":       {"path": "insider/transactions/latest.json", "date": "transactedAt"},
+    "thirteenf":     {"path": "thirteenf/holdings/latest.json", "date": "filedAt"},
+    "contracts":     {"path": "contracts/awards/latest.json", "date": "actionDate"},
+    "lobbying":      {"path": "lobbying/filings/latest.json", "date": "filingYear"},
+    "short-volume":  {"path": "short-volume/daily/latest.json", "date": "date"},
+    # Patents publish yearly snapshots, not a daily latest.json: the newest one is
+    # 377,953 grants (17 MB gzipped), so we keep only the ticker-mapped rows — the
+    # ones a trader can actually act on — and sort them newest first.
+    "patents":       {"path": "patents/grants/snapshot-2025.json.gz", "gz": True,
+                      "date": "grantDate", "tickers_only": True},
+    "fed":           {"path": "fed/communications/latest.json", "date": "date"},
+}
 
-    paths = {
-        "insider": "insider/transactions/latest.json",
-        "short-volume": "short-volume/daily/latest.json",
-        "congress": "congress/trades/latest.json",
-        "fed": "fed/communications/latest.json",
-    }
-    rel = paths.get(dataset)
-    if not rel:
+
+def _row_tickers(row: dict) -> list[str]:
+    """Ticker symbols on a public-record row, whether flat or nested in an entity."""
+    found = []
+    if row.get("ticker"):
+        found.append(str(row["ticker"]).upper())
+    for key in ("assignee", "client", "recipient", "member"):
+        ent = row.get(key)
+        if isinstance(ent, dict):
+            found.extend(str(t).upper() for t in (ent.get("tickers") or []))
+    return found
+
+
+def _public_rows(dataset: str, spec: dict) -> list[dict]:
+    """Raw rows for one dataset, cached on disk so a ticker change is not a refetch."""
+    gz = bool(spec.get("gz"))
+    hit = cache_get(f"public_raw_{dataset}", TTL["public_raw_patents" if gz else "public_raw"])
+    if hit:
+        return hit[0]
+    with urllib.request.urlopen(f"{DATA_ROOT}/{spec['path']}", timeout=180) as resp:  # noqa: S310 - fixed host
+        raw = resp.read()
+    if gz:
+        raw = gzip.decompress(raw)
+    rows = json.loads(raw)
+    if spec.get("tickers_only"):
+        rows = [r for r in rows if _row_tickers(r)]
+    rows.sort(key=lambda r: str(r.get(spec["date"]) or ""), reverse=True)
+    cache_put(f"public_raw_{dataset}", rows)
+    return rows
+
+
+def fetch_public_record(dataset: str, ticker: str | None, limit: int) -> dict:
+    spec = PUBLIC_DATASETS.get(dataset)
+    if spec is None:
         raise KeyError(dataset)
-    with urllib.request.urlopen(f"{DATA_ROOT}/{rel}", timeout=45) as resp:  # noqa: S310 - fixed host
-        rows = json.loads(resp.read().decode())
+    rows = _public_rows(dataset, spec)
     if ticker:
         t = ticker.upper()
-        rows = [r for r in rows if str(r.get("ticker", "")).upper() == t]
+        rows = [r for r in rows if t in _row_tickers(r)]
     return {
         "dataset": dataset,
         "source": "LuxAlgo market-trackers-data (CC0)",
         "rows": rows[:limit],
         "total": len(rows),
+        "available": bool(rows),
+        "note": None if rows else (
+            f"{dataset} has no rows matched in the current dump." if ticker else
+            f"{dataset} has no rows in the current dump."),
     }
-
 
 
 def _basket_one(sym: str, interval: str) -> dict:
@@ -511,28 +617,137 @@ def _basket_one(sym: str, interval: str) -> dict:
         return {"symbol": sym, "error": str(exc)[:120]}
 
 
+# ------------------------------------------------------- live quote/bar pair
+# One place that answers "a quote right now" and "bars right now" for the paper
+# desk, using the same provider order as the public routes.
+
+def live_quotes(symbols: list[str]):
+    quotes = fetch_lse_quotes(symbols)
+    if quotes:
+        missing = [s for s in symbols if s not in quotes]
+        if missing:
+            try:
+                quotes.update(fetch_quotes(missing))
+            except Exception:  # noqa: BLE001 - partial is fine
+                pass
+        return quotes, "lse-data"
+    return fetch_quotes(symbols), "yfinance"
+
+
+def live_bars(symbol: str, interval: str, period: str):
+    bars = fetch_lse_candles(symbol, interval, period)
+    if bars:
+        return bars, "lse-data"
+    if interval == "4h":
+        bars = aggregate_bars(fetch_candles(symbol, "1h", "3mo"), 4)
+        if bars:
+            return bars, "yfinance"
+    bars = fetch_candles(symbol, interval, period)
+    return bars, ("yfinance" if bars else None)
+
+
+def paper_desk():
+    """Import the paper engine and give it the live providers once per process."""
+    import paper_trader
+    if not paper_trader.bound():
+        paper_trader.bind(
+            quotes=lambda syms: live_quotes([str(s).upper() for s in syms])[0],
+            bars=lambda sym, interval, period: live_bars(sym, interval, period)[0],
+        )
+    return paper_trader
+
+
 # ------------------------------------------------------------------- handler
+# The API is bound to loopback and the dashboard is served from another port, so
+# a grant is needed for a loopback Origin, and for a dashboard served over http
+# on any other host it points the service at (`http://<app host>:8788`). A page
+# on any other site gets no grant, and its writes are refused outright — that is
+# what stops a random tab from posting to the paper desk. The page's own origin
+# is what decides: a cross-site POST always carries the attacker's Origin, so it
+# never matches the host the request was addressed to.
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def origin_host(value: str):
+    """Host of an Origin header, lowercased; None when absent or unparsable."""
+    if not value:
+        return None
+    try:
+        return (urlparse(value).hostname or "").lower() or None
+    except ValueError:
+        return None
+
+
+def header_host(value: str):
+    """Host of a bare `host[:port]` authority, lowercased, without its port.
+
+    A Host header carries no scheme, and urlparse reads `mybox.local:8788` as the
+    scheme `mybox.local`, so it has to be parsed as an authority instead.
+    """
+    if not value:
+        return None
+    try:
+        return (urlparse(f"//{value}").hostname or "").lower() or None
+    except ValueError:
+        return None
+
+
 class Handler(BaseHTTPRequestHandler):
-    server_version = "PipNexMarket/1.0"
+    server_version = "CairnlineMarket/1.0"
 
     def log_message(self, fmt, *args):  # quieter log
         sys.stderr.write("[%s] %s\n" % (time.strftime("%H:%M:%S"), fmt % args))
 
+    def _request_host(self):
+        """Host of this request's own Host header, lowercased; None if absent."""
+        return header_host(self.headers.get("Host") or "")
+
+    def _allowed_origin(self):
+        """The Origin to echo back, or None when it is not this page's own site."""
+        origin = self.headers.get("Origin") or ""
+        host = origin_host(origin)
+        if host is None:
+            return None
+        return origin if host in LOOPBACK_HOSTS or host == self._request_host() else None
+
+    def _foreign_write(self) -> bool:
+        """True for a write carrying an Origin that is not this host.
+
+        Requests with no Origin at all (curl, local scripts) are allowed: a
+        browser always sends Origin on a cross-site POST, so CSRF is covered
+        without a token or any config.
+        """
+        origin = self.headers.get("Origin") or ""
+        return bool(origin) and self._allowed_origin() is None
+
     def _send(self, payload, status=200):
         body = json.dumps(payload).encode()
+        origin = self._allowed_origin()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self):  # noqa: N802
+        origin = self.headers.get("Origin") or ""
+        allowed = self._allowed_origin()
+        if origin and not allowed:
+            self.send_response(403)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "*")
+        if allowed:
+            self.send_header("Access-Control-Allow-Origin", allowed)
+            self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS")
+        self.send_header("Content-Length", "0")
         self.end_headers()
 
     def _body(self) -> dict:
@@ -542,8 +757,110 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001
             return {}
 
+    def _drain_body(self):
+        """Discard up to MAX_BODY bytes so a refused client can still read the reply.
+
+        Closing while the caller is mid-write loses the 413 to a broken pipe.
+        """
+        try:
+            remaining = min(int(self.headers.get("Content-Length") or 0), MAX_BODY)
+        except (TypeError, ValueError):
+            return
+        while remaining > 0:
+            chunk = self.rfile.read(min(remaining, 65536))
+            if not chunk:
+                return
+            remaining -= len(chunk)
+
+    def _body_too_large(self) -> bool:
+        try:
+            size = int(self.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            return True
+        return not 0 <= size <= MAX_BODY
+
     def do_POST(self):  # noqa: N802
+        if self._foreign_write():
+            return self._send({"error": "cross-origin writes are refused"}, 403)
+        if self._body_too_large():
+            self._drain_body()
+            return self._send({"error": "request body too large", "limit": MAX_BODY}, 413)
         url = urlparse(self.path)
+
+        # ---- Paper desk: server-side rails, paper fills, no broker ----
+        if url.path.startswith("/api/paper/"):
+            try:
+                desk = paper_desk()
+                body = self._body()
+                if url.path == "/api/paper/order":
+                    return self._send(desk.submit(body))
+                if url.path == "/api/paper/close":
+                    return self._send(desk.close(str(body.get("id") or ""),
+                                                 reason=body.get("reason")))
+                if url.path == "/api/paper/kill":
+                    return self._send(desk.kill(bool(body.get("engaged")),
+                                                reason=body.get("reason")))
+                if url.path == "/api/paper/rails":
+                    return self._send(desk.set_rails(body.get("rails") or body))
+                if url.path == "/api/paper/deploy":
+                    return self._send(desk.deploy(body))
+                if url.path == "/api/paper/cycle":
+                    return self._send(desk.cycle(body.get("id")))
+                return self._send({"error": "unknown paper route", "path": url.path}, 404)
+            except ValueError as exc:
+                return self._send({"error": str(exc)[:300]}, 400)
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": type(exc).__name__, "message": str(exc)[:400]}, 500)
+
+        # Edge Stats: one preset, one instrument, answered by the engine in edge_stats.py.
+        if url.path == "/api/edge-stats/run":
+            body = self._body()
+            symbol = str(body.get("symbol") or "EURUSD").upper()
+            interval = str(body.get("interval") or "1h")
+            period = str(body.get("range") or "1y")
+            preset_id = str(body.get("presetId") or "")
+            params = body.get("params") or {}
+            try:
+                import edge_stats as es
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": f"edge stats engine unavailable: {exc}"}, 500)
+            preset = next((p for p in es.load_presets() if p["id"] == preset_id), None)
+            if preset is None:
+                return self._send({"error": f"unknown preset {preset_id!r}"}, 400)
+            bars, source = live_bars(symbol, interval, period)
+            if not bars:
+                return self._send({"error": f"no bars for {symbol} {interval} {period}"}, 400)
+            try:
+                result = es.run_preset(preset, params, bars, symbol, interval, period)
+            except getattr(es, "DslError", ValueError) as exc:
+                return self._send({"error": str(exc), "preset": preset_id}, 400)
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": type(exc).__name__, "message": str(exc)[:300]}, 500)
+            result.update({"source": source, "stale": False})
+            return self._send(result)
+
+        # Backtest Studio: signals on closed bars, fills on the next open, costs both sides.
+        if url.path == "/api/backtest":
+            body = self._body()
+            symbol = str(body.get("symbol") or "EURUSD").upper()
+            interval = str(body.get("interval") or "1h")
+            period = str(body.get("range") or "1y")
+            try:
+                import backtest as bt
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": f"backtest engine unavailable: {exc}"}, 500)
+            bars, source = live_bars(symbol, interval, period)
+            if not bars:
+                return self._send({"error": f"no bars for {symbol} {interval} {period}"}, 400)
+            try:
+                result = bt.run(bars, body)
+            except ValueError as exc:
+                return self._send({"error": str(exc)}, 400)
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": type(exc).__name__, "message": str(exc)[:300]}, 500)
+            result.update({"symbol": symbol, "interval": interval, "range": period,
+                           "source": source, "stale": False})
+            return self._send(result)
 
         if url.path == "/api/trish/config":
             body = self._body()
@@ -564,6 +881,32 @@ class Handler(BaseHTTPRequestHandler):
             cfg["trish"] = cur
             save_config(cfg)
             return self._send({"saved": True, "trish": trish_config()})
+
+        # ---- Trish's engine controls ----
+        if url.path in ("/api/trish/engine", "/api/trish/memory", "/api/trish/pending"):
+            body = self._body()
+            try:
+                import trish_runtime
+                if url.path == "/api/trish/engine":
+                    action = str(body.get("action") or "")
+                    if action in ("start", "stop", "restart"):
+                        result = getattr(trish_runtime, action)()
+                    elif body.get("provider") or body.get("model") or body.get("base_url") or body.get("api_key"):
+                        result = trish_runtime.set_engine(body)
+                    elif "learning" in body or any(k.endswith("_approval") or k == "suggest_after_turn" for k in body):
+                        result = trish_runtime.set_learning(body)
+                    else:
+                        result = trish_runtime.state()
+                    return self._send(result)
+                if url.path == "/api/trish/memory":
+                    return self._send(trish_runtime.write_memory(str(body.get("name") or "MEMORY.md"),
+                                                                 str(body.get("text") or "")))
+                return self._send(trish_runtime.decide(str(body.get("id") or ""),
+                                                       str(body.get("action") or "")))
+            except ValueError as exc:
+                return self._send({"error": str(exc)[:300]}, 400)
+            except Exception as exc:  # noqa: BLE001
+                return self._send({"error": type(exc).__name__, "message": str(exc)[:400]}, 500)
 
         if url.path == "/api/trish/chat":
             body = self._body()
@@ -594,13 +937,13 @@ class Handler(BaseHTTPRequestHandler):
             usage = LSE(api_key=key).usage()
         except Exception as exc:  # noqa: BLE001
             return self._send({"error": str(exc)[:200], "saved": False}, 400)
-        cfg = load_config()
-        cfg["lse_api_key"] = key
-        save_config(cfg)
+        save_lse_key(key)
         _lse_state.update({"key": None, "client": None, "resolved": {}})
         return self._send({"saved": True, "lse": lse_status(), "plan": usage.get("plan")})
 
     def do_DELETE(self):  # noqa: N802
+        if self._foreign_write():
+            return self._send({"error": "cross-origin writes are refused"}, 403)
         url = urlparse(self.path)
         if url.path == "/api/trish/config":
             cfg = load_config()
@@ -609,9 +952,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send({"saved": True, "trish": trish_config()})
         if url.path != "/api/config/lse":
             return self._send({"error": "not found"}, 404)
-        cfg = load_config()
-        cfg.pop("lse_api_key", None)
-        save_config(cfg)
+        save_lse_key(None)
         _lse_state.update({"key": None, "client": None, "resolved": {}})
         return self._send({"saved": True, "lse": lse_status()})
 
@@ -630,6 +971,9 @@ class Handler(BaseHTTPRequestHandler):
                         "lse_plan": st.get("plan"),
                         "yfinance": _yfinance_ok(),
                         "pinets": PINETS_RUNNER.exists(),
+                        "backtest": (ROOT / "backtest.py").exists(),
+                        "edge_stats": (ROOT / "edge_stats.py").exists(),
+                        "paper": (ROOT / "paper_trader.py").exists(),
                         "public_record": "LuxAlgo market-trackers-data (CC0)",
                     },
                     "order": ["lse-data", "yfinance", "cache"],
@@ -675,6 +1019,27 @@ class Handler(BaseHTTPRequestHandler):
 
             if url.path == "/api/trish/config":
                 return self._send({"trish": trish_config()})
+
+            # ---- Trish's engine (project-owned Hermes checkout) ----
+            if url.path == "/api/trish/engine":
+                import trish_runtime
+                return self._send(trish_runtime.state())
+
+            if url.path == "/api/trish/memory":
+                import trish_runtime
+                return self._send({"files": trish_runtime.memory_files()})
+
+            if url.path == "/api/trish/pending":
+                import trish_runtime
+                return self._send({"items": trish_runtime.pending()})
+
+            if url.path == "/api/trish/skills":
+                import trish_runtime
+                return self._send({"skills": trish_runtime.skills_catalogue()})
+
+            if url.path == "/api/trish/journey":
+                import trish_runtime
+                return self._send({"items": trish_runtime.journey()})
 
             if url.path == "/api/config":
                 return self._send({"lse": lse_status(), "order": ["lse-data", "yfinance", "cache"]})
@@ -723,12 +1088,8 @@ class Handler(BaseHTTPRequestHandler):
                     payload = dict(hit[0]); payload["cached"] = True; payload["age_s"] = round(hit[2], 1)
                     return self._send(payload)
                 try:
-                    # Primary: LSE Data 3.0. Fallback: yfinance. Last resort: stale cache.
-                    bars = fetch_lse_candles(symbol, interval, period)
-                    source = "lse-data" if bars else None
-                    if not bars:
-                        bars = fetch_candles(symbol, interval, period)
-                        source = "yfinance"
+                    # One provider chain for every consumer: live_bars().
+                    bars, source = live_bars(symbol, interval, period)
                     if not bars:
                         raise RuntimeError(f"no bars for {symbol} {interval} {period}")
                     payload = {"source": source, "stale": False, "symbol": symbol,
@@ -754,7 +1115,7 @@ class Handler(BaseHTTPRequestHandler):
                     payload = dict(hit[0]); payload["cached"] = True; payload["age_s"] = round(hit[2], 1)
                     return self._send(payload)
                 try:
-                    bars = fetch_candles(symbol, interval, period)
+                    bars = bars_for_analysis(symbol, interval, period)
                     if not bars:
                         raise RuntimeError(f"no bars for {symbol}")
                     result = run_pinets(bars, preset)
@@ -771,6 +1132,91 @@ class Handler(BaseHTTPRequestHandler):
                         return self._send(payload)
                     raise
 
+            if url.path == "/api/options-flow":
+                q = parse_qs(url.query)
+                underlying = (q.get("underlying", ["SPY"])[0] or "SPY").upper()
+                window = q.get("window", ["7d"])[0] or "7d"
+                try:
+                    limit = max(50, min(5000, int(q.get("limit", ["1000"])[0])))
+                except ValueError:
+                    limit = 1000
+                min_premium = q.get("min_premium", [None])[0]
+                max_dte = q.get("max_dte", [None])[0]
+                if not lse_key():
+                    return self._send({
+                        "available": False,
+                        "engine": "cairnline-options-flow",
+                        "source": "lse-data",
+                        "reason": "LSE_API_KEY is not configured, so no options feed is reachable from this machine",
+                        "unavailable": [{"metric": "options chain", "reason": "no LSE key configured"}],
+                    }, 503)
+                try:
+                    import options_flow as options_engine
+                except Exception as exc:  # noqa: BLE001
+                    return self._send({"available": False, "engine": "cairnline-options-flow",
+                                       "reason": f"options engine unavailable: {exc}"}, 500)
+                try:
+                    payload = options_engine.build(lse_client(), underlying, window=window, limit=limit,
+                                                   min_premium=min_premium, max_dte=max_dte)
+                except Exception as exc:  # noqa: BLE001
+                    return self._send({"available": False, "engine": "cairnline-options-flow",
+                                       "source": "lse-data",
+                                       "reason": f"{type(exc).__name__}: {str(exc)[:200]}"}, 502)
+                # 200 even when the engine found nothing: the query succeeded, the
+                # answer is "no feed", and the payload carries the reason. A 5xx
+                # here would only make the browser log a network error for a state
+                # the page renders deliberately.
+                return self._send(payload)
+
+            if url.path == "/api/paper":
+                try:
+                    return self._send(paper_desk().snapshot())
+                except Exception as exc:  # noqa: BLE001
+                    return self._send({"mode": "paper", "error": f"paper desk unavailable: {exc}"}
+                                      , 500)
+
+            if url.path == "/api/edge-stats/presets":
+                try:
+                    import edge_stats as es
+                except Exception as exc:  # noqa: BLE001
+                    return self._send({"error": f"edge stats engine unavailable: {exc}"}, 500)
+                presets = es.load_presets()
+                return self._send({
+                    "engine": "cairnline-edge-stats",
+                    "catalog": "LuxAlgo edge-stats preset catalog (MIT), vendored in server/presets/",
+                    "preset_count": len(presets),
+                    "presets": [
+                        {
+                            "id": p["id"], "title": p["title"], "category": p.get("category"),
+                            "summary": p.get("summary"), "version": p.get("version"),
+                            "outcome": p["outcome"], "where": p.get("where"),
+                            "groupBy": p.get("groupBy"),
+                            "needs_intraday": p["id"] in es.NEEDS_INTRADAY,
+                            "params": p.get("params", []),
+                        }
+                        for p in presets
+                    ],
+                    "sessions": [
+                        {"key": k, "label": lbl, "utc": f"{a:02d}:00-{b:02d}:00"}
+                        for k, lbl, a, b in es.SESSIONS
+                    ],
+                    "gap_floor_pct": es.GAP_FLOOR_PCT,
+                })
+
+            if url.path == "/api/backtest/strategies":
+                try:
+                    import backtest as bt
+                except Exception as exc:  # noqa: BLE001
+                    return self._send({"error": f"backtest engine unavailable: {exc}"}, 500)
+                return self._send({
+                    "engine": "cairnline-backtest",
+                    "strategies": [
+                        {"id": k, "label": v["label"], "note": v["note"],
+                         "params": v["params"], "shared": v["shared"]}
+                        for k, v in bt.STRATEGIES.items()
+                    ],
+                })
+
             if url.path == "/api/public-record":
                 dataset = one("dataset", "insider")
                 limit = int(one("limit", "40"))
@@ -779,7 +1225,11 @@ class Handler(BaseHTTPRequestHandler):
                 hit = cache_get(key, TTL["public_record"])
                 if hit:
                     payload = dict(hit[0]); payload["age_s"] = round(hit[2], 1)
+                    payload.setdefault("available", bool(payload.get("rows")))
                     return self._send(payload)
+                if dataset not in PUBLIC_DATASETS:
+                    return self._send({"error": f"unknown dataset {dataset}",
+                                       "datasets": sorted(PUBLIC_DATASETS)}, 400)
                 payload = fetch_public_record(dataset, ticker, limit)
                 payload["fetched_at"] = datetime.now(timezone.utc).isoformat()
                 cache_put(key, payload)
@@ -826,7 +1276,7 @@ def main():
         print("warning: yfinance is not installed (pip install yfinance); only cached data will serve",
               file=sys.stderr)
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"PipNex market service on http://127.0.0.1:{port}", flush=True)
+    print(f"Cairnline market service on http://127.0.0.1:{port}", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

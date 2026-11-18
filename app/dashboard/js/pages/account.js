@@ -93,8 +93,10 @@ export async function wallet(ctx) {
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
-        el('h2', { class: 'page__title', text: 'Pipnex Wallet' }),
-        el('p', { class: 'page__sub', text: 'AI credits, deposits and withdrawals.' })),
+        el('h2', { class: 'page__title', text: 'Cairnline Wallet' }),
+        el('p', { class: 'page__sub', text: raw && raw.local
+          ? 'No wallet is connected before accounts exist: the desk trades a paper ledger, so every balance here is zero.'
+          : 'AI credits, deposits and withdrawals.' })),
       chip(w.is_frozen ? 'Frozen' : 'Active', w.is_frozen ? 'chip--danger' : 'chip--on')),
     el('div', { class: 'grid grid--4' },
       el('div', { class: 'stat' }, el('small', { text: 'Available' }), el('b', { text: fmt.money(w.available_cents) }), el('span', { text: 'ready to spend' })),
@@ -141,10 +143,11 @@ export async function settings(ctx) {
   const paintLiveState = () => {
     liveState.innerHTML = '';
     const info = sessionInfo();
+    const live = hasSession();
     liveState.append(
-      el('div', { class: 'fact' }, el('small', { text: 'STATUS' }), el('b', { class: hasSession() ? 'on' : 'off', text: hasSession() ? 'CONNECTED' : 'NOT CONNECTED' })),
-      el('div', { class: 'fact' }, el('small', { text: 'ACCOUNT' }), el('b', { text: info ? (info.email || 'signed in') : '—' })),
-      el('div', { class: 'fact' }, el('small', { text: 'USER ID' }), el('b', { text: info && info.userId ? info.userId.slice(0, 8) : '—' })));
+      el('div', { class: 'fact' }, el('small', { text: 'STATUS' }), el('b', { class: live ? 'on' : '', text: live ? 'CONNECTED' : 'LOCAL DESK' })),
+      el('div', { class: 'fact' }, el('small', { text: 'ACCOUNT' }), el('b', { text: live ? (info && (info.email || 'signed in')) || 'signed in' : 'paper ledger' })),
+      el('div', { class: 'fact' }, el('small', { text: 'USER ID' }), el('b', { text: live && info && info.userId ? info.userId.slice(0, 8) : '—' })));
   };
   paintLiveState();
   /* ---- Trish provider ---- */
@@ -355,7 +358,7 @@ export async function settings(ctx) {
     el('p', { class: 'form__note', style: 'margin-top:10px', text: `Endpoint: ${market.base}` }));
 
   const dataSource = card('Account connection', { note: 'read-only' },
-    el('p', { class: 'card__note', text: 'Every row on these pages comes from your own account in the Pipnex Supabase project through PostgREST — reads only, never writes. There is no demo data: without a session the pages say what is missing.' }),
+    el('p', { class: 'card__note', text: 'Every row on these pages comes from your own account in the Cairnline Supabase project through PostgREST — reads only, never writes. There is no demo data: without a session the pages say what is missing.' }),
     el('div', { style: 'margin-top:16px' },
       field('Session token', tokenInput),
       el('div', { style: 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap' },
@@ -385,13 +388,240 @@ export async function settings(ctx) {
   const prefs = await api.signals.preferences().catch(() => null);
   const deliveryCard = card('Signal delivery', {},
     prefs ? el('div', {},
-      switchRow('In-app alerts', 'Show signals inside PipNex', prefs.in_app, (v) => toast(`In-app alerts ${v ? 'on' : 'off'}`)),
+      switchRow('In-app alerts', 'Show signals inside Cairnline', prefs.in_app, (v) => toast(`In-app alerts ${v ? 'on' : 'off'}`)),
       switchRow('Browser push', 'Push notifications in this browser', prefs.push, (v) => toast(`Browser push ${v ? 'on' : 'off'}`)),
       switchRow('Email', 'Send a copy to your email', prefs.email, (v) => toast(`Email delivery ${v ? 'on' : 'off'}`)),
       el('div', { style: 'margin-top:16px' },
         el('label', { class: 'field' }, el('span', { text: 'Symbols' }),
           el('input', { value: prefs.symbols.join(', '), onchange: () => toast('Symbol watchlist saved') }))))
       : notConnected('Signal delivery preferences'));
+
+  /* ---- Trish engine: the project-owned Hermes runtime ---- */
+  const evoFacts = el('div', { class: 'factgrid', style: 'margin-top:12px' });
+  const evoWarn = el('p', { class: 'form__note is-bad', style: 'display:none' });
+  const evoNote = el('p', { class: 'form__note' });
+  const evoProvider = el('select', {}, ['custom', 'openai', 'anthropic', 'openrouter', 'llamacpp', 'ollama']
+    .map((v) => el('option', { value: v, text: v })));
+  const evoModel = el('input', { type: 'text', placeholder: 'hermes-agent / model id' });
+  const evoBase = el('input', { type: 'text', placeholder: 'http://127.0.0.1:11434/v1' });
+  const evoCtx = el('input', { type: 'number', placeholder: 'e.g. 200000', min: '1000' });
+  const evoKey = el('input', { type: 'password', placeholder: 'provider key', autocomplete: 'off' });
+  const learningBox = el('div', { style: 'margin-top:6px' });
+  const pendingBox = el('div', { style: 'margin-top:6px' });
+  const memoryBox = el('div', { style: 'margin-top:6px' });
+  const journeyBox = el('div', { style: 'margin-top:6px' });
+  const memEditors = {};
+
+  const pill = (label, value, on) => el('div', { class: 'fact' },
+    el('small', { text: label }),
+    el('b', { class: on === undefined ? '' : (on ? 'on' : 'off'), text: String(value) }));
+
+  const paintEvolution = (s) => {
+    if (!s) {
+      evoFacts.replaceChildren(pill('ENGINE', 'not installed', false));
+      return;
+    }
+    const g = s.gateway || {};
+    evoFacts.replaceChildren(
+      pill('ENGINE', s.installed ? `hermes ${s.revision || ''}`.trim() : 'not installed', s.installed),
+      pill('GATEWAY', g.up ? `running · pid ${g.pid}` : 'stopped', Boolean(g.up)),
+      pill('PROVIDER', (s.provider && s.provider.fake_model) ? 'DEV fake :8801'
+        : ((s.model && s.model.provider) || '—'), !(s.provider && s.provider.fake_model)),
+      pill('MODEL', s.model && s.model.model ? `${s.model.model}` : 'not set', Boolean(s.model && s.model.model)),
+      pill('SKILLS', `${s.skills.count} in catalogue`, s.skills.count > 0),
+      pill('MCP', s.mcp && s.mcp.registered ? `${s.mcp.server} · ${s.mcp.tools} tools` : 'not wired', Boolean(s.mcp && s.mcp.registered)),
+      pill('PENDING', String(s.pending), s.pending === 0),
+      pill('TOOLSETS', `${s.toolsets_enabled} on · ${s.deferred_toolsets} deferred`, s.toolsets_enabled > 0),
+      pill('PROFILE', s.profile, true));
+    const pv = s.provider || {};
+    if (pv.warning) {
+      evoWarn.textContent = pv.warning;
+      evoWarn.style.display = 'block';
+    } else {
+      evoWarn.textContent = '';
+      evoWarn.style.display = 'none';
+    }
+    if (document.activeElement !== evoModel && s.model) evoModel.value = s.model.model || '';
+    if (document.activeElement !== evoBase && s.model) evoBase.value = s.model.base_url || '';
+    if (document.activeElement !== evoProvider && s.model && s.model.provider) evoProvider.value = s.model.provider;
+
+    const toggles = [
+      ['skills_write_approval', 'Skills: every write waits for you', 'A patch can change how she sizes a trade, so it never lands unread.'],
+      ['memory_write_approval', 'Memory: every write waits for you', 'MEMORY.md and USER.md stay yours to approve.'],
+      ['suggest_after_turn', 'Propose skills after a turn', 'The review pass runs behind the reply; it can only propose.'],
+    ];
+    learningBox.replaceChildren(...toggles.map(([key, label, hint]) => el('label', {
+      class: 'switch',
+      style: 'display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer',
+    },
+      el('input', {
+        type: 'checkbox', checked: Boolean(s.learning && s.learning[key]),
+        onchange: async (e) => {
+          try {
+            const payload = {};
+            payload[key] = e.target.checked;
+            const res = await market.trishEngineAction(payload);
+            paintEvolution(res);
+            evoNote.textContent = 'Learning setting saved. The engine restarted to apply it.';
+            evoNote.className = 'form__note is-ok';
+          } catch (err) {
+            evoNote.textContent = `Not saved: ${String(err.message || err).slice(0, 160)}`;
+            evoNote.className = 'form__note is-bad';
+          }
+        },
+      }),
+      el('span', {}, el('b', { text: label }), el('small', { class: 'card__note', style: 'display:block', text: hint })))));
+  };
+
+  const pendingRow = (item) => el('div', { style: 'border-top:1px solid var(--line);padding:10px 0' },
+    el('div', { style: 'display:flex;gap:8px;align-items:center;justify-content:space-between' },
+      el('div', {},
+        el('b', { text: `${item.kind}: ${item.title}` }),
+        el('small', { class: 'card__note', style: 'display:block', text: item.created || '' })),
+      el('div', { style: 'display:flex;gap:8px' },
+        el('button', { class: 'btn btn--primary btn--sm', onclick: () => decide(item, 'approve') }, 'Approve'),
+        el('button', { class: 'btn btn--outline btn--sm', onclick: () => decide(item, 'reject') }, 'Reject'))),
+    el('pre', { class: 'card__note',
+      style: 'white-space:pre-wrap;max-height:140px;overflow:auto;margin:8px 0 0',
+      text: (item.diff || '(no diff recorded)').slice(0, 1200) }));
+
+  const decide = async (item, action) => {
+    try {
+      const res = await market.trishDecide(item.id, action);
+      evoNote.textContent = action === 'approve'
+        ? (res.ok ? 'Approved and applied inside the engine.' : `Engine refused: ${res.error || ''}`)
+        : 'Rejected and archived.';
+      evoNote.className = res.ok ? 'form__note is-ok' : 'form__note is-bad';
+      await paintPending();
+      paintEvolution(await market.trishEngine());
+    } catch (err) {
+      evoNote.textContent = String(err.message || err).slice(0, 160);
+      evoNote.className = 'form__note is-bad';
+    }
+  };
+
+  const paintPending = async () => {
+    try {
+      const { items } = await market.trishPending();
+      if (!items || !items.length) {
+        pendingBox.replaceChildren(el('p', { class: 'card__note',
+          text: 'Nothing waiting. She has not proposed a skill or memory change since the last review.' }));
+        return;
+      }
+      pendingBox.replaceChildren(...items.slice(0, 8).map(pendingRow));
+    } catch {
+      pendingBox.replaceChildren(el('p', { class: 'card__note', text: 'The market service did not answer.' }));
+    }
+  };
+
+  const paintMemory = async () => {
+    try {
+      const { files } = await market.trishMemory();
+      memoryBox.replaceChildren(...(files || []).map((f) => {
+        memEditors[f.name] = memEditors[f.name] || el('textarea', {
+          rows: '4',
+          placeholder: f.name === 'USER.md' ? 'Operator preferences: flat-by time, risk %, preferred timeframe…' : 'Desk facts: symbol basket, plan tier, timezone…',
+          style: 'width:100%;font-family:var(--mono);font-size:12px',
+        });
+        if (document.activeElement !== memEditors[f.name]) memEditors[f.name].value = f.text || '';
+        return el('div', { style: 'margin-bottom:14px' },
+          el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:6px' },
+            el('b', { text: f.name }),
+            el('small', { class: 'card__note', text: f.updated ? `updated ${f.updated}` : 'empty' })),
+          memEditors[f.name],
+          el('button', { class: 'btn btn--outline btn--sm', style: 'margin-top:6px', onclick: async () => {
+            try {
+              await market.trishSaveMemory(f.name, memEditors[f.name].value);
+              evoNote.textContent = `${f.name} saved.`;
+              evoNote.className = 'form__note is-ok';
+              await paintMemory();
+            } catch (err) { evoNote.textContent = String(err.message || err).slice(0, 160); evoNote.className = 'form__note is-bad'; }
+          } }, 'Save ' + f.name));
+      }));
+    } catch {
+      memoryBox.replaceChildren(el('p', { class: 'card__note', text: 'The market service did not answer.' }));
+    }
+  };
+
+  const paintJourney = async () => {
+    try {
+      const { items } = await market.trishJourney();
+      journeyBox.replaceChildren(items && items.length
+        ? el('div', {}, ...items.slice(0, 10).map((it) => el('div', { style: 'border-top:1px solid var(--line);padding:8px 0' },
+          el('b', { text: `${it.kind}: ${it.title || it.name || it.id || ''}` }),
+          el('small', { class: 'card__note', style: 'display:block', text: `${it.decision || 'saved'} · ${it.at || ''}` }))))
+        : el('p', { class: 'card__note', text: 'Nothing learned yet. Approvals and memory edits appear here with their date.' }));
+    } catch {
+      journeyBox.replaceChildren(el('p', { class: 'card__note', text: 'The market service did not answer.' }));
+    }
+  };
+
+  const evoAction = async (action) => {
+    evoNote.textContent = `${action}…`;
+    evoNote.className = 'form__note';
+    try {
+      const res = await market.trishEngineAction({ action });
+      paintEvolution(res);
+      evoNote.textContent = res.error ? res.error : `Engine ${action}: ok.`;
+      evoNote.className = res.error ? 'form__note is-bad' : 'form__note is-ok';
+    } catch (err) {
+      evoNote.textContent = `Engine ${action} failed: ${String(err.message || err).slice(0, 160)}`;
+      evoNote.className = 'form__note is-bad';
+    }
+  };
+
+  const saveEngine = async () => {
+    evoNote.textContent = 'Saving and restarting the engine…';
+    evoNote.className = 'form__note';
+    try {
+      const payload = { provider: evoProvider.value, model: evoModel.value.trim(), base_url: evoBase.value.trim() };
+      if (evoCtx.value) payload.context_length = evoCtx.value;
+      if (evoKey.value) payload.api_key = evoKey.value.trim();
+      const res = await market.trishEngineAction(payload);
+      evoKey.value = '';
+      paintEvolution(res);
+      evoNote.textContent = 'Engine provider saved. Model turns now run on it.';
+      evoNote.className = 'form__note is-ok';
+    } catch (err) {
+      evoNote.textContent = `Not saved: ${String(err.message || err).slice(0, 160)}`;
+      evoNote.className = 'form__note is-bad';
+    }
+  };
+
+  const evolutionCard = card('Engine', { note: 'project-owned Hermes' },
+    el('p', { class: 'card__note', text: 'Trish runs on a pinned checkout of Nous Research\'s Hermes Agent in vendor/hermes-agent, with its own venv and its own home (runtime/hermes) — not the Hermes installed for your personal agent. Its API is loopback-only and key-gated.' }),
+    evoFacts,
+    evoWarn,
+    el('div', { style: 'margin-top:14px;display:flex;gap:10px;flex-wrap:wrap' },
+      el('button', { class: 'btn btn--primary btn--sm', onclick: () => evoAction('start') }, 'Start engine'),
+      el('button', { class: 'btn btn--outline btn--sm', onclick: () => evoAction('stop') }, 'Stop'),
+      el('button', { class: 'btn btn--outline btn--sm', onclick: () => evoAction('restart') }, 'Restart')),
+    el('div', { class: 'form form--2', style: 'margin-top:16px' },
+      field('Provider', evoProvider),
+      field('Model', evoModel),
+      field('Base URL', evoBase),
+      field('Context length', evoCtx),
+      field('Provider key', evoKey)),
+    el('div', { style: 'margin-top:12px;display:flex;gap:10px;flex-wrap:wrap' },
+      el('button', { class: 'btn btn--primary btn--sm', onclick: saveEngine }, 'Save engine provider'),
+      el('button', { class: 'btn btn--outline btn--sm', onclick: () => evoAction('restart') }, 'Apply and restart')),
+    el('p', { class: 'card__note', style: 'margin-top:8px', text: 'The provider key is written to runtime/hermes/.env (mode 600) and never returned by any request. Leave it blank to keep the stored one.' }),
+    evoNote);
+
+  const learningCard = card('Learning & memory', { note: 'gated by you' },
+    el('p', { class: 'card__note', text: 'Hermes writes skills and memory from what happens in a session. Both gates are on: a proposal lands in the queue below and nothing changes until you approve it. Skills that encode a market claim are rejected on sight — Edge Stats is the only source of statistical truth here.' }),
+    learningBox,
+    el('div', { style: 'margin-top:4px' },
+      el('h4', { style: 'margin:14px 0 4px', text: 'Waiting for you' }), pendingBox),
+    el('div', { style: 'margin-top:18px' },
+      el('h4', { style: 'margin:0 0 8px', text: 'Memory' }), memoryBox),
+    el('div', { style: 'margin-top:18px' },
+      el('h4', { style: 'margin:0 0 8px', text: 'What she learned' }), journeyBox));
+
+  market.trishEngine().then(paintEvolution).catch(() => paintEvolution(null));
+  paintPending();
+  paintMemory();
+  paintJourney();
 
   const group = (title, ...cards) => el('section', { class: 'settings-group' },
     el('h2', { class: 'settings-group__title', text: title }),
@@ -440,7 +670,7 @@ export async function settings(ctx) {
           el('button', { class: 'btn btn--outline btn--sm', onclick: removeTrish }, 'Remove')),
         el('p', { class: 'card__note', style: 'margin-top:10px', text: 'The key is stored server-side in server/config.json (mode 600) and never returned by any request.' })),
       card('What she can do', {},
-        el('p', { class: 'card__note', text: 'Tools she can call, all backed by real Pipnex data:' }),
+        el('p', { class: 'card__note', text: 'Tools she can call, all backed by real Cairnline data:' }),
         el('div', { class: 'tools', style: 'margin-top:10px' },
           el('div', { class: 'tool' }, el('b', { text: 'get_quote' }), el('small', { text: 'Live price and session change' })),
           el('div', { class: 'tool' }, el('b', { text: 'get_indicators' }), el('small', { text: 'Pine EMA/RSI/ATR/MACD + bias' })),
@@ -448,7 +678,9 @@ export async function settings(ctx) {
           el('div', { class: 'tool' }, el('b', { text: 'get_cot' }), el('small', { text: 'CFTC positioning' })),
           el('div', { class: 'tool' }, el('b', { text: 'get_calendar' }), el('small', { text: 'Macro events' })),
           el('div', { class: 'tool' }, el('b', { text: 'position_size' }), el('small', { text: 'Size from equity and stop' })),
-          el('div', { class: 'tool' }, el('b', { text: 'risk_gate' }), el('small', { text: 'PASS or BLOCK, final' }))))),
+          el('div', { class: 'tool' }, el('b', { text: 'risk_gate' }), el('small', { text: 'PASS or BLOCK, final' })))),
+      evolutionCard,
+      learningCard),
 
     group('Signals & alerts',
       deliveryCard,
@@ -458,7 +690,9 @@ export async function settings(ctx) {
             switchRow('Promotions', 'Offers and partner campaigns', Boolean(profile.email_preferences.promotions), () => toast('Preference saved')),
             switchRow('Announcements', 'Product news', Boolean(profile.email_preferences.announcements), () => toast('Preference saved')),
             switchRow('System updates', 'Security and downtime notices', Boolean(profile.email_preferences.system_updates), () => toast('Preference saved')))
-          : notConnected('Your notifications'))),
+          : el('div', { class: 'empty' },
+            el('h3', { text: 'No email preferences yet' }),
+            el('p', { text: 'Email preferences are stored on an account row. The desk runs without one, so there is nothing here to set.' })))),
 
     group('Appearance',
       card('Interface', {},

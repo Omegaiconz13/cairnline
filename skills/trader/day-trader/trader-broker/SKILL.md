@@ -4,7 +4,7 @@ description: "Order Executor. Sends approved orders to your broker, paper tradin
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-broker
     upstream_commit: 3d0f4ef6986f

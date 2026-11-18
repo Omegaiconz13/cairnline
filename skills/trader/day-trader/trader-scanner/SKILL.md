@@ -4,7 +4,7 @@ description: "Chart Scanner. Scans thousands of charts for setups: opening-range
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-scanner
     upstream_commit: 3d0f4ef6986f

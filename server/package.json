@@ -1,8 +1,8 @@
 {
-  "name": "pipnex-market-service",
+  "name": "cairnline-market-service",
   "private": true,
   "type": "module",
-  "description": "Real market data + PineScript indicators for the Pipnex dashboard rebuild",
+  "description": "Real market data + PineScript indicators for the Cairnline dashboard rebuild",
   "dependencies": {
     "pinets": "^0.13.1"
   }

@@ -8,10 +8,13 @@ import { subscription, wallet, settings } from './pages/account.js';
 import { lens, referral, tutorials, support } from './pages/content.js';
 import { research } from './pages/research.js';
 import { propFirm, edgeStats } from './pages/tools.js';
+import { backtest } from './pages/backtest.js';
+import { optionsFlow } from './pages/options.js';
+import { paperDesk } from './pages/paper.js';
 import { eaMarketplace } from './pages/marketplace.js';
 
 const ROUTES = {
-  overview: { title: 'PipNex Dashboard', render: overview },
+  overview: { title: 'Cairnline Dashboard', render: overview },
   chart: { title: 'AI Trading', render: terminal },
   upload: { title: 'Upload Chart', render: upload },
   bots: { title: 'Manage Bots', render: bots },
@@ -21,12 +24,15 @@ const ROUTES = {
   subscription: { title: 'Subscription', render: subscription },
   wallet: { title: 'Wallet', render: wallet },
   settings: { title: 'Settings', render: settings },
-  lens: { title: 'Pipnex Trade Lens', render: lens },
+  lens: { title: 'Cairnline Lens', render: lens },
   referral: { title: 'Refer & Earn', render: referral },
   tutorials: { title: 'How to Use', render: tutorials },
   research: { title: 'Market Research', render: research },
   'prop-firm': { title: 'Prop Firm Simulator', render: propFirm },
   'edge-stats': { title: 'Edge Stats', render: edgeStats },
+  backtest: { title: 'Backtest Studio', render: backtest },
+  'options-flow': { title: 'Options Flow', render: optionsFlow },
+  paper: { title: 'Paper Desk', render: paperDesk },
   support: { title: 'Contact Support', render: support },
 };
 
@@ -69,13 +75,17 @@ export async function boot() {
   const stored = loadStoredSession();
   if (stored) sessionInfo();
 
-  // Everything below reads the signed-in account only. With no session the boot
-  // keeps the shell running and every page renders its own "not connected" state.
+  // A session reads its own plan and subscription. Without one the shell runs on
+  // the local desk profile: no plan is claimed, so permissions come back empty.
   try {
     ctx.profile = await api.profile.get();
-    const plans = await api.plans.list();
-    const sub = await api.subscription.get();
-    ctx.permissions = permissionsFor(sub && sub.plan_key, plans);
+    if (hasSession()) {
+      const plans = await api.plans.list();
+      const sub = await api.subscription.get();
+      ctx.permissions = permissionsFor(sub && sub.plan_key, plans);
+    } else {
+      ctx.permissions = permissionsFor(null, []);
+    }
   } catch {
     ctx.profile = null;
     ctx.permissions = permissionsFor(null, []);
@@ -85,10 +95,10 @@ export async function boot() {
     .split(/\s+/).map((s) => s[0]).join('').slice(0, 2).toUpperCase();
   document.getElementById('sideAvatar').textContent = initials;
   document.getElementById('topAvatar').textContent = initials;
-  document.getElementById('sideName').textContent = ctx.profile && ctx.profile.display_name ? ctx.profile.display_name : 'Not connected';
+  document.getElementById('sideName').textContent = ctx.profile && ctx.profile.display_name ? ctx.profile.display_name : 'Local desk';
   document.getElementById('sideAccount').textContent = ctx.profile && ctx.profile.account_id
-    ? `${ctx.profile.account_id} · ${ctx.permissions.planName}`
-    : 'Sign in to read your account';
+    ? `${ctx.profile.account_id} · ${hasSession() ? ctx.permissions.planName : 'paper ledger'}`
+    : 'paper ledger';
   document.getElementById('liveBadge').hidden = !ctx.profile;
 
   document.getElementById('bellDot').hidden = false;

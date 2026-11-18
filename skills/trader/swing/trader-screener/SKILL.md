@@ -4,7 +4,7 @@ description: "The Stock Screener. Checks a list of companies against the user's 
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-screener
     upstream_commit: 5189e79b9a48

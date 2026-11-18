@@ -4,7 +4,7 @@ description: "Order Executor. Places APPROVED orders through your brokerage conn
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-broker
     upstream_commit: 5189e79b9a48

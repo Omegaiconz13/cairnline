@@ -1,4 +1,4 @@
-import { el, card, chip, toast } from '../ui.js';
+import { el, card, chip, toast, table } from '../ui.js';
 import { market, px, pct } from '../market.js';
 
 /* ------------------------------------------------------------------ shared */
@@ -18,6 +18,9 @@ function wilson(hits, n, z = 1.96) {
 }
 
 const pctStr = (v) => `${(v * 100).toFixed(1)}%`;
+
+// Edge Stats prefers the shared table helper; the alias keeps the call sites short.
+const tableEl = table;
 
 /* --------------------------------------------------- prop firm simulator */
 
@@ -176,116 +179,253 @@ export async function propFirm(ctx) {
 
 /* --------------------------------------------------------- edge stats */
 
-/** P(outcome | conditions) over real bars, with sample size and Wilson CI. */
+const ES_SYMBOLS = [
+  ['EURUSD', 'EUR/USD'], ['GBPUSD', 'GBP/USD'], ['USDJPY', 'USD/JPY'],
+  ['XAUUSD', 'XAU/USD (gold)'], ['GBPJPY', 'GBP/JPY'], ['BTCUSD', 'BTC/USD'],
+];
+const ES_TIMEFRAMES = [['15m', '15m'], ['1h', '1h'], ['4h', '4h'], ['1d', 'daily']];
+const ES_RANGES = [['3mo', '3 months'], ['6mo', '6 months'], ['1y', '1 year'], ['2y', '2 years'], ['5y', '5 years']];
+
+/**
+ * Edge Stats — one preset from LuxAlgo's edge-stats catalog (MIT, vendored in
+ * server/presets/) answered by our own engine over our own bars.
+ *
+ * The page shows the point estimate next to its Wilson interval, the
+ * unconditional baseline for the same outcome, the half-split, the per-year
+ * counts and the per-session split. A rate without those is a guess.
+ */
 export async function edgeStats(ctx) {
   const page = el('div', { class: 'page' });
-  const out = el('div', {}, el('div', { class: 'empty' }, el('h3', { text: 'Reading bars…' })));
+  const out = el('div');
 
-  const symSel = el('select', {}, ['EURUSD', 'GBPUSD', 'USDJPY', 'XAUUSD', 'GBPJPY', 'BTCUSD']
-    .map((s) => el('option', { value: s, text: s })));
-  const condSel = el('select', {},
-    el('option', { value: 'gap', text: 'Gap fills the same day' }),
-    el('option', { value: 'monday', text: 'Monday closes green' }),
-    el('option', { value: 'outside', text: 'Outside day → next day up' }));
-  const rangeSel = el('select', {},
-    el('option', { value: '2y', text: '2 years' }),
-    el('option', { value: '5y', text: '5 years' }),
-    el('option', { value: '1y', text: '1 year' }));
-
-  const run = async () => {
-    out.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'Reading bars…' })));
-    let bars = [];
-    try {
-      const data = await market.candles(symSel.value, '1d', rangeSel.value);
-      bars = data.bars || [];
-    } catch (err) {
-      out.replaceChildren(card('No data', {},
+  let catalog = null;
+  try {
+    catalog = await market.edgeStatsPresets();
+  } catch {
+    catalog = null;
+  }
+  if (!catalog || !catalog.presets || !catalog.presets.length) {
+    page.append(
+      el('div', { class: 'page__head' }, el('div', {}, el('h2', { class: 'page__title', text: 'Edge Stats' }))),
+      card('Engine unavailable', {},
         el('div', { class: 'empty' },
-          el('h3', { text: 'Market service unreachable' }),
-          el('p', { text: 'Edge Stats needs real daily bars. Start the service and reload.' }))));
-      return;
-    }
-    if (bars.length < 30) {
-      out.replaceChildren(card('Not enough history', {},
-        el('p', { class: 'card__note', text: `Only ${bars.length} daily bars came back.` })));
-      return;
-    }
+          el('h3', { text: 'The market service is not answering' }),
+          el('p', { text: 'Start it with python3 server/market_service.py — the Edge Stats engine runs inside it.' }))));
+    return page;
+  }
 
-    // Build the condition/outcome pairs from real OHLC.
-    const samples = [];
-    for (let i = 1; i < bars.length; i += 1) {
-      const b = bars[i];
-      const p = bars[i - 1];
-      const d = new Date(b.openTime);
-      const dow = d.getUTCDay();
-      if (condSel.value === 'gap') {
-        const gap = (b.open - p.close) / p.close;
-        if (Math.abs(gap) < 0.0005) continue;         // meaningful gap only
-        const filled = gap > 0 ? b.low <= p.close : b.high >= p.close;
-        samples.push(filled ? 1 : 0);
-      } else if (condSel.value === 'monday') {
-        if (dow !== 1) continue;
-        samples.push(b.close > b.open ? 1 : 0);
+  const presets = catalog.presets;
+  const byId = new Map(presets.map((p) => [p.id, p]));
+  const categories = [...new Set(presets.map((p) => p.category))].sort();
+
+  const presetSel = el('select', {}, categories.map((cat) =>
+    el('optgroup', { label: cat }, presets.filter((p) => p.category === cat).map((p) =>
+      el('option', { value: p.id, text: p.title, selected: p.id === 'green-rate' })))));
+  const symSel = el('select', {}, ES_SYMBOLS.map(([v, t]) => el('option', { value: v, text: t, selected: v === 'XAUUSD' })));
+  const tfSel = el('select', {}, ES_TIMEFRAMES.map(([v, t]) => el('option', { value: v, text: t, selected: v === '1h' })));
+  const rangeSel = el('select', {}, ES_RANGES.map(([v, t]) => el('option', { value: v, text: t, selected: v === '1y' })));
+  const paramsBox = el('div', { class: 'form form--3' });
+  const summaryEl = el('p', { class: 'card__note' });
+  const runBtn = el('button', { class: 'btn btn--primary' }, 'Run preset');
+  let paramInputs = {};
+
+  const paintParams = () => {
+    const p = byId.get(presetSel.value);
+    paramsBox.replaceChildren();
+    paramInputs = {};
+    summaryEl.textContent = p ? p.summary : '';
+    for (const spec of p ? p.params : []) {
+      let input;
+      if (spec.type === 'enum' && spec.values) {
+        // No default means "no filter": leave the choice empty rather than
+        // silently picking the first option and narrowing the denominator.
+        input = el('select', {},
+          spec.default === undefined ? [el('option', { value: '', text: 'any (no filter)' })] : [],
+          spec.values.map((v) => el('option', {
+            value: String(v), text: String(v), selected: String(v) === String(spec.default ?? ''),
+          })));
       } else {
-        const outside = b.high > p.high && b.low < p.low;
-        if (!outside || i + 1 >= bars.length) continue;
-        samples.push(bars[i + 1].close > b.close ? 1 : 0);
+        // A numeric parameter with no default is unbounded upstream: leaving it
+        // empty keeps it out of the query instead of pinning it to an arbitrary 1.
+        input = el('input', {
+          type: 'number', step: 'any',
+          value: spec.default === undefined || spec.default === null ? '' : String(spec.default),
+          placeholder: 'any', min: '0',
+        });
       }
+      paramInputs[spec.name] = { input, spec };
+      paramsBox.append(field(`${spec.name}${spec.type === 'duration' ? ' (minutes)' : ''}`, input));
     }
-
-    const n = samples.length;
-    const hits = samples.reduce((a, b) => a + b, 0);
-    const [lo, hi] = wilson(hits, n);
-    const base = n ? hits / n : 0;
-
-    const label = {
-      gap: 'Gap fills the same day',
-      monday: 'Monday closes green',
-      outside: 'Outside day → next day up',
-    }[condSel.value];
-
-    out.replaceChildren(card(`${label} — ${symSel.value}`, { note: `${rangeSel.value} of daily bars` },
-      n < 10
-        ? el('div', { class: 'empty' },
-            el('h3', { text: 'Sample too small' }),
-            el('p', { text: `Only ${n} matching bars in this window — widen the range or pick another condition.` }))
-        : el('div', {},
-            el('div', { class: 'metrics' },
-              el('div', { class: 'metric metric--accent' },
-                el('div', { class: 'metric__k', text: 'Estimate' }),
-                el('div', { class: 'metric__v', text: pctStr(base) })),
-              el('div', { class: 'metric' },
-                el('div', { class: 'metric__k', text: 'Sample size' }),
-                el('div', { class: 'metric__v', text: String(n) })),
-              el('div', { class: 'metric' },
-                el('div', { class: 'metric__k', text: '95% CI' }),
-                el('div', { class: 'metric__v metric__v--sm', text: `${pctStr(lo)} – ${pctStr(hi)}` })),
-              el('div', { class: 'metric' },
-                el('div', { class: 'metric__k', text: 'Hits' }),
-                el('div', { class: 'metric__v', text: String(hits) }))),
-            el('div', { class: 'bars', style: 'margin-top:18px' },
-              el('div', { class: 'bars__row' },
-                el('span', { class: 'bars__label', text: 'observed' }),
-                el('div', { class: 'bars__track' }, el('i', { style: `width:${(base * 100).toFixed(1)}%` })),
-                el('span', { class: 'bars__val', text: pctStr(base) }))),
-            el('p', { class: 'card__note', style: 'margin-top:16px',
-              text: `P(outcome | condition) = ${hits}/${n} on live ${symSel.value} daily bars. Wilson interval, not a normal approximation — it stays honest at small N. Same question shape as LuxAlgo's Edge Stats.` }))));
+    if (!paramsBox.childElementCount) {
+      paramsBox.append(el('p', { class: 'card__note', text: 'This preset takes no parameters.' }));
+    }
   };
 
-  [symSel, condSel, rangeSel].forEach((s) => s.addEventListener('change', run));
+  const readParams = () => {
+    const params = {};
+    for (const [name, { input, spec }] of Object.entries(paramInputs)) {
+      const raw = input.value;
+      if (raw === '') continue;
+      params[name] = spec.type === 'enum' || spec.type === 'string' ? raw : Number(raw);
+    }
+    return params;
+  };
+
+  const pctText = (v) => (v === null || v === undefined ? '—' : `${v}%`);
+  const ciText = (b) => (b && b.ci_low !== null ? `${b.ci_low}–${b.ci_high}%` : '—');
+
+  const paintResult = (r) => {
+    const est = r.estimate;
+    const base = r.baseline || {};
+    const st = r.stability || {};
+    const tone = est.rate === null ? '' : 'metric--accent';
+
+    const children = [];
+
+    children.push(card(r.preset.title, {
+      note: `${r.symbol} · ${r.interval} · ${r.history} · ${r.sessions.count} sessions (${r.sessions.first} → ${r.sessions.last}) · ${r.source}${r.stale ? ' (stale)' : ''}`,
+    },
+      el('p', { class: 'card__note', text: r.preset.summary }),
+      el('div', { class: 'metrics' },
+        el('div', { class: `metric ${tone}` },
+          el('div', { class: 'metric__k', text: 'Estimate' }),
+          el('div', { class: 'metric__v', text: pctText(est.rate) }),
+          el('div', { class: 'card__note', text: `95% CI ${ciText(est)}` })),
+        el('div', { class: 'metric' },
+          el('div', { class: 'metric__k', text: 'Observations' }),
+          el('div', { class: 'metric__v', text: String(est.n) }),
+          el('div', { class: 'card__note', text: `${est.hits} hits` })),
+        el('div', { class: 'metric' },
+          el('div', { class: 'metric__k', text: 'Baseline' }),
+          el('div', { class: 'metric__v', text: pctText(base.rate) }),
+          el('div', { class: 'card__note', text: `unconditional, n=${base.n || 0}` })),
+        el('div', { class: 'metric' },
+          el('div', { class: 'metric__k', text: 'Lift' }),
+          el('div', { class: 'metric__v', text: r.lift_points === null ? '—' : `${r.lift_points > 0 ? '+' : ''}${r.lift_points} pts` })),
+        el('div', { class: 'metric' },
+          el('div', { class: 'metric__k', text: 'Stability' }),
+          el('div', { class: 'metric__v metric__v--sm', text: st.score === null || st.score === undefined ? '—' : `${st.score} · ${st.label}` })),
+        el('div', { class: 'metric' },
+          el('div', { class: 'metric__k', text: 'CI width' }),
+          el('div', { class: 'metric__v metric__v--sm', text: est.ci_width === null ? '—' : `${est.ci_width} pts` }))),
+      el('div', { class: 'bars', style: 'margin-top:16px' },
+        el('div', { class: 'bars__row' },
+          el('span', { class: 'bars__label', text: 'conditional' }),
+          el('div', { class: 'bars__track' }, el('i', { style: `width:${est.rate || 0}%` })),
+          el('span', { class: 'bars__val', text: pctText(est.rate) })),
+        el('div', { class: 'bars__row' },
+          el('span', { class: 'bars__label', text: 'baseline' }),
+          el('div', { class: 'bars__track' }, el('i', { style: `width:${base.rate || 0}%;opacity:.55` })),
+          el('span', { class: 'bars__val', text: pctText(base.rate) }))),
+      el('p', { class: 'card__note', style: 'margin-top:14px', text: r.verdict })));
+
+    if (st.halves && st.halves.length === 2) {
+      children.push(card('Stability', { note: 'the same estimate on each half of the sample, split by time' },
+        el('div', { class: 'metrics' },
+          st.halves.map((h, i) => el('div', { class: 'metric' },
+            el('div', { class: 'metric__k', text: i === 0 ? 'First half' : 'Second half' }),
+            el('div', { class: 'metric__v metric__v--sm', text: pctText(h.rate) }),
+            el('div', { class: 'card__note', text: `n=${h.n} · CI ${ciText(h)}` }))))));
+    }
+
+    children.push(card('By session', { note: 'UTC windows, attributed to when the outcome happened' },
+      r.by_session && r.by_session.length
+        ? el('div', {},
+            tableEl([
+              { key: 'session', label: 'Session' },
+              { key: 'utc', label: 'UTC', render: (row) => (r.session_windows.find((w) => w.key === row.key) || {}).utc || '—' },
+              { key: 'rate', label: 'Rate', num: true, render: (row) => pctText(row.rate) },
+              { key: 'ci', label: '95% CI', render: (row) => ciText(row) },
+              { key: 'n', label: 'N', num: true },
+            ], r.by_session),
+            el('p', { class: 'card__note', style: 'margin-top:10px', text: r.session_note }))
+        : el('p', { class: 'card__note', text: r.session_note })));
+
+    if (r.groups && r.groups.length) {
+      children.push(card(`Split by ${r.preset.groupBy}`, { note: 'each row its own denominator and interval' },
+        tableEl([
+          { key: 'group', label: r.preset.groupBy },
+          { key: 'rate', label: 'Rate', num: true, render: (row) => pctText(row.rate) },
+          { key: 'ci', label: '95% CI', render: (row) => ciText(row) },
+          { key: 'n', label: 'N', num: true },
+        ], r.groups)));
+    }
+
+    if (r.per_year && r.per_year.length) {
+      children.push(card('By year', { note: 'drift in the sample itself' },
+        tableEl([
+          { key: 'year', label: 'Year' },
+          { key: 'rate', label: 'Rate', num: true, render: (row) => pctText(row.rate) },
+          { key: 'ci', label: '95% CI', render: (row) => ciText(row) },
+          { key: 'n', label: 'N', num: true },
+        ], r.per_year)));
+    }
+
+    if (r.distribution) {
+      children.push(card('Distribution', { note: r.distribution.unit },
+        el('div', { class: 'metrics' },
+          ['p10', 'p50', 'p90'].map((k) => el('div', { class: 'metric' },
+            el('div', { class: 'metric__k', text: k }),
+            el('div', { class: 'metric__v metric__v--sm', text: String(r.distribution[k]) })))),
+        el('p', { class: 'card__note', style: 'margin-top:10px', text: `over ${r.distribution.n} observations` })));
+    }
+
+    children.push(card('How this was computed', {},
+      el('p', { class: 'card__note', text: `Outcome: ${r.outcome}${r.where ? ` · condition: ${r.where}` : ''}` }),
+      el('p', { class: 'card__note', text: `Session: ${r.definitions.session}. ${r.definitions.gap_floor_note}.` }),
+      el('p', { class: 'card__note', text: `Interval: ${r.definitions.ci}. Stability: ${r.definitions.stability}.` }),
+      el('p', { class: 'card__note', text: `Bars: ${r.sessions.bars} (${r.sessions.bar_minutes} min each); open == close on ${r.sessions.flat_open_close_pct}% of sessions.` })));
+
+    out.replaceChildren(...children);
+  };
+
+  const run = async () => {
+    runBtn.disabled = true;
+    out.replaceChildren(card('', {}, el('div', { class: 'empty' },
+      el('h3', { text: 'Reading bars and evaluating the preset…' }),
+      el('p', { class: 'card__note', text: 'Sessions are built from the bars, then the preset is applied.' }))));
+    try {
+      paintResult(await market.edgeStatsRun({
+        presetId: presetSel.value,
+        symbol: symSel.value,
+        interval: tfSel.value,
+        range: rangeSel.value,
+        params: readParams(),
+      }));
+    } catch (err) {
+      out.replaceChildren(card('Nothing computed', {},
+        el('div', { class: 'empty' },
+          el('h3', { text: 'The engine refused this run' }),
+          el('p', { class: 'card__note', text: String(err.message || err).slice(0, 300) }))));
+    } finally {
+      runBtn.disabled = false;
+    }
+  };
+
+  presetSel.addEventListener('change', paintParams);
+  runBtn.addEventListener('click', run);
+  paintParams();
 
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
         el('h2', { class: 'page__title', text: 'Edge Stats' }),
-        el('p', { class: 'page__sub', text: 'Ask how often a setup actually worked, on real bars, with the sample size attached.' })),
-      chip('MIT · LuxAlgo edge-stats', 'chip--on')),
-    card('Question', {},
+        el('p', { class: 'page__sub', text: `${presets.length} presets from LuxAlgo's edge-stats catalog (MIT), answered by our own engine over live bars — every result with its interval, its stability split and a per-session breakdown.` })),
+      chip(`${presets.length} presets · real engine`, 'chip--on')),
+    card('Preset', {},
       el('div', { class: 'form form--3' },
+        field('Question', presetSel),
         field('Symbol', symSel),
-        field('Condition', condSel),
-        field('History', rangeSel))),
+        field('Timeframe', tfSel),
+        field('History', rangeSel)),
+      summaryEl,
+      paramsBox,
+      el('div', { class: 'bt__actions' }, runBtn)),
     out);
+
+  out.append(el('div', { class: 'empty' },
+    el('h3', { text: 'Pick a question and run it' }),
+    el('p', { text: 'The presets are LuxAlgo\'s own definitions; the answers come from this machine\'s bars.' })));
   run();
   return page;
 }

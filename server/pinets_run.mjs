@@ -12,7 +12,7 @@ import { PineTS } from 'pinets';
 const PRESETS = {
   core: `
 //@version=6
-indicator("PipNex core", overlay=true)
+indicator("Cairnline core", overlay=true)
 emaFast = ta.ema(close, 9)
 emaMid  = ta.ema(close, 21)
 emaSlow = ta.ema(close, 50)
@@ -34,7 +34,7 @@ plot(bbLower, "bbLower")
 `,
   smc: `
 //@version=6
-indicator("PipNex structure", overlay=true)
+indicator("Cairnline structure", overlay=true)
 swingHigh = ta.highest(high, 20)
 swingLow  = ta.lowest(low, 20)
 emaFast   = ta.ema(close, 9)

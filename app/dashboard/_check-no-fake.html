@@ -16,7 +16,9 @@ const body = (p) => fetch(p).then((r) => r.text());
 const dataJs = await body('./js/data.js');
 check(!/const mock\s*=/.test(dataJs), 'data.js has no mock fixture block');
 check(!/mockApi/.test(dataJs), 'data.js has no mock adapter');
-check(/NO_ACCOUNT/.test(dataJs), 'missing account is a named error, not fake rows');
+check(!/NO_ACCOUNT/.test(dataJs), 'no account gate blocks the local desk');
+check(/deskApi/.test(dataJs), 'data.js serves a local desk branch instead of fake rows');
+check(/local: true/.test(dataJs), 'local figures are labelled local');
 
 const uiJs = await body('./js/ui.js');
 check(!/Math\.sin/.test(uiJs), 'ui.js has no generated candlestick series');
@@ -45,7 +47,7 @@ for (const [name, fn] of Object.entries(pages)) {
   }
   await new Promise((r) => setTimeout(r, 60));
   const text = host.innerText;
-  check(/Not connected to an account/.test(text), `#/${name} states it has nothing to read`);
+  check(!/Not connected to an account/.test(text), `#/${name} no longer shows the dead account state`);
   check(!/Something went wrong/.test(text), `#/${name} renders without an error card`);
   for (const bad of ['Aurora Scalper', 'Volatility 75', 'Omega Iconz', 'nandejeclinton', 'EquityGuardian', '87%']) {
     if (text.includes(bad)) check(false, `#/${name} still shows "${bad}"`);

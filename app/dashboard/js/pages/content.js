@@ -1,5 +1,6 @@
-import { api, fmt } from '../data.js';
+import { api, fmt, hasSession } from '../data.js';
 import { el, card, chip, table, toast, notConnected } from '../ui.js';
+import { supportEmail, referralUrl } from '../config.js';
 
 /** Trade Lens — production /lens (Chrome extension product page). */
 export async function lens(ctx) {
@@ -7,23 +8,23 @@ export async function lens(ctx) {
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
-        el('h2', { class: 'page__title', text: 'Pipnex Trade Lens' }),
+        el('h2', { class: 'page__title', text: 'Cairnline Lens' }),
         el('p', { class: 'page__sub', text: 'AI chart analysis inside TradingView.' })),
       chip(ctx.permissions.tradeLens ? 'Included in your plan' : 'Platinum feature', ctx.permissions.tradeLens ? 'chip--on' : 'chip--warn')),
     el('div', { class: 'grid grid--sidebar' },
-      card('Bring the Pipnex brain to your chart', {},
-        el('p', { class: 'card__note', text: 'A Chrome extension that reads your live TradingView chart and runs it through the Pipnex Market Brain — structure, order blocks, liquidity sweeps and a confidence-scored trade plan, right beside the chart you already trade.' }),
+      card('Bring the Cairnline brain to your chart', {},
+        el('p', { class: 'card__note', text: 'A Chrome extension that reads your live TradingView chart and runs it through the Cairnline Market Brain — structure, order blocks, liquidity sweeps and a confidence-scored trade plan, right beside the chart you already trade.' }),
         el('div', { class: 'metrics', style: 'margin-top:20px' },
           el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Latency' }), el('div', { class: 'metric__v metric--accent' }, el('div', { class: 'metric__v metric__v--sm', text: '< 400 ms' }))),
           el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Timeframes' }), el('div', { class: 'metric__v metric__v--sm', text: 'M1 → W1' })),
           el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Pairs' }), el('div', { class: 'metric__v metric__v--sm', text: 'Forex · Metals' })))),
         el('div', { style: 'margin-top:20px;display:flex;gap:8px' },
-          el('a', { class: 'btn btn--primary', href: 'https://chromewebstore.google.com/detail/pipnex-trade-lens/nepgnfpaipmeehkpcapbaglddhgppbhh' }, 'Install from Chrome Web Store'),
+          el('a', { class: 'btn btn--primary', href: 'https://chromewebstore.google.com/detail/cairnline-lens/nepgnfpaipmeehkpcapbaglddhgppbhh' }, 'Install from Chrome Web Store'),
           el('button', { class: 'btn btn--outline', onclick: () => toast('Lens deep-link sent to your account email') }, 'Send me the link'))),
       card('How to install', {},
         el('ol', { style: 'padding-left:18px;color:var(--ice-dim);font-size:13px;line-height:2' },
           el('li', { text: 'Install the extension from the Chrome Web Store.' }),
-          el('li', { text: 'Sign in with your Pipnex account.' }),
+          el('li', { text: 'Sign in with your Cairnline account.' }),
           el('li', { text: 'Open a TradingView chart — the Lens panel docks to the side.' }),
           el('li', { text: 'Ask for structure, liquidity or a full trade plan.' }))),
     card('Included with Platinum — no extra subscription.', { class: 'card--flush' }));
@@ -33,23 +34,28 @@ export async function lens(ctx) {
 /** Referral — production /referral. */
 export async function referral(ctx) {
   const profile = await api.profile.get().catch(() => null);
-  if (!profile) {
+  /* A referral link is issued per account, and accounts do not exist yet. */
+  if (!profile || !hasSession()) {
     return el('div', { class: 'page' },
-      card('Referral Program', { note: 'nothing to read' }, notConnected('Your referral link and commissions')));
+      card('Referral Program', { note: 'needs an account' },
+        el('div', { class: 'empty' },
+          el('h3', { text: 'Referrals need an account' }),
+          el('p', { text: 'Each referral link is issued against an account, and accounts open in a later build. The desk meanwhile runs on a local paper ledger.' }))));
   }
-  const link = `https://pipnex-ai.com/?ref=${profile.account_id}`;
+  const link = referralUrl('/', profile.account_id);
   const page = el('div', { class: 'page' });
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
-        el('h2', { class: 'page__title', text: 'Earn Real Money By Sharing Pipnex' }),
+        el('h2', { class: 'page__title', text: 'Earn Real Money By Sharing Cairnline' }),
         el('p', { class: 'page__sub', text: 'Share your link — earn when friends subscribe.' })),
       chip(`${profile.referral_count || 0} referrals`, 'chip--on')),
     el('div', { class: 'grid grid--sidebar' },
       card('Your referral link', {},
         el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' },
-          el('input', { value: link, readonly: true, style: 'flex:1;min-width:240px;font-family:var(--mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ice)' }),
+          el('input', { value: link || 'not configured — see js/config.js', readonly: true, style: 'flex:1;min-width:240px;font-family:var(--mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ice)' }),
           el('button', { class: 'btn btn--primary', onclick: async () => {
+            if (!link) return toast('No domain configured: set BRAND_DOMAIN in js/config.js');
             try { await navigator.clipboard.writeText(link); toast('Link copied'); }
             catch { toast(link); }
           } }, 'Copy link')),
@@ -61,7 +67,7 @@ export async function referral(ctx) {
         el('ol', { style: 'padding-left:18px;color:var(--ice-dim);font-size:13px;line-height:2' },
           el('li', { text: 'Share your link with a friend.' }),
           el('li', { text: 'They sign up and subscribe to any paid plan.' }),
-          el('li', { text: 'Your reward lands in your Pipnex wallet.' }),
+          el('li', { text: 'Your reward lands in your Cairnline wallet.' }),
           el('li', { text: 'Withdraw once you reach $75.00.' })))),
     card('Why join our referral program?', {},
       el('div', { class: 'grid grid--3' },
@@ -97,7 +103,7 @@ export async function tutorials(ctx) {
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
-        el('h2', { class: 'page__title', text: 'Pipnex Video Tutorials' }),
+        el('h2', { class: 'page__title', text: 'Cairnline Video Tutorials' }),
         el('p', { class: 'page__sub', text: 'Short walkthroughs covering setup, MT5, chart analysis and running bots.' })),
       el('div', { class: 'tabs' }, cats.map((c, i) => el('button', {
         class: i === 0 ? 'is-active' : '',
@@ -120,7 +126,7 @@ export async function support(ctx) {
     el('div', { class: 'page__head' },
       el('div', {},
         el('h2', { class: 'page__title', text: 'Contact Support' }),
-        el('p', { class: 'page__sub', text: 'Your conversations with the Pipnex team.' })),
+        el('p', { class: 'page__sub', text: 'Your conversations with the Cairnline team.' })),
       chip('Mon–Fri 9:00–17:30 GMT', '')),
     el('div', { class: 'grid grid--sidebar' },
       card('New message', {},
@@ -134,10 +140,10 @@ export async function support(ctx) {
           note)),
       card('Other channels', {},
         el('dl', { class: 'kv' },
-          el('dt', { text: 'Email' }), el('dd', { text: 'support@pipnex-ai.com' }),
+          el('dt', { text: 'Email' }), el('dd', { text: supportEmail() || 'not configured' }),
           el('dt', { text: 'Phone' }), el('dd', { text: '+44 7462 221694' }),
           el('dt', { text: 'Address' }), el('dd', { text: "St Aldate's, Pembroke St, Oxford" }),
-          el('dt', { text: 'Telegram' }), el('dd', { text: '@pipnex' })),
+          el('dt', { text: 'Telegram' }), el('dd', { text: '@cairnline' })),
         el('div', { style: 'margin-top:16px' },
           el('button', { class: 'btn btn--outline btn--block', onclick: () => toast('Telegram link copied') }, 'Join Telegram')))));
   return page;

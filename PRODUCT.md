@@ -9,7 +9,7 @@ web
 ## Users
 
 - **[inferred]** Retail forex and gold traders evaluating an AI-assisted trading tool, and existing
-  Pipnex customers running analyses, signals and bots from the dashboard.
+  Cairnline customers running analyses, signals and bots from the dashboard.
 - **[inferred]** Two secondary readers: the person building this clone (comparing it against the
   production app at `pipnex-ai.com`) and anyone they show it to.
 
@@ -19,7 +19,7 @@ other agent stopped and build on", so every fact below is either read from the r
 
 ## Product Purpose
 
-**[inferred]** A working replica of the Pipnex AI web product: a public marketing site plus a
+**[inferred]** A working replica of the Cairnline AI web product: a public marketing site plus a
 signed-in trading dashboard (chart analysis, pulse signals, rumours-free bot management, wallet,
 subscription, EA marketplace). Success is a visitor being able to walk the whole production route
 map — landing page to dashboard to plan selection — and recognise the real product's behaviour at
@@ -28,7 +28,7 @@ each step, running from a plain static server with no build step.
 ## Positioning
 
 **[inferred]** Not a competing product: a faithful, editable reconstruction. The differentiator of
-the real product is the Pipnex "Market Brain" — Smart Money Concepts chart reads with a
+the real product is the Cairnline "Market Brain" — Smart Money Concepts chart reads with a
 confidence-scored trade plan — plus the Trade Lens Chrome extension that applies it inside
 TradingView. The clone's own differentiator is legibility: readable vanilla source and a data layer
 that shows only real reads — no demo rows, no generated series.
@@ -57,15 +57,26 @@ that shows only real reads — no demo rows, no generated series.
   public-side `/auth`, `/choose-plan`, `/checkout`, `/terms`, `/privacy`, `/refund`.
 - Operator/admin routes on the real product (`/gateway`, `/terminals`, `/events`, `/incidents`,
   `/watchdog`, `/bridges`, `/analytics`) are out of scope by design.
-- Open decision: whether this may keep the PipNex name, copy and logo, or must be rebranded before
-  being shown. Unanswered; treated as "keep the reference brand, it is a study clone" for now.
+- Decision taken: rebranded to **Cairnline** — wordmark `cairnline`, sub-brands **Cairnline Desk**
+  (the terminal/analysis surface) and **Cairnline Lens** (the chart extension), with **Trish** kept as
+  the analyst's name, which was never the vendor's.
+- Naming: **Cairnline**, screened 2026-11-17 against indexed USPTO records (Trademarkia, Justia,
+  Trademark Directory). No exact registration or application in Class 9, 36 or 42, and no company
+  using the name in software, fintech or trading. `cairnline.ai`, `.io`, `.co`, `.app` and `.trade`
+  were unregistered; `cairnline.com` belongs to a one-person consultancy. GitHub and npm handles are
+  free. This is a knockout screen, not legal clearance: confirm in TSDR and with counsel pre-launch.
 
 ## Brand Commitments
 
-**[inferred]** The name PipNex, the product copy captured in `/home/omega/pipnex-reference`, and the
-route names are carried over from production so the clone reads as the same product. The clone's own
-visual language (marketing: black / ice / aurora green; dashboard: black / brand red / lime data) is
-local work, not a Pipnex asset.
+The name **Cairnline** (tagline "every level, sourced") is the clone's own mark, applied across the
+site, dashboard, skills and docs; the wordmark is lowercase `cairnline` in the header, `CAIRNLINE DESK`
+in the terminal status line. Sub-brands: **Cairnline Desk**, **Cairnline Lens**. Trish stays the analyst.
+Product copy and route names are still carried over from production so the clone reads as the same
+product, and `/home/omega/pipnex-reference` keeps its original folder name as the capture source. The
+clone's own visual language (marketing: black / ice / aurora green; dashboard: black / brand red /
+lime data) is local work. Outbound support and referral links carry no domain at all: `BRAND_DOMAIN` in
+`app/dashboard/js/config.js` is empty until a domain is registered, and the UI says "not configured"
+rather than pointing at a site someone else owns.
 
 ## Evidence on Hand
 

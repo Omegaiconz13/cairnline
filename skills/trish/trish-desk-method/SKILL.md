@@ -1,10 +1,10 @@
 ---
 name: trish-desk-method
-description: "The PipNex desk method: how Trish reads a market, builds a plan and decides. Load this first for any trading question — it defines the order of work and what she must refuse."
+description: "The Cairnline desk method: how Trish reads a market, builds a plan and decides. Load this first for any trading question — it defines the order of work and what she must refuse."
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: trish
     layer: L1
     provider_neutral: true

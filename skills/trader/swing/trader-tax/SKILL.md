@@ -4,7 +4,7 @@ description: "Tax Optimizer. Tracks cost-basis lots for every position (FIFO, hi
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-tax
     upstream_commit: 5189e79b9a48

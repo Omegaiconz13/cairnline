@@ -3,9 +3,13 @@ import { market, px } from '../market.js';
 import { fmt } from '../data.js';
 
 const DATASETS = [
-  { key: 'insider', label: 'Insider filings', note: 'SEC Form 4 · who bought and sold' },
-  { key: 'short-volume', label: 'Short volume', note: 'FINRA daily short-sale volume' },
   { key: 'congress', label: 'Congress trades', note: 'Disclosures by members of Congress' },
+  { key: 'insider', label: 'Insider filings', note: 'SEC Form 4 · who bought and sold' },
+  { key: 'thirteenf', label: '13F holdings', note: 'Quarterly institutional positions' },
+  { key: 'contracts', label: 'Gov contracts', note: 'Federal awards by recipient' },
+  { key: 'lobbying', label: 'Lobbying', note: 'LDA filings and the issues lobbied' },
+  { key: 'short-volume', label: 'Short volume', note: 'FINRA daily short-sale volume' },
+  { key: 'patents', label: 'Patents', note: 'USPTO grants mapped to public companies' },
   { key: 'fed', label: 'Fed communications', note: 'FOMC statements and speeches' },
 ];
 
@@ -119,7 +123,42 @@ export async function research(ctx) {
       { label: 'Title', render: (r) => String(r.title || '—').slice(0, 70) },
       { label: 'Speaker', render: (r) => r.speaker || r.author || '—' },
       { label: 'Source', render: (r) => (r.provenance?.sourceUrl ? el('a', { href: r.provenance.sourceUrl, target: '_blank', rel: 'noopener', class: 'chip', text: 'federalreserve.gov' }) : '—') },
-    ], rows, { emptyTitle: 'No communications', emptyText: 'FOMC releases appear here after publication.' }),
+    ],
+    rows, { emptyTitle: 'No communications', emptyText: 'FOMC releases appear here after publication.' }),
+    thirteenf: (rows) => table([
+      { label: 'Ticker', render: (r) => chip(r.ticker || '—', 'chip--mono') },
+      { label: 'Manager', render: (r) => String(r.managerName || '—').slice(0, 32) },
+      { label: 'Issuer', render: (r) => String(r.issuerName || '—').slice(0, 30) },
+      { label: 'Shares', num: true, render: (r) => Number(r.shares || 0).toLocaleString() },
+      { label: 'Value', num: true, render: (r) => (r.valueUsd ? `$${(Number(r.valueUsd) / 1e6).toFixed(2)}M` : '—') },
+      { label: 'Filed', render: (r) => r.filedAt || '—' },
+      { label: 'Source', render: (r) => (r.provenance?.sourceUrl ? el('a', { href: r.provenance.sourceUrl, target: '_blank', rel: 'noopener', class: 'chip', text: 'sec.gov' }) : '—') },
+    ], rows, { emptyTitle: 'No 13F holdings', emptyText: 'Quarterly filings appear here after the SEC ingest.' }),
+    contracts: (rows) => table([
+      { label: 'Recipient', render: (r) => String(r.recipient?.name || '—').slice(0, 34) },
+      { label: 'Agency', render: (r) => String(r.agency || '—').slice(0, 28) },
+      { label: 'Ticker', render: (r) => (r.recipient?.tickers?.length ? r.recipient.tickers.slice(0, 3).join(' · ') : '—') },
+      { label: 'Amount', num: true, render: (r) => (r.amountUsd ? `$${Number(r.amountUsd).toLocaleString()}` : '—') },
+      { label: 'Awarded', render: (r) => r.actionDate || '—' },
+      { label: 'Source', render: (r) => (r.provenance?.sourceUrl ? el('a', { href: r.provenance.sourceUrl, target: '_blank', rel: 'noopener', class: 'chip', text: 'usaspending.gov' }) : '—') },
+    ], rows, { emptyTitle: 'No contract awards', emptyText: 'Federal awards appear here after the USAspending ingest.' }),
+    lobbying: (rows) => table([
+      { label: 'Client', render: (r) => String(r.client?.name || '—').slice(0, 32) },
+      { label: 'Registrant', render: (r) => String(r.registrant?.name || '—').slice(0, 30) },
+      { label: 'Ticker', render: (r) => (r.client?.tickers?.length ? r.client.tickers.slice(0, 3).join(' · ') : '—') },
+      { label: 'Amount', num: true, render: (r) => (r.amountUsd ? `$${Number(r.amountUsd).toLocaleString()}` : '—') },
+      { label: 'Period', render: (r) => `${r.filingYear || '—'} · ${String(r.filingPeriod || '').replace(/_/g, ' ')}` },
+      { label: 'Issues', render: (r) => (r.issues?.length ? r.issues.slice(0, 4).join(' · ') : '—') },
+      { label: 'Source', render: (r) => (r.provenance?.sourceUrl ? el('a', { href: r.provenance.sourceUrl, target: '_blank', rel: 'noopener', class: 'chip', text: 'lda.gov' }) : '—') },
+    ], rows, { emptyTitle: 'No lobbying filings', emptyText: 'LDA filings appear here after each quarterly ingest.' }),
+    patents: (rows) => table([
+      { label: 'Patent', render: (r) => String(r.title || '—').slice(0, 48) },
+      { label: 'Assignee', render: (r) => String(r.assignee?.name || '—').slice(0, 30) },
+      { label: 'Ticker', render: (r) => (r.assignee?.tickers?.length ? r.assignee.tickers.slice(0, 3).join(' · ') : '—') },
+      { label: 'Granted', render: (r) => r.grantDate || '—' },
+      { label: 'Class', render: (r) => chip(r.cpcClass || '—', 'chip--mono') },
+      { label: 'Source', render: (r) => (r.provenance?.sourceUrl ? el('a', { href: r.provenance.sourceUrl, target: '_blank', rel: 'noopener', class: 'chip', text: 'uspto.gov' }) : '—') },
+    ], rows, { emptyTitle: 'No patents', emptyText: 'Only grants mapped to a listed ticker are shown.' }),
   };
 
   async function load() {
@@ -131,7 +170,7 @@ export async function research(ctx) {
       const data = await market.publicRecord(active, { ticker, limit: 40 });
       const builder = rowBuilders[active];
       body.replaceChildren(card(`${DATASETS.find((d) => d.key === active).label}`, {
-        note: `${data.total} matching rows · ${data.source}`,
+        note: data.available === false ? `empty · ${data.note || data.source}` : `${data.total} matching rows · ${data.source}`,
       }, builder(data.rows || []),
         el('p', { class: 'card__note', style: 'margin-top:12px',
           text: `Fetched ${new Date(data.fetched_at).toLocaleString()} · cached for 6 hours · ${data.total} rows matched before the limit.` })));

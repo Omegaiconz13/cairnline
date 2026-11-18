@@ -4,7 +4,7 @@ description: "Price Alerts. Rings when a price, a stop or the opening bell hits.
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-alerts
     upstream_commit: 3d0f4ef6986f

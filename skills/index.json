@@ -3,37 +3,37 @@
   "entries": [
     {
       "name": "trish-desk-method",
-      "description": "The PipNex desk method: how Trish reads a market, builds a plan and decides. Load this first for any trading question \u2014 it defines the order of work and what she must refuse.",
+      "description": "The Cairnline desk method: how Trish reads a market, builds a plan and decides. Load this first for any trading question \u2014 it defines the order of work and what she must refuse.",
       "layer": "L1",
       "path": "skills/trish/trish-desk-method/SKILL.md",
       "chars": 1598
     },
     {
-      "name": "pipnex-chart-read",
-      "description": "Read a PipNex chart: the seeded EMA 9/21/50 + RSI studies, how to interpret the bias summary, and how the confidence number is produced. Use for 'what is X doing', 'read this chart', 'is it bullish'.",
+      "name": "cairnline-chart-read",
+      "description": "Read a Cairnline chart: the seeded EMA 9/21/50 + RSI studies, how to interpret the bias summary, and how the confidence number is produced. Use for 'what is X doing', 'read this chart', 'is it bullish'.",
       "layer": "L3",
-      "path": "skills/trish/pipnex-chart-read/SKILL.md",
+      "path": "skills/trish/cairnline-chart-read/SKILL.md",
       "chars": 1227
     },
     {
-      "name": "pipnex-news-gate",
+      "name": "cairnline-news-gate",
       "description": "Check the macro calendar before a plan is taken: which high-impact prints are near, and whether a stop is likely to be jumped. Use for 'is there news', 'can I take this now', 'why is it moving'.",
       "layer": "L3",
-      "path": "skills/trish/pipnex-news-gate/SKILL.md",
+      "path": "skills/trish/cairnline-news-gate/SKILL.md",
       "chars": 886
     },
     {
-      "name": "pipnex-risk-discipline",
+      "name": "cairnline-risk-discipline",
       "description": "The desk's risk limits and how to enforce them: max risk per trade, minimum reward:risk, when to refuse, and how to explain a BLOCK without softening it.",
       "layer": "L3",
-      "path": "skills/trish/pipnex-risk-discipline/SKILL.md",
+      "path": "skills/trish/cairnline-risk-discipline/SKILL.md",
       "chars": 1148
     },
     {
-      "name": "pipnex-signal-plan",
-      "description": "Use the PipNex basket engine: rank all pairs at one timeframe, pick the best setup, and explain why the top one beat the rest. Use for 'best trade now', 'what should I trade', 'scan the pairs'.",
+      "name": "cairnline-signal-plan",
+      "description": "Use the Cairnline basket engine: rank all pairs at one timeframe, pick the best setup, and explain why the top one beat the rest. Use for 'best trade now', 'what should I trade', 'scan the pairs'.",
       "layer": "L3",
-      "path": "skills/trish/pipnex-signal-plan/SKILL.md",
+      "path": "skills/trish/cairnline-signal-plan/SKILL.md",
       "chars": 1082
     },
     {

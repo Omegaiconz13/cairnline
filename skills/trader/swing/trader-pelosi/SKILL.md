@@ -4,7 +4,7 @@ description: "The Pelosi Tracker. Watches the stock trades members of Congress m
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-pelosi
     upstream_commit: 5189e79b9a48

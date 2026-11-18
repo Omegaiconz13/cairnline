@@ -4,7 +4,7 @@ description: "Entry Timer. Watches a setup bar by bar and tells you the moment t
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-entry
     upstream_commit: 3d0f4ef6986f

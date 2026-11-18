@@ -102,7 +102,7 @@ export async function signals(ctx) {
   page.append(
     el('div', { class: 'page__head' },
       el('div', {},
-        el('h2', { class: 'page__title', text: 'PipNex Pulse Signals' }))),
+        el('h2', { class: 'page__title', text: 'Cairnline Pulse Signals' }))),
     el('div', { class: 'grid' },
       card('Live signals', {
         note: basket.error

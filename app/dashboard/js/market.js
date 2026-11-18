@@ -12,7 +12,7 @@
 const BASE = (() => {
   const fromQuery = new URLSearchParams(location.search).get('market');
   if (fromQuery) return fromQuery.replace(/\/$/, '');
-  const fromStorage = (() => { try { return localStorage.getItem('pipnex_market_api'); } catch { return null; } })();
+  const fromStorage = (() => { try { return localStorage.getItem('cairnline_market_api'); } catch { return null; } })();
   if (fromStorage) return fromStorage;
   // Same host as the app, port 8788 by default.
   return `${location.protocol}//${location.hostname || '127.0.0.1'}:8788`;
@@ -41,10 +41,40 @@ async function get(path, { timeout = 45000 } = {}) {
   }
 }
 
+/**
+ * One write path for every non-GET call: same abort timer, same error shape.
+ * A request with no timeout can leave a button pending forever on a stalled
+ * service, so `timeout` is not optional here.
+ *
+ * `okStatus` lets a route that answers "I honestly have no data" with 503
+ * (options flow) hand its body to the page instead of throwing.
+ */
+async function send(path, { method = 'POST', payload = undefined, timeout = 45000, okStatus = (status) => status >= 200 && status < 300 } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const init = { method, signal: ctrl.signal, headers: { Accept: 'application/json' } };
+    if (method === 'POST') {
+      init.headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(payload ?? {});
+    }
+    const res = await fetch(`${BASE}${path}`, init);
+    const body = await res.json().catch(() => ({}));
+    if (!okStatus(res.status, body)) throw new Error(body.error || `HTTP ${res.status}`);
+    return body;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function post(path, payload, timeout = 45000) {
+  return send(path, { method: 'POST', payload, timeout });
+}
+
 export const market = {
   get base() { return BASE; },
   setBase(url) {
-    try { localStorage.setItem('pipnex_market_api', url); } catch { /* ignore */ }
+    try { localStorage.setItem('cairnline_market_api', url); } catch { /* ignore */ }
   },
   status() { return { ...state, base: BASE }; },
 
@@ -53,20 +83,10 @@ export const market = {
     return get('/api/config', { timeout: 20000 });
   },
   async setLseKey(key) {
-    const res = await fetch(`${BASE}/api/config/lse`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key }),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-    return body;
+    return send('/api/config/lse', { payload: { key }, timeout: 15000 });
   },
   async clearLseKey() {
-    const res = await fetch(`${BASE}/api/config/lse`, { method: 'DELETE' });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-    return body;
+    return send('/api/config/lse', { method: 'DELETE', timeout: 15000 });
   },
 
   async health() {
@@ -86,42 +106,95 @@ export const market = {
   async basketSignals(interval = '15m') {
     return get(`/api/basket/signals?interval=${interval}`, { timeout: 90000 });
   },
+  /* ---- Edge Stats: the engine lives in server/edge_stats.py ---- */
+  async edgeStatsPresets() {
+    return get('/api/edge-stats/presets', { timeout: 20000 });
+  },
+  async edgeStatsRun(payload) {
+    return send('/api/edge-stats/run', { payload, timeout: 120000 });
+  },
+
+  /* ---- Options Flow: chain + tape from LSE, metrics in server/options_flow.py ---- */
+  async optionsFlow({ underlying = 'SPY', window = '7d', limit = 1000, minPremium = null, maxDte = null } = {}) {
+    const q = new URLSearchParams({ underlying, window, limit: String(limit) });
+    if (minPremium) q.set('min_premium', String(minPremium));
+    if (maxDte) q.set('max_dte', String(maxDte));
+    // A 503 here is the engine's honest "no feed" answer, not a transport error:
+    // hand it to the page so it can render the reason instead of inventing data.
+    return send(`/api/options-flow?${q}`, {
+      method: 'GET',
+      timeout: 60000,
+      okStatus: (status, body) => (status >= 200 && status < 300) || Boolean(body.reason),
+    });
+  },
+
+  /* ---- Backtest Studio: the engine lives in server/backtest.py ---- */
+  async backtestStrategies() {
+    return get('/api/backtest/strategies', { timeout: 15000 });
+  },
+  async backtest(payload) {
+    return send('/api/backtest', { payload, timeout: 120000 });   // an optimizer sweep takes longer
+  },
+  /* ---- Paper desk: server/paper_trader.py owns the rails and the ledger ---- */
+  async paper() {
+    return get('/api/paper', { timeout: 25000 });
+  },
+  async paperOrder(payload) {
+    return post('/api/paper/order', payload, 30000);
+  },
+  async paperClose(id, reason = null) {
+    return post('/api/paper/close', { id, reason }, 30000);
+  },
+  async paperKill(engaged, reason = null) {
+    return post('/api/paper/kill', { engaged, reason }, 15000);
+  },
+  async paperRails(rails) {
+    return post('/api/paper/rails', { rails }, 15000);
+  },
+  async paperDeploy(strategyFile) {
+    return post('/api/paper/deploy', strategyFile, 20000);
+  },
+  async paperCycle(id = null) {
+    return post('/api/paper/cycle', { id }, 120000);
+  },
+
   /* ---- Trish: provider config + one chat turn ---- */
   async trishConfig() {
     return get('/api/trish/config', { timeout: 15000 });
   },
   async setTrishConfig(patch) {
-    const res = await fetch(`${BASE}/api/trish/config`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-    return body;
+    return send('/api/trish/config', { payload: patch, timeout: 15000 });
   },
   async clearTrish() {
-    const res = await fetch(`${BASE}/api/trish/config`, { method: 'DELETE' });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-    return body;
+    return send('/api/trish/config', { method: 'DELETE', timeout: 15000 });
   },
   async trishChat(messages, context = {}) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 190000);
-    try {
-      const res = await fetch(`${BASE}/api/trish/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages, context }),
-        signal: ctrl.signal,
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
-      return body;
-    } finally {
-      clearTimeout(timer);
-    }
+    return send('/api/trish/chat', { payload: { messages, context }, timeout: 190000 });
+  },
+  /* ---- Trish engine (project-owned Hermes runtime) ---- */
+  async trishEngine() {
+    return get('/api/trish/engine', { timeout: 25000 });
+  },
+  async trishEngineAction(patch) {
+    return send('/api/trish/engine', { payload: patch, timeout: 30000 });   // start/stop waits on the runtime
+  },
+  async trishPending() {
+    return get('/api/trish/pending', { timeout: 15000 });
+  },
+  async trishDecide(id, action) {
+    return send('/api/trish/pending', { payload: { id, action }, timeout: 20000 });
+  },
+  async trishMemory() {
+    return get('/api/trish/memory', { timeout: 15000 });
+  },
+  async trishSaveMemory(name, text) {
+    return send('/api/trish/memory', { payload: { name, text }, timeout: 20000 });
+  },
+  async trishSkills() {
+    return get('/api/trish/skills', { timeout: 15000 });
+  },
+  async trishJourney() {
+    return get('/api/trish/journey', { timeout: 15000 });
   },
   async cot(symbol = 'GC') {
     return get(`/api/cot?symbol=${encodeURIComponent(symbol)}`, { timeout: 60000 });

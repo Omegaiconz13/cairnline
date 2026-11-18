@@ -1,4 +1,4 @@
-# Pipnex AI — rebuild plan (authenticated app)
+# Cairnline AI — rebuild plan (authenticated app)
 
 Study date: 2026-11-11 · Target: `https://pipnex-ai.com` (production, authenticated as `nandejeclinton@gmail.com`, user id `8aa02895-8758-4628-bfe3-8ac80f03594c`, account id `OME4770`)
 
@@ -6,7 +6,7 @@ Study date: 2026-11-11 · Target: `https://pipnex-ai.com` (production, authentic
 
 ## 1. What the real product is
 
-**Pipnex AI** is an AI-assisted Forex trading platform: chart analysis (Smart Money Concepts),
+**Cairnline AI** is an AI-assisted Forex trading platform: chart analysis (Smart Money Concepts),
 signal delivery, MT5 broker connection, cloud bots, an EA marketplace, a points wallet, and a
 Chrome "Trade Lens" extension.
 
@@ -74,10 +74,10 @@ returns **404 for this user** — they are role-gated operator/admin surfaces.
 
 ### App shell (measured from the live DOM)
 
-- Left sidebar (fixed, 250 px): logo → **Overview**, **Quick Access Tools** → *Pipnex Trade Lens*,
+- Left sidebar (fixed, 250 px): logo → **Overview**, **Quick Access Tools** → *Cairnline Lens*,
   *Auto Trading*, *AI Trading*, *Upload Chart*, *Manage Bots*, *Pulse Signals*, **Subscription**,
   **How to Use**, **Contact Support**, **Settings**. Platinum-only items carry a diamond badge.
-- Top bar: sidebar toggle · page title ("PipNex Dashboard") · theme toggle · notifications bell ·
+- Top bar: sidebar toggle · page title ("Cairnline Dashboard") · theme toggle · notifications bell ·
   avatar.
 - Overview: welcome banner → **Quick Performance Snapshot** (AI Analyses Today, Signals Generated,
   Charts Analyzed, Preferred Strategy, AI Confidence (Avg), Auto-Trading, Copy Trading) →
@@ -85,7 +85,7 @@ returns **404 for this user** — they are role-gated operator/admin surfaces.
 - `/chart`: full-bleed terminal — symbol selector (XAU/USD (Gold)), timeframe tabs M1…W1, live
   price, TradingView lightweight-charts canvas, right rail **TRISH AI ASSISTANT** with
   *Analyze Current Chart*, SYMBOL/INTERVAL/STATUS chips, chat transcript, message box,
-  "PIPNEX DESK" footer.
+  "CAIRNLINE DESK" footer.
 - `/manage-bots`: ACTIVE BOTS / TOTAL BOTS / TOTAL TRADES / NET P&L, tabs Stats · Trades · Logs.
 - `/subscription`: current plan + history, Export PDF, Upgrade/Change plan.
 - `/wallet`: AI Credits balance, Add money / Withdraw / Transfer, FAQ.

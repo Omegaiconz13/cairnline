@@ -1,3 +1,10 @@
+> **Superseded, 17 Nov 2026 (historical record only).** This draft described the
+> Hermes installed in the user's home; that install is no longer Trish's engine and
+> nothing here should be followed as setup. Trish runs on the upstream repo vendored
+> at `vendor/hermes-agent` (pinned `9dbaa77c`) with its own `HERMES_HOME` at
+> `runtime/hermes`; the authoritative plan is `PLAN-TRISH-EVOLUTION.md`. The
+> `~/.hermes` reference below survives only as the research record.
+
 # Trish AI — skills, providers, MCP, and the learning loop
 
 Research date: 2026-11-12
@@ -35,7 +42,7 @@ is not a fork — it is the default design.
 
 ### Does it accept MCP servers? — **Yes, stdio and remote HTTP.**
 
-`~/.hermes/config.yaml`:
+`$HERMES_HOME/config.yaml` (locally `runtime/hermes/config.yaml`):
 ```yaml
 mcp_servers:
   filesystem:
@@ -52,7 +59,7 @@ Coming from Claude Code, `mcpServers` maps 1:1 to `mcp_servers`.
 - Standard: `SKILL.md` with YAML frontmatter (`name`, `description`, `version`, `author`,
   `license`, `platforms`, `metadata.hermes.tags`, `related_skills`) + optional
   `references/ templates/ scripts/ assets/`. Compatible with **agentskills.io**.
-- Location: `~/.hermes/skills/` is source of truth; bundled catalog seeded from the repo;
+- Location: `$HERMES_HOME/skills/` is source of truth (locally `runtime/hermes/skills/`); bundled catalog seeded from the repo;
   **`external_dirs`** lets it scan a shared `~/.agents/skills/` alongside — directly useful
   to us, since this machine already keeps skills there.
 - Progressive disclosure: the description is what loads; the body loads on demand.
@@ -69,7 +76,7 @@ Coming from Claude Code, `mcpServers` maps 1:1 to `mcp_servers`.
 | **Journey / curator** — a graph of learned skills + memories; background review; consolidation; delete = *archive* with restore | `agent/learning_graph.py`, `learning_mutations.py`, `agent/curator.py` |
 
 Plus FTS5 session search, Honcho dialectic user modeling, `skills.write_approval` to require
-human review of every skill write (staged in `~/.hermes/pending/skills/`).
+human review of every skill write (staged in `$HERMES_HOME/pending/skills/`).
 
 ### The critical unlock
 
@@ -167,7 +174,7 @@ tools/port_skill.py              # the normaliser
 2. `s/${CLAUDE_PLUGIN_ROOT}/{{SKILLS_ROOT}}/g` (same class of bug).
 3. Rewrite `python3 "{{SKILL_DIR}}/x.py"` → `{{PY}} "{{SKILL_DIR}}/x.py"` so an
    interpreter is configurable.
-4. Add `metadata.pipnex.host: any`, `provider_neutral: true`, and `requires: [python3]`.
+4. Add `metadata.cairnline.host: any`, `provider_neutral: true`, and `requires: [python3]`.
 5. Strip Claude-only frontmatter keys, keep everything else byte-identical.
 6. Emit a `PROVENANCE.md` per skill: repo, commit SHA, license, diff summary.
 
@@ -201,10 +208,10 @@ can call them by intent rather than by repo:
 `position-sizing` → trader-budget, `risk-gate` → trader-risk, `news-scan` → trader-news,
 `congress-flow` → trader-pelosi, `13f-copy` → trader-copycat, `earnings` → trader-analyst.
 
-**L3 — Pipnex-specific (ours).** These encode what only this app knows:
-`pipnex-chart-read` (Vela + the seeded EMA/RSI studies), `pipnex-signal-plan` (basket
-engine → entry/SL/TP on the chart), `pipnex-news-gate` (NewsIQ high-impact events within N
-hours), `pipnex-account-limits` (plan, uploads/day, MT5 state), `pipnex-research-cite`
+**L3 — Cairnline-specific (ours).** These encode what only this app knows:
+`cairnline-chart-read` (Vela + the seeded EMA/RSI studies), `cairnline-signal-plan` (basket
+engine → entry/SL/TP on the chart), `cairnline-news-gate` (NewsIQ high-impact events within N
+hours), `cairnline-account-limits` (plan, uploads/day, MT5 state), `cairnline-research-cite`
 (LuxAlgo CC0 record + LSE COT/calendar provenance rules).
 
 Routing: a ~300-token `trish-index` lists every skill's description; the model picks by
@@ -224,14 +231,14 @@ broker/paper-trading server, a calendar server, the LuxAlgo ecosystems' own MCP
 
 **Expose Trish as MCP** — wrap our market service endpoints (`/api/quotes`, `/api/indicators`,
 `/api/cot`, `/api/calendar`, `/api/basket/signals`) as MCP tools so any agent, including
-Hermes subagents, can read real Pipnex data. One `trish_mcp.py`, ~150 lines, reusing the
+Hermes subagents, can read real Cairnline data. One `trish_mcp.py`, ~150 lines, reusing the
 existing handlers.
 
 ---
 
 ## 6. The learning loop, and its guardrails
 
-Turn on in `~/.hermes/config.yaml`:
+Turn on in `$HERMES_HOME/config.yaml` (locally `runtime/hermes/config.yaml`):
 
 ```yaml
 skills:
@@ -243,9 +250,9 @@ memory:
 ```
 
 Then Trish learns from *our* desk: after three chart reads that all rejected a setup for
-the same reason, the background review proposes a `pipnex-chart-read` patch. Two payoffs:
+the same reason, the background review proposes a `cairnline-chart-read` patch. Two payoffs:
 
-- **Skill ledger as audit trail.** `~/Pipnex/trish/journey` shows every learned skill and
+- **Skill ledger as audit trail.** `~/Cairnline/trish/journey` shows every learned skill and
   memory with provenance, and deletions archive rather than destroy.
 - **Trading-specific truth.** A skill must never encode a market claim it cannot re-derive
   from live data. Our `trish-desk-method` states this as a hard rule and the suggestion pass

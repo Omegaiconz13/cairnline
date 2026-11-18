@@ -4,7 +4,7 @@ description: "Exit Planner. Sets your stop and your target before you enter, so 
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-exit
     upstream_commit: 3d0f4ef6986f

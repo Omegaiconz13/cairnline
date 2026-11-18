@@ -4,7 +4,7 @@ Trish — the desk assistant runtime.
 
 Provider-agnostic: any OpenAI-compatible endpoint (OpenRouter, OpenAI, Anthropic
 via proxy, Ollama, LM Studio, a local gateway) works through one wire shape.
-Tools are our own market-data functions, so Trish can act on real Pipnex data.
+Tools are our own market-data functions, so Trish can act on real Cairnline data.
 
 Backends:
   direct  — we run the tool loop ourselves against the configured endpoint.
@@ -62,7 +62,7 @@ def skill_catalogue(max_desc: int = 200) -> str:
         lines.append(f"- {e['name']} [{e['layer']}]: {d[:max_desc]}")
     return "\n".join(lines)
 
-TRISH_METHOD = """You are Trish, the trading desk assistant inside PipNex.
+TRISH_METHOD = """You are Trish, the trading desk assistant inside Cairnline.
 
 How you work, in order:
 1. CONTEXT - which symbol, which timeframe, what the account allows. Ask only if

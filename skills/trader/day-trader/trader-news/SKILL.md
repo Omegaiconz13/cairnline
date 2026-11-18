@@ -4,7 +4,7 @@ description: "News Monitor. Tracks breaking news on every stock you watch and fl
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-news
     upstream_commit: 3d0f4ef6986f

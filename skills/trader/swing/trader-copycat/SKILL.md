@@ -4,7 +4,7 @@ description: "The Reverse Engineer. Reads a famous investor's public SEC filings
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-copycat
     upstream_commit: 5189e79b9a48

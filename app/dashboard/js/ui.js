@@ -52,16 +52,16 @@ export const empty = (title, text, action) =>
   el('div', { class: 'empty' }, el('h3', { text: title }), el('p', { text }), action || null);
 
 /**
- * The one honest thing to show when a page has no real source for its numbers.
- * This build ships no demo rows, so "no account" and "nothing published" are
- * real states a visitor can be in.
+ * The one honest thing to show when a read failed and there is no real number
+ * to put in its place. This build ships no demo rows, so an empty card states
+ * the failed read instead of inventing a state the app is not in.
  */
 export const notConnected = (what, action) => {
   const subject = what ? what.charAt(0).toLowerCase() + what.slice(1) : 'this page';
   return empty(
-    'Not connected to an account',
-    `No account is connected, so ${subject} cannot be read. Connect a session in Settings — this build renders no demo or simulated data.`,
-    action || el('a', { class: 'btn btn--outline', href: '#/settings' }, 'Connect a session'),
+    `Could not read ${subject}`,
+    'The request failed, so nothing is shown rather than a placeholder figure. Reload to try again.',
+    action || el('button', { class: 'btn btn--outline', type: 'button', onclick: () => location.reload() }, 'Reload'),
   );
 };
 

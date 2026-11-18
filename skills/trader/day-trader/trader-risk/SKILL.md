@@ -4,7 +4,7 @@ description: "Risk Manager. Checks every trade against your limits and stops any
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-risk
     upstream_commit: 3d0f4ef6986f

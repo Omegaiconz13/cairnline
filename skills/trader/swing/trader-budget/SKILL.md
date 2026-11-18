@@ -4,7 +4,7 @@ description: "Budget Manager. Sizes every position to your budget before anythin
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: swing
     upstream: trader-budget
     upstream_commit: 5189e79b9a48

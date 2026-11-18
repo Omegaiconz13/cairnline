@@ -1,5 +1,5 @@
 /**
- * PipnexProvider — a Vela DataProvider over the local market service.
+ * CairnlineProvider — a Vela DataProvider over the local market service.
  *
  * Vela owns caching, chunked history backfill and live polling; this object only
  * answers "bars for ticker + timeframe". Contract notes (from Vela's provider rules):
@@ -25,6 +25,19 @@ const TF_MAP = {
   'W':   ['1wk', '10y'],
   'M':   ['1mo', 'max'],
 };
+
+/**
+ * Per-timeframe range override. The chart opens on its own default window (3
+ * months of 1h bars, say), which cannot show a trade from a year ago — so when a
+ * backtest hands its run over, the provider is told how far back to load.
+ */
+const RANGE_OVERRIDE = new Map();
+
+export function setRangeOverride(timeframe, range) {
+  const key = normTF(timeframe);
+  if (range) RANGE_OVERRIDE.set(key, String(range));
+  else RANGE_OVERRIDE.delete(key);
+}
 
 const NO_VOLUME = new Set(['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCHF', 'EURJPY', 'GBPJPY', 'XAUUSD']);
 
@@ -69,15 +82,22 @@ function toOHLCV(rows) {
 
 async function fetchBars(sym, yfInterval, range) {
   const url = `${BASE}/api/candles?symbol=${encodeURIComponent(sym)}&interval=${yfInterval}&range=${range}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`market service ${res.status}`);
-  const body = await res.json();
-  if (body.stale) console.warn(`[pipnex] candles for ${sym} served stale (${body.error || 'provider failed'})`);
-  return body.bars || [];
+  // A stalled service must fail the load instead of hanging the chart forever.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 45000);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`market service ${res.status}`);
+    const body = await res.json();
+    if (body.stale) console.warn(`[cairnline] candles for ${sym} served stale (${body.error || 'provider failed'})`);
+    return body.bars || [];
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-export const PipnexProvider = {
-  name: 'pipnex',
+export const CairnlineProvider = {
+  name: 'cairnline',
 
   async getBars(ticker, timeframe) {
     const tf = normTF(timeframe);
@@ -85,11 +105,13 @@ export const PipnexProvider = {
     const yfSym = sym === 'XAUUSD' ? 'GC=F' : sym === 'BTCUSD' ? 'BTC-USD' : sym;
 
     // 4h: yahoo serves no native 4h interval — aggregate 4×1h in the provider (rule 7).
-    if (tf === '240') return aggregate(toOHLCV(await fetchBars(yfSym, '1h', '1y')), 4);
+    if (tf === '240') {
+      return aggregate(toOHLCV(await fetchBars(yfSym, '1h', RANGE_OVERRIDE.get('240') || '1y')), 4);
+    }
 
     const mapped = TF_MAP[tf];
     if (!mapped) throw new window.Vela.DataUnavailableError({ reason: 'timeframe', finest: '60', default: '60' });
-    return toOHLCV(await fetchBars(yfSym, mapped[0], mapped[1]));
+    return toOHLCV(await fetchBars(yfSym, mapped[0], RANGE_OVERRIDE.get(tf) || mapped[1]));
   },
 
   /** Lets bare symbols resolve here and feeds any symbol-picker UI. */
@@ -109,7 +131,7 @@ export const PipnexProvider = {
       ticker: t,
       description,
       type,
-      prefix: 'PIPNE',
+      prefix: 'CAIRNLINE',
     }));
   },
 
@@ -127,8 +149,8 @@ export const PipnexProvider = {
   },
 };
 
-/** Vela theme matched to the Pipnex token language (deep black / Netflix red / lime data). */
-export function pipnexTheme(VelaNS) {
+/** Vela theme matched to the Cairnline token language (deep black / Netflix red / lime data). */
+export function cairnlineTheme(VelaNS) {
   return VelaNS.createTheme({
     colors: {
       background: '#050505',

@@ -4,7 +4,7 @@ description: "Budget Manager. Sizes every position to your budget and your max l
 version: 1.0.0
 license: MIT
 metadata:
-  pipnex:
+  cairnline:
     pack: day-trader
     upstream: trader-budget
     upstream_commit: 3d0f4ef6986f
