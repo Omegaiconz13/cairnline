@@ -35,3 +35,9 @@ server/.env
 **/.impeccable/live/deferred-svelte-component-accepts.json
 **/.impeccable/live/*.png
 # impeccable-ignore-end
+
+# reference captures and build-tool output, not project source
+checks/aurora-check/
+build-activity.log
+craft.json
+feed.json
