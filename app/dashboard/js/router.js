@@ -54,7 +54,7 @@ export async function renderRoute() {
   const view = document.getElementById('view');
 
   document.getElementById('topTitle').textContent = route.title;
-  document.querySelectorAll('.nav-item').forEach((a) => {
+  document.querySelectorAll('.nav-item, .bottomnav__item').forEach((a) => {
     a.classList.toggle('is-active', a.dataset.route === name);
   });
 
@@ -131,6 +131,10 @@ export async function boot() {
   document.getElementById('sideToggle').addEventListener('click', () => {
     if (!isWide()) { side.classList.toggle('is-open'); return; }
     setPinned(isDocked());
+  });
+  /* The mobile bottom bar's "More" opens the full rail. */
+  document.getElementById('bottomnavMore')?.addEventListener('click', () => {
+    side.classList.add('is-open');
   });
 
   /* Navigation auto-hides the rail so the page gets the width back. */

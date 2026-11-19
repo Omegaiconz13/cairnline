@@ -740,3 +740,44 @@ body.app.side-collapsed .side-edge { display: block; }
 .of__body.is-collapsed { display: none; }
 .bars__track i.gex--pos { background: linear-gradient(90deg, var(--lime-deep), var(--lime)); }
 .bars__track i.gex--neg { background: linear-gradient(90deg, var(--brand-deep), var(--danger)); }
+
+/* ---------------- mobile bottom navigation ---------------- */
+
+/* Phones and small tablets keep the main routes one tap away in a fixed bar
+   above the safe area; the rail still holds every route behind "More". */
+.bottomnav { display: none; }
+
+@media (max-width: 900px) {
+  .main { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .side { z-index: 60; }
+
+  .bottomnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    gap: 2px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(11, 11, 12, 0.94);
+    border-top: 1px solid var(--line);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .bottomnav__item {
+    display: grid; justify-items: center; align-content: center; gap: 3px;
+    min-width: 0; padding: 5px 2px 4px;
+    border: 0; border-radius: 10px; background: transparent;
+    color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+    transition: color 0.18s var(--ease), background 0.18s var(--ease);
+  }
+  .bottomnav__item svg { width: 21px; height: 21px; }
+  .bottomnav__item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bottomnav__item.is-active { color: var(--ice); background: var(--surface); }
+  .bottomnav__item.is-active svg { color: var(--brand); }
+  .bottomnav__item:active { background: var(--surface-2); }
+
+  .toast { left: 18px; right: 18px; bottom: calc(76px + env(safe-area-inset-bottom)); text-align: center; }
+}
+
+@media (max-width: 620px) {
+  .top { padding: 0 14px; gap: 10px; }
+  .top__right { gap: 6px; }
+}

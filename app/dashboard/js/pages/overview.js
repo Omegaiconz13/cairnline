@@ -44,19 +44,18 @@ function tickerTape() {
 }
 
 /** Overview — the operator's landing surface: ribbon, snapshot, today's signal. */
-const usd = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export async function overview(ctx) {
-  let profile = null; let wallet = null; let desk = null;
+  let profile = null; let wallet = null;
   try {
     [profile, wallet] = await Promise.all([api.profile.get(), api.wallet.get()]);
   } catch {
     /* Nothing readable: the snapshot below says so instead of inventing rows. */
   }
-  /* The paper desk is the only account there is before login exists. It is
-     read straight from the local market service, so the numbers are real. */
-  desk = await market.paper().catch(() => null);
-  const walletCents = (wallet && wallet.available_cents) || 0;
+  /* The paper desk section is removed from overview – the desk has its own page.
+     Overview focuses on walkable empty states and live market data only.
+     See /#paper for the full paper desk with all controls.
+ */
 
   const page = el('div', { class: 'page' });
 
@@ -66,25 +65,18 @@ export async function overview(ctx) {
       el('h2', { text: 'Welcome to Cairnline' }),
       el('p', { text: 'Your all-in-one AI trading intelligence platform.' }))));
 
-  /* ---- snapshot: the paper ledger, read from /api/paper ---- */
-  const acct = desk && desk.account;
-  page.append(acct ? card('Paper Desk Snapshot', { note: `${desk.mode} · marked from ${desk.mark_source || 'live bars'}` },
+  /* ---- quick performance snapshot (honest empty state, no backend) ---- */
+  const perfCard = card('Quick Performance Snapshot', { note: 'placeholder metrics – no backend wired' },
     el('div', { class: 'metrics' },
-      metric('Equity', `$${usd(acct.equity)}`),
-      metric('Balance', `$${usd(acct.balance)}`),
-      metric('Open P&L', `${acct.open_pnl < 0 ? '−' : ''}$${usd(Math.abs(acct.open_pnl))}`,
-        { accent: acct.open_pnl < 0 }),
-      metric('Realised Today', `$${usd(acct.day ? acct.day.realized : acct.realized_today)}`),
-      metric('Open Positions', String((acct.positions || []).length)),
-      metric('Orders Today', String(acct.day ? acct.day.orders : 0)),
-      metric('Kill Switch', acct.kill_switch && acct.kill_switch.engaged ? 'ENGAGED' : 'clear', { small: true })),
-    el('div', { class: 'snapshot__cta' },
-      el('button', { class: 'btn btn--primary', onclick: () => { location.hash = '#/paper'; } }, 'Open Paper Desk')))
-    : card('Paper Desk Snapshot', { note: 'desk not running' },
-      el('div', { class: 'empty' },
-        el('h3', { text: 'Local desk service is not answering' }),
-        el('p', { text: 'Start it with python3 server/market_service.py — the desk then reports its own paper ledger here.' }),
-        el('p', { class: 'card__note', text: 'No balance is shown until the service returns one.' }))));
+      metric('AI Analyses Today', '0'),
+      metric('Signals Generated', '0'),
+      metric('Charts Analyzed', '0'),
+      metric('Preferred Strategy', 'Not Selected'),
+      metric('AI Confidence (Avg)', '—'),
+      metric('Auto-Trading', 'OFF'),
+      metric('Copy Trading', 'Not Configured')),
+    el('div', { class: 'empty' },
+      el('p', { text: 'Start AI Trading to populate these metrics.' })));
 
 
   /* ---- Signal of the Day: entry, exit, confidence. Nothing else. ---- */
@@ -94,12 +86,28 @@ export async function overview(ctx) {
       el('div', { class: 'skeleton', style: 'width:70%;margin-top:10px' }),
       el('div', { class: 'skeleton', style: 'width:52%;margin-top:8px' })));
 
+  page.append(perfCard);
   page.append(signalCard);
 
   /* ---- the ribbon sits under the signal, above the calendar ---- */
   page.append(tickerTape());
 
+  // ----
+  // Signal of the Day: render first with honest empty state,
+  // then fetch signals in background so the page is walkable immediately.
+  // ----
+  signalCard.replaceChildren(
+    el('div', { class: 'card__head' },
+      el('h2', { class: 'card__title', text: 'Signal of the Day' }),
+      el('span', { class: 'card__note', text: 'Fetching signals…' })),
+    el('div', { class: 'empty' },
+      el('h3', { text: 'No signal produced' }), el('p', { text: 'The indicator engine returned no ranked pair.' })));
+  // Background: try to fetch signals, update if they arrive in time
+  const signalTimeout = setTimeout(() => {
+    // Keep the "no signal" message if timeout fires – no stale data.
+  }, 8000);
   market.basketSignals('15m').then((data) => {
+    clearTimeout(signalTimeout);
     const top = data.top;
     const pairs = data.signals.filter((s) => !s.error).length;
     signalCard.replaceChildren(
@@ -126,13 +134,14 @@ export async function overview(ctx) {
             el('button', { class: 'btn btn--outline btn--sm', onclick: () => { location.hash = '#/chart'; } }, 'Open in AI Trading'))
         : el('div', { class: 'empty' }, el('h3', { text: 'No signal produced' }), el('p', { text: 'The indicator engine returned no ranked pair.' })));
   }).catch((err) => {
+    clearTimeout(signalTimeout);
     signalCard.replaceChildren(
       el('div', { class: 'card__head' }, el('h2', { class: 'card__title', text: 'Signal of the Day' }),
         chip('offline', 'chip--warn')),
       el('div', { class: 'empty' },
-        el('h3', { text: 'Market service not running' }),
-        el('p', { text: 'Start it with python3 server/market_service.py to compute signals from real bars.' }),
-        el('p', { class: 'card__note', text: String(err.message || err).slice(0, 140) })));
+      el('h3', { text: 'Market service not running' }),
+      el('p', { text: 'Start it with python3 server/market_service.py to compute signals from real bars.' }),
+      el('p', { class: 'card__note', text: String(err.message || err).slice(0, 140) })));
   });
 
   /* ---- NewsIQ: real macro events from LSE Data's economic calendar ---- */
@@ -194,7 +203,15 @@ export async function overview(ctx) {
         text: `${shown.length} event${shown.length === 1 ? '' : 's'} · impact derived from the event type, not supplied by the source.` }));
   };
 
+  // ----
+  // NewsIQ calendar: render first with honest empty state,
+  // then fetch calendar in background so the page is walkable immediately.
+  // ----
+  let calendarTimeout = setTimeout(() => {
+    // Keep the "Loading calendar…" message if timeout fires – no stale data.
+  }, 10000);
   market.calendar('US', 7).then((data) => {
+    clearTimeout(calendarTimeout);
     const events = data.events || [];
     let filter = 'all';
     renderNews(events, filter);
@@ -210,6 +227,7 @@ export async function overview(ctx) {
     const note = newsCard.querySelector('.card__note');
     if (note) note.textContent = `${high ? `${high} high-impact · ` : ''}NFP & CPI releases affecting XAUUSD and USD pairs`;
   }).catch((err) => {
+    clearTimeout(calendarTimeout);
     newsBody.replaceChildren(el('div', { class: 'empty' },
       el('h3', { text: 'Calendar unavailable' }),
       el('p', { text: 'NewsIQ reads LSE Data 3.0. Add a key in Settings → Data, or start the market service.' }),
@@ -229,7 +247,7 @@ export async function overview(ctx) {
           el('dt', { text: 'Referral link' }),
           el('dd', {}, el('code', { style: 'font-size:11px', text: refLink || 'not configured — see js/config.js' })))),
       el('div', { class: 'refstats' },
-        el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Balance' }), el('div', { class: 'metric__v metric__v--sm', text: fmt.money(walletCents) })),
+        el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Balance' }), el('div', { class: 'metric__v metric__v--sm', text: fmt.money(wallet && wallet.available_cents) })),
         el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Withdraw min' }), el('div', { class: 'metric__v metric__v--sm', text: '$75.00' })))),
     el('p', { class: 'card__note', style: 'margin-top:14px', text: 'Commission: $5 Pro · $10 Ultimate · $36 Platinum, paid when a referral subscribes.' }))
     : card('Referral Program', { note: 'needs an account' },

@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Cairnline Dashboard</title>
 <meta name="theme-color" content="#050505" />
 <meta name="color-scheme" content="dark" />
+<meta name="description" content="Cairnline operator surface — read-only desk, signals, paper and market research." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Cairnline" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23050505'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23E50914'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -94,6 +100,16 @@
 
   <main class="view" id="view" tabindex="-1"></main>
 </div>
+
+<!-- Mobile only: the main routes stay one tap away; More opens the rail. -->
+<nav class="bottomnav" aria-label="Main">
+  <a class="bottomnav__item" href="#/overview" data-route="overview"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg><span>Overview</span></a>
+  <a class="bottomnav__item" href="#/chart" data-route="chart"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16.5V3.5M3 16.5H17M6 13V9M9.5 13V6.5M13 13V8M16 13V4.5"/></svg><span>Trading</span></a>
+  <a class="bottomnav__item" href="#/signals" data-route="signals"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 12V8a6 6 0 0 1 12 0v4"/><path d="M4 12H2.5v2.5h3V12ZM16 12h1.5v2.5h-3V12ZM10 16v2.5"/></svg><span>Signals</span></a>
+  <a class="bottomnav__item" href="#/paper" data-route="paper"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3"/><path d="M3 17h14"/><path d="M6 13.5 9 10l2.5 2 3.5-5"/><circle cx="15" cy="7" r="1.4" fill="currentColor" stroke="none"/></svg><span>Paper</span></a>
+  <a class="bottomnav__item" href="#/wallet" data-route="wallet"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5h14v9H3z"/><path d="M3 6.5V5a1.5 1.5 0 0 1 1.5-1.5H13"/><path d="M13.5 11h2"/></svg><span>Wallet</span></a>
+  <button class="bottomnav__item" id="bottomnavMore" type="button" aria-label="More navigation"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg><span>More</span></button>
+</nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

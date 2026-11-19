@@ -160,50 +160,6 @@ const ICONS = {
   eyeOff: '<svg viewBox="0 0 20 20"><path d="M3 3l14 14"/><path d="M7.2 5.4A8.9 8.9 0 0 1 10 4.8c5.1 0 8.2 5.2 8.2 5.2a15 15 0 0 1-2.7 3.2"/><path d="M5.3 7.1A15.6 15.6 0 0 0 1.8 10S4.9 15.2 10 15.2c1 0 1.9-.2 2.7-.6"/></svg>',
 };
 
-/** Position size + pip value from the live ATR stop — real arithmetic, not a mockup. */
-function riskCalculator(getSummary) {
-  const out = el('div', { class: 'metrics' });
-  const equity = el('input', { type: 'number', min: '10', step: '10', value: '1000', id: 'riskEquity' });
-  const riskPct = el('input', { type: 'number', min: '0.1', max: '10', step: '0.1', value: '1', id: 'riskPct' });
-
-  const compute = () => {
-    const s = getSummary();
-    const eq = Number(equity.value || 0);
-    const pctRisk = Number(riskPct.value || 0);
-    out.innerHTML = '';
-    if (!s) {
-      out.append(el('div', { class: 'metric' },
-        el('div', { class: 'metric__k', text: 'Run an analysis' }),
-        el('div', { class: 'metric__v metric__v--sm', text: 'then size the trade' })));
-      return;
-    }
-    const stopDistance = Math.abs(s.entry - s.stop_loss);
-    const riskAmount = eq * (pctRisk / 100);
-    const units = stopDistance > 0 ? riskAmount / stopDistance : 0;
-    const reward = Math.abs(s.take_profit - s.entry);
-    const rr = stopDistance > 0 ? reward / stopDistance : 0;
-    out.append(
-      el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Risk amount' }), el('div', { class: 'metric__v metric__v--sm', text: `$${riskAmount.toFixed(2)}` })),
-      el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Stop distance' }), el('div', { class: 'metric__v metric__v--sm', text: px(stopDistance) })),
-      el('div', { class: 'metric metric--accent' }, el('div', { class: 'metric__k', text: 'Position size' }), el('div', { class: 'metric__v metric__v--sm', text: units ? units.toFixed(2) : '—' })),
-      el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'Reward at target' }), el('div', { class: 'metric__v metric__v--sm', text: units ? `$${(units * reward).toFixed(2)}` : '—' })),
-      el('div', { class: 'metric' }, el('div', { class: 'metric__k', text: 'R:R' }), el('div', { class: 'metric__v metric__v--sm', text: `1 : ${rr.toFixed(2)}` })));
-  };
-
-  [equity, riskPct].forEach((i) => i.addEventListener('input', compute));
-  window.addEventListener('cairnline:indicators', compute);
-  compute();
-
-  return el('section', { class: 'card', style: 'margin-top:14px' },
-    el('div', { class: 'card__head' },
-      el('h2', { class: 'card__title', text: 'Risk calculator' }),
-      el('span', { class: 'card__note', text: 'sized from the live ATR stop above' })),
-    el('div', { style: 'display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px' },
-      el('label', { class: 'field', style: 'max-width:200px' }, el('span', { text: 'Account equity (USD)' }), equity),
-      el('label', { class: 'field', style: 'max-width:200px' }, el('span', { text: 'Risk per trade (%)' }), riskPct)),
-    out);
-}
-
 /** Candlestick SVG from real OHLCV bars, with optional EMA overlays. */
 function renderChart(bars, overlays = {}, width = 1000, height = 440) {
   if (!bars.length) return '<div class="empty"><h3>No bars returned</h3><p>Try another interval or symbol.</p></div>';
@@ -1304,7 +1260,6 @@ export async function terminal(ctx) {
     assistant);
 
   page.append(wrap);
-  page.append(riskCalculator(() => state.indicators?.summary));
   drawFacts(); drawIndicators(); renderChat();
   if (VELA) {
     mountVela().then(() => load()).catch((err) => {
